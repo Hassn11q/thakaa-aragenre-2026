@@ -1,0 +1,446 @@
+[
+  {
+    "broad_genre": "Creative",
+    "broad_genre_definition": "Expressive, reflective, or artistic writing emphasising personal voice, emotional expression, storytelling, imagination, persuasion, or stylistic creativity.",
+    "specific_genre": "classical_poetry",
+    "specific_genre_definition": "Poetic writing composed in Classical Arabic using traditional literary style, formal vocabulary, rhetorical imagery, and structured poetic expression, often focusing on themes such as love, wisdom, praise, religion, or human experience."
+  },
+  {
+    "broad_genre": "Creative",
+    "broad_genre_definition": "Expressive, reflective, or artistic writing emphasising personal voice, emotional expression, storytelling, imagination, persuasion, or stylistic creativity.",
+    "specific_genre": "egyptian_song_lyrics",
+    "specific_genre_definition": "Song lyrics written primarily in the Egyptian Arabic dialect, typically expressive, emotional, rhythmic, and intended for musical performance, often discussing love, relationships, social life, or personal emotions."
+  },
+  {
+    "broad_genre": "Creative",
+    "broad_genre_definition": "Expressive, reflective, or artistic writing emphasising personal voice, emotional expression, storytelling, imagination, persuasion, or stylistic creativity.",
+    "specific_genre": "gulf_song_lyrics",
+    "specific_genre_definition": "Song lyrics written primarily in Gulf Arabic dialects, characterised by lyrical and emotional expression intended for musical performance, often reflecting themes of love, longing, social identity, or regional culture."
+  },
+  {
+    "broad_genre": "Creative",
+    "broad_genre_definition": "Expressive, reflective, or artistic writing emphasising personal voice, emotional expression, storytelling, imagination, persuasion, or stylistic creativity.",
+    "specific_genre": "iraqi_song_lyrics",
+    "specific_genre_definition": "Song lyrics written primarily in the Iraqi Arabic dialect, typically emotional, expressive, and rhythmically structured for musical performance, often featuring themes of love, sadness, memory, separation, or everyday life."
+  },
+  {
+    "broad_genre": "Creative",
+    "broad_genre_definition": "Expressive, reflective, or artistic writing emphasising personal voice, emotional expression, storytelling, imagination, persuasion, or stylistic creativity.",
+    "specific_genre": "levantine_song_lyrics",
+    "specific_genre_definition": "Song lyrics written primarily in Levantine Arabic dialects, using conversational and expressive language intended for musical performance, often focusing on emotions, relationships, nostalgia, or daily experiences."
+  },
+  {
+    "broad_genre": "Creative",
+    "broad_genre_definition": "Expressive, reflective, or artistic writing emphasising personal voice, emotional expression, storytelling, imagination, persuasion, or stylistic creativity.",
+    "specific_genre": "msa_poetry",
+    "specific_genre_definition": "Poetic writing composed in Modern Standard Arabic using literary and artistic language, often employing metaphor, symbolism, emotional reflection, or social commentary in a structured poetic style."
+  },
+  {
+    "broad_genre": "Creative",
+    "broad_genre_definition": "Expressive, reflective, or artistic writing emphasising personal voice, emotional expression, storytelling, imagination, persuasion, or stylistic creativity.",
+    "specific_genre": "sudanese_song_lyrics",
+    "specific_genre_definition": "Song lyrics written primarily in Sudanese Arabic dialect, characterised by expressive and rhythmic language intended for musical performance, often discussing emotions, relationships, heritage, or social themes."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "admin_and_secretarial_jobs",
+    "specific_genre_definition": "Job advertisement texts related to administrative, office, or secretarial roles, typically describing responsibilities, organisational tasks, communication skills, scheduling, documentation, or workplace requirements in a professional recruitment context."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "arts_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to arts, visual culture, creativity, artistic movements, or cultural production, typically presenting the themes, content, or significance of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "automotive_and_mechanics_jobs",
+    "specific_genre_definition": "Job advertisement texts related to automotive, mechanical, maintenance, or repair work, typically describing technical responsibilities, equipment handling, vehicle servicing, or required vocational skills."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "biographies_memoirs_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising biography or memoir books that discuss personal lives, historical figures, experiences, or life journeys, usually presenting the themes and focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "cleaning_services_jobs",
+    "specific_genre_definition": "Job advertisement texts related to cleaning, maintenance, sanitation, or housekeeping services, typically describing practical duties, workplace environments, schedules, or operational requirements."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "culture_encyclopedia",
+    "specific_genre_definition": "Encyclopedic informational texts discussing cultural topics such as traditions, heritage, customs, arts, social practices, or cultural history in a factual and explanatory style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "culture_news",
+    "specific_genre_definition": "Journalistic news reporting discussing cultural events, artistic activities, exhibitions, literature, heritage, media, or public cultural affairs in an informative reporting style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "customer_service_jobs",
+    "specific_genre_definition": "Job advertisement texts related to customer support, client communication, service assistance, or call centre roles, typically describing interpersonal responsibilities, communication skills, and workplace service requirements."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "drivers_and_delivery_jobs",
+    "specific_genre_definition": "Job advertisement texts related to transportation, driving, logistics, or delivery services, typically describing vehicle operation, delivery responsibilities, routing, scheduling, or transportation-related duties."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "economics_business_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to economics, finance, management, commerce, or business practices, typically presenting the themes, arguments, or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "economy_news",
+    "specific_genre_definition": "Journalistic news reporting discussing economic developments, markets, trade, finance, employment, investment, or commercial activities in an informative reporting style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "education_jobs",
+    "specific_genre_definition": "Job advertisement texts related to educational or teaching roles, typically describing instructional responsibilities, educational qualifications, classroom duties, or academic workplace requirements."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "engineering_jobs",
+    "specific_genre_definition": "Job advertisement texts related to engineering or technical professions, typically describing design, construction, systems development, maintenance, or specialised technical responsibilities within professional work environments."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "family_children_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to family life, parenting, children, or child development, typically presenting the themes, educational value, or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "finance_and_accounting_jobs",
+    "specific_genre_definition": "Job advertisement texts related to finance, accounting, auditing, bookkeeping, or financial management roles, typically describing analytical responsibilities, financial reporting, budgeting, or accounting-related professional skills."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "health_and_beauty_jobs",
+    "specific_genre_definition": "Job advertisement texts related to beauty, cosmetics, wellness, or personal care professions, typically describing customer services, beauty treatments, product usage, or appearance-related professional responsibilities."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "healthcare_jobs",
+    "specific_genre_definition": "Job advertisement texts related to healthcare, medical, nursing, or clinical professions, typically describing patient care, medical services, healthcare responsibilities, or professional medical qualifications."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "history_encyclopedia",
+    "specific_genre_definition": "Encyclopedic informational texts discussing historical topics, civilisations, historical figures, places, or events in a factual and explanatory style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "history_geography_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to history, geography, places, societies, or historical developments, typically presenting the themes or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "human_resources_jobs",
+    "specific_genre_definition": "Job advertisement texts related to human resources, recruitment, employee management, or organisational administration, typically describing hiring responsibilities, staff coordination, workplace policies, or communication skills."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "information_technology_jobs",
+    "specific_genre_definition": "Job advertisement texts related to information technology, computing, software, networks, or digital systems, typically describing technical responsibilities, system management, programming, or technology-related professional skills."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "international_news",
+    "specific_genre_definition": "Journalistic news reporting discussing international events, foreign affairs, diplomacy, conflicts, global developments, or relations between countries in an informative reporting style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "islamic_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising Islamic or religious books discussing beliefs, teachings, ethics, history, jurisprudence, or spiritual topics, typically presenting the themes and focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "journalism_media_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to journalism, media, communication, broadcasting, or public discourse, typically presenting the themes, content, or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "law_and_legal_services_jobs",
+    "specific_genre_definition": "Job advertisement texts related to legal professions, law offices, legal consultation, or judicial services, typically describing legal responsibilities, documentation, case handling, or professional legal qualifications."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "literature_fiction_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising literary or fictional books, typically presenting narrative themes, characters, storytelling elements, or the general focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "local_news",
+    "specific_genre_definition": "Journalistic news reporting discussing local events, institutions, services, public activities, or community affairs within a specific region or country in an informative reporting style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "manufacturing_and_retail_jobs",
+    "specific_genre_definition": "Job advertisement texts related to manufacturing, production, retail, or commercial sales environments, typically describing operational responsibilities, production tasks, inventory handling, or workplace service duties."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "marketing_jobs",
+    "specific_genre_definition": "Job advertisement texts related to marketing, advertising, branding, or promotional activities, typically describing communication responsibilities, market analysis, sales promotion, or customer engagement tasks."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "math_encyclopedia",
+    "specific_genre_definition": "Encyclopedic informational texts explaining mathematical concepts, principles, methods, formulas, or scientific reasoning in a factual and explanatory style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "media_and_design_jobs",
+    "specific_genre_definition": "Job advertisement texts related to media production, graphic design, visual communication, or creative digital work, typically describing artistic, technical, or content-production responsibilities."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "philosophy_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to philosophy, thought, ethics, logic, or intellectual traditions, typically presenting the themes, arguments, or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "political_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to politics, governance, ideology, public affairs, or political history, typically presenting the themes, arguments, or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "religion_news",
+    "specific_genre_definition": "Journalistic news reporting discussing religious events, institutions, public religious affairs, faith-related activities, or developments connected to religious communities in an informative reporting style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "sales_jobs",
+    "specific_genre_definition": "Job advertisement texts related to sales, commercial transactions, product promotion, or customer acquisition, typically describing selling responsibilities, communication skills, targets, or retail-related professional duties."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "science_nature_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to science, nature, environment, biology, or scientific knowledge, typically presenting the themes, discoveries, or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "security_jobs",
+    "specific_genre_definition": "Job advertisement texts related to security, guarding, surveillance, or protection services, typically describing monitoring responsibilities, safety procedures, or workplace security duties."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "sharia_law_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to Islamic law, jurisprudence, legal interpretation, or religious legal principles, typically presenting the themes or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "sports_entertainment_book_description",
+    "specific_genre_definition": "Informative descriptive texts summarising books related to sports, recreation, celebrities, or entertainment topics, typically presenting the themes, content, or focus of the publication."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "sports_news",
+    "specific_genre_definition": "Journalistic news reporting discussing sports events, competitions, teams, athletes, tournaments, or sports-related activities in an informative reporting style."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "technicians_and_craftsmen_jobs",
+    "specific_genre_definition": "Job advertisement texts related to technical, vocational, maintenance, or craft-based professions, typically describing practical skills, repair work, installation tasks, or specialised manual responsibilities."
+  },
+  {
+    "broad_genre": "Informative",
+    "broad_genre_definition": "Primarily factual, descriptive, or analytical communication intended to inform, explain, analyse, report, or discuss information, events, observations, or social phenomena.",
+    "specific_genre": "tourism_and_restaurants_jobs",
+    "specific_genre_definition": "Job advertisement texts related to tourism, hospitality, food service, or restaurant work, typically describing customer interaction, hospitality duties, food preparation, or tourism-related service responsibilities."
+  },
+  {
+    "broad_genre": "Interactive",
+    "broad_genre_definition": "Conversational or socially oriented communication involving discussion, advice, opinions, questions, reactions, or interpersonal exchange, often written in an informal style.",
+    "specific_genre": "app_reviews",
+    "specific_genre_definition": "User-generated review texts discussing mobile applications, software, or digital services, typically expressing personal opinions, evaluations, experiences, complaints, or recommendations in an informal style."
+  },
+  {
+    "broad_genre": "Interactive",
+    "broad_genre_definition": "Conversational or socially oriented communication involving discussion, advice, opinions, questions, reactions, or interpersonal exchange, often written in an informal style.",
+    "specific_genre": "book_reviews",
+    "specific_genre_definition": "User-generated review texts discussing books or reading experiences, typically expressing personal opinions, evaluations, recommendations, or reactions to literary content in an informal or semi-informal style."
+  },
+  {
+    "broad_genre": "Interactive",
+    "broad_genre_definition": "Conversational or socially oriented communication involving discussion, advice, opinions, questions, reactions, or interpersonal exchange, often written in an informal style.",
+    "specific_genre": "twitter_posts",
+    "specific_genre_definition": "Short social media posts written primarily for public online interaction, typically using informal, conversational, emotional, opinionated, or reactive language related to everyday events, personal thoughts, or public discussions."
+  },
+  {
+    "broad_genre": "Interactive",
+    "broad_genre_definition": "Conversational or socially oriented communication involving discussion, advice, opinions, questions, reactions, or interpersonal exchange, often written in an informal style.",
+    "specific_genre": "youtube_comments",
+    "specific_genre_definition": "User-generated online comments responding to videos or media content, typically written in an informal conversational style expressing reactions, opinions, humour, criticism, or engagement with the content or audience."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "communication_student_writing",
+    "specific_genre_definition": "Educational student-written texts discussing communication, interaction, media, or social relationships, typically written for academic or instructional purposes using explanatory or reflective language."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "culture_student_writing",
+    "specific_genre_definition": "Educational student-written texts discussing cultural topics, traditions, identity, society, or heritage, typically written for academic or instructional purposes using explanatory or reflective language."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "early_education_textbooks",
+    "specific_genre_definition": "Educational textbook texts intended for early-stage learners, typically using simplified instructional language, basic explanations, exercises, or introductory educational content."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "high_school_textbooks",
+    "specific_genre_definition": "Educational textbook texts intended for high school learners, typically presenting structured academic explanations, instructional material, scientific concepts, or subject-based educational content."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "intermediate_textbooks",
+    "specific_genre_definition": "Educational textbook texts intended for intermediate-level learners, typically presenting instructional explanations, academic concepts, or guided educational material suitable for middle-level education."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "national_development_student_writing",
+    "specific_genre_definition": "Educational student-written texts discussing national development, public progress, social improvement, or civic responsibility, typically written for academic or instructional purposes using explanatory or reflective language."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "schoolwork_student_writing",
+    "specific_genre_definition": "Educational student-written assignments or classroom compositions discussing general academic or everyday topics, typically written to demonstrate understanding, writing ability, or subject knowledge in an instructional setting."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "social_media_student_writing",
+    "specific_genre_definition": "Educational student-written texts discussing social media, online communication, digital behaviour, or internet-related social issues, typically written for academic or instructional purposes using explanatory or reflective language."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "sports_student_writing",
+    "specific_genre_definition": "Educational student-written texts discussing sports, physical activity, teamwork, or athletic topics, typically written for academic or instructional purposes using explanatory or reflective language."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "technology_student_writing",
+    "specific_genre_definition": "Educational student-written texts discussing technology, digital tools, innovation, or modern technological developments, typically written for academic or instructional purposes using explanatory or reflective language."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "upper_elementary_textbooks",
+    "specific_genre_definition": "Educational textbook texts intended for upper elementary learners, typically presenting structured instructional explanations, exercises, or foundational academic concepts suitable for elementary education levels."
+  },
+  {
+    "broad_genre": "Learning",
+    "broad_genre_definition": "Explanatory, instructional, or educational communication intended to teach, clarify, guide, demonstrate, or improve understanding of practical, academic, technical, or conceptual topics.",
+    "specific_genre": "values_student_writing",
+    "specific_genre_definition": "Educational student-written texts discussing ethics, values, behaviour, responsibility, or moral principles, typically written for academic or instructional purposes using explanatory or reflective language."
+  },
+  {
+    "broad_genre": "Legal",
+    "broad_genre_definition": "Formal legal, governmental, diplomatic, administrative, or institutional communication intended to announce decisions, regulations, agreements, obligations, policies, or coordinated positions.",
+    "specific_genre": "constitutions",
+    "specific_genre_definition": "Formal legal and governmental texts defining the foundational principles, laws, structures, rights, and responsibilities governing a state, institution, or political system."
+  },
+  {
+    "broad_genre": "Legal",
+    "broad_genre_definition": "Formal legal, governmental, diplomatic, administrative, or institutional communication intended to announce decisions, regulations, agreements, obligations, policies, or coordinated positions.",
+    "specific_genre": "contracts",
+    "specific_genre_definition": "Formal legal agreement texts defining obligations, conditions, responsibilities, or rights between parties using structured and precise legal language."
+  },
+  {
+    "broad_genre": "Legal",
+    "broad_genre_definition": "Formal legal, governmental, diplomatic, administrative, or institutional communication intended to announce decisions, regulations, agreements, obligations, policies, or coordinated positions.",
+    "specific_genre": "resolutions",
+    "specific_genre_definition": "Formal legal or governmental texts announcing official decisions, declarations, agreements, recommendations, or coordinated positions adopted by institutions, councils, organisations, or governing bodies."
+  },
+  {
+    "broad_genre": "Religious",
+    "broad_genre_definition": "Religious or spiritually oriented communication discussing beliefs, moral lessons, interpretation, guidance, ethics, worship, or religious understanding within a faith-related context.",
+    "specific_genre": "bible",
+    "specific_genre_definition": "Religious texts from the Christian Bible discussing spiritual teachings, narratives, beliefs, moral guidance, or religious events within a Christian faith context."
+  },
+  {
+    "broad_genre": "Religious",
+    "broad_genre_definition": "Religious or spiritually oriented communication discussing beliefs, moral lessons, interpretation, guidance, ethics, worship, or religious understanding within a faith-related context.",
+    "specific_genre": "biblical",
+    "specific_genre_definition": "Religious interpretative texts discussing explanation, interpretation, analysis, or understanding of passages from the Christian Bible within a theological or faith-related context."
+  },
+  {
+    "broad_genre": "Religious",
+    "broad_genre_definition": "Religious or spiritually oriented communication discussing beliefs, moral lessons, interpretation, guidance, ethics, worship, or religious understanding within a faith-related context.",
+    "specific_genre": "coptic_devotional_literature",
+    "specific_genre_definition": "Religious devotional texts from Christian or Coptic traditions emphasising spiritual reflection, worship, moral guidance, prayer, or religious contemplation within a faith-oriented context."
+  },
+  {
+    "broad_genre": "Religious",
+    "broad_genre_definition": "Religious or spiritually oriented communication discussing beliefs, moral lessons, interpretation, guidance, ethics, worship, or religious understanding within a faith-related context.",
+    "specific_genre": "hadith",
+    "specific_genre_definition": "Religious texts reporting sayings, actions, teachings, or traditions attributed to the Prophet Muhammad (PBUH), typically used for religious guidance, interpretation, or moral understanding within an Islamic context."
+  },
+  {
+    "broad_genre": "Religious",
+    "broad_genre_definition": "Religious or spiritually oriented communication discussing beliefs, moral lessons, interpretation, guidance, ethics, worship, or religious understanding within a faith-related context.",
+    "specific_genre": "quran",
+    "specific_genre_definition": "Religious texts consisting of verses from the Quran, typically discussing beliefs, worship, morality, guidance, narratives, or spiritual teachings within an Islamic context."
+  },
+  {
+    "broad_genre": "Religious",
+    "broad_genre_definition": "Religious or spiritually oriented communication discussing beliefs, moral lessons, interpretation, guidance, ethics, worship, or religious understanding within a faith-related context.",
+    "specific_genre": "tafsir",
+    "specific_genre_definition": "Religious interpretative texts explaining, analysing, or discussing meanings, linguistic features, historical context, or religious understanding of Quranic verses within an Islamic scholarly tradition."
+  }
+]
