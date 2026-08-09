@@ -14,6 +14,11 @@ import torch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# Set EMBED_DEVICE to cuda:1 or cpu when the default GPU is busy or absent.
+DEVICE = os.environ.get(
+    "EMBED_DEVICE", "cuda:0" if torch.cuda.is_available() else "cpu"
+)
+DTYPE = torch.float16 if DEVICE.startswith("cuda") else torch.float32
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
 OUT = Path(os.environ.get("OUT_DIR", ROOT / "artifacts"))
@@ -36,8 +41,8 @@ def main():
     model = SentenceTransformer(
         "Qwen/Qwen3-Embedding-8B",
         trust_remote_code=True,
-        device="cuda:0",
-        model_kwargs={"torch_dtype": torch.float16},
+        device=DEVICE,
+        model_kwargs={"torch_dtype": DTYPE},
     )
     model.max_seq_length = 512
 
