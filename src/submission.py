@@ -34,7 +34,6 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
-
 # The six broad genres documented on the official task page. Used only for a warning; the
 # authoritative mapping always comes from the released definitions file.
 KNOWN_BROAD_GENRES = {
@@ -95,9 +94,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
 
     missing = [rid for rid in input_ids if rid not in pred_by_id]
     if missing:
-        raise ValueError(
-            f"Predictions missing {len(missing)} ids, first: {missing[:10]}"
-        )
+        raise ValueError(f"Predictions missing {len(missing)} ids, first: {missing[:10]}")
 
     ordered: list[dict[str, str]] = []
     fixed_broad = 0
@@ -110,9 +107,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         derived_broad = SPEC_TO_BROAD[spec]
         if pred_by_id[rid].get("broad_genre") != derived_broad:
             fixed_broad += 1
-        ordered.append(
-            {"id": rid, "broad_genre": derived_broad, "specific_genre": spec}
-        )
+        ordered.append({"id": rid, "broad_genre": derived_broad, "specific_genre": spec})
 
     # The official task page fixes the broad taxonomy at six categories. Broad labels here
     # are derived from the released definitions file, so an out-of-set value means the
@@ -162,18 +157,10 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Split genre definitions JSON.",
     )
-    p.add_argument(
-        "--predictions-file", type=Path, required=True, help="Raw predictions JSON."
-    )
-    p.add_argument(
-        "--out-json", type=Path, required=True, help="Ordered submission JSON to write."
-    )
-    p.add_argument(
-        "--out-zip", type=Path, required=True, help="Submission ZIP to write."
-    )
-    p.add_argument(
-        "--arcname", default="predictions.json", help="Filename inside the ZIP."
-    )
+    p.add_argument("--predictions-file", type=Path, required=True, help="Raw predictions JSON.")
+    p.add_argument("--out-json", type=Path, required=True, help="Ordered submission JSON to write.")
+    p.add_argument("--out-zip", type=Path, required=True, help="Submission ZIP to write.")
+    p.add_argument("--arcname", default="predictions.json", help="Filename inside the ZIP.")
     return p.parse_args()
 
 
@@ -184,7 +171,7 @@ def main() -> None:
         report = build(args)
     except ValueError as exc:
         print(f"REFUSED: {exc}", file=sys.stderr)
-        raise SystemExit(2)
+        raise SystemExit(2) from exc
     print(json.dumps(report, ensure_ascii=False, indent=2))
     print("OK: submission JSON + ZIP written and hierarchy-validated.")
 

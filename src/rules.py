@@ -13,8 +13,8 @@ Usage:
 import argparse
 import json
 import re
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEST = ROOT / "data" / "test.json"
@@ -89,9 +89,7 @@ def main():
     a = ap.parse_args()
 
     text = {r["id"]: (r.get("text") or "") for r in json.loads(TEST.read_text())}
-    SPEC_TO_BROAD = {
-        d["specific_genre"]: d["broad_genre"] for d in json.loads(DEFS.read_text())
-    }
+    SPEC_TO_BROAD = {d["specific_genre"]: d["broad_genre"] for d in json.loads(DEFS.read_text())}
     preds = json.loads(a.pred.read_text())
 
     fired = flipped = 0
@@ -101,7 +99,7 @@ def main():
         r = rules(text.get(p["id"], ""))
         if r:
             fired += 1
-            b, s = r
+            _, s = r
             if p["specific_genre"] != s:
                 flipped += 1
                 flips_by[f"{p['specific_genre']} -> {s}"] += 1

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Expert-linguist contrastive discriminators for all 74 test genres.
 
 Each entry names the concrete SURFACE/CONTENT signal that separates a genre from its family

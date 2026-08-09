@@ -13,28 +13,29 @@ top-k ranking is used, and NF4 preserves embedding direction.
 
 import json
 import os
+from pathlib import Path
+
 import numpy as np
 import torch
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 # Set RETRIEVE_DEVICE to cuda:1 or cpu when the default GPU is busy or absent.
-DEVICE = os.environ.get(
-    "RETRIEVE_DEVICE", "cuda:0" if torch.cuda.is_available() else "cpu"
-)
+DEVICE = os.environ.get("RETRIEVE_DEVICE", "cuda:0" if torch.cuda.is_available() else "cpu")
 DTYPE = torch.float16 if DEVICE.startswith("cuda") else torch.float32
 MAX_SEQ_LEN = int(os.environ.get("MAX_SEQ_LEN", "512"))
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
-SHARD = os.environ.get(
-    "SHARD", "0/1"
-)  # "i/n": which contiguous slice of rows to process
+SHARD = os.environ.get("SHARD", "0/1")  # "i/n": which contiguous slice of rows to process
 SI, SN = (int(x) for x in SHARD.split("/"))
 OUT = ROOT / "work" / f"candidates_{SI}of{SN}.json"
 TOPK = 20  # save a deep candidate list so the judge can pick any k without re-embedding
 # Qwen3-Embedding query instruction, applied to the Arabic TEXTS only (from the harness MODELS spec).
-QPROMPT = "Instruct: Given an Arabic text, retrieve the genre definition that best describes it.\nQuery: "
-CHAR_CAP = 8000  # pre-truncate very long texts; genre signal is in the opening (max_model_len=8192).
+QPROMPT = (
+    "Instruct: Given an Arabic text, retrieve the genre definition that best describes it.\nQuery: "
+)
+CHAR_CAP = (
+    8000  # pre-truncate very long texts; genre signal is in the opening (max_model_len=8192).
+)
 
 
 def main():
@@ -85,9 +86,7 @@ def main():
                 "top_defs": [cand_def[j] for j in top],
             }
         )
-    OUT.write_text(
-        json.dumps({"topk": out, "spec2broad": spec2broad}, ensure_ascii=False)
-    )
+    OUT.write_text(json.dumps({"topk": out, "spec2broad": spec2broad}, ensure_ascii=False))
     print(f"[phaseA] {len(out)} rows, top{TOPK} saved -> {OUT}")
     # quick sanity: retrieval-top1 genre distribution
     from collections import Counter

@@ -56,24 +56,16 @@ def main():
     """Apply consensus corrections and the attractor drain to the base predictions."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--test", type=Path, default=ROOT / "data" / "test.json")
-    ap.add_argument(
-        "--defs", type=Path, default=ROOT / "data" / "test_genre_definitions.json"
-    )
+    ap.add_argument("--defs", type=Path, default=ROOT / "data" / "test_genre_definitions.json")
     ap.add_argument(
         "--base",
         type=Path,
         required=True,
         help="base judge predictions (artifacts/base_predictions.json)",
     )
-    ap.add_argument(
-        "--gpt", type=Path, required=True, help="full-context GPT predictions"
-    )
-    ap.add_argument(
-        "--gemini", type=Path, required=True, help="full-context Gemini predictions"
-    )
-    ap.add_argument(
-        "--cot", type=Path, required=True, help="chain-of-thought judge predictions"
-    )
+    ap.add_argument("--gpt", type=Path, required=True, help="full-context GPT predictions")
+    ap.add_argument("--gemini", type=Path, required=True, help="full-context Gemini predictions")
+    ap.add_argument("--cot", type=Path, required=True, help="chain-of-thought judge predictions")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()
 
@@ -97,9 +89,7 @@ def main():
         broad, spec = pred["broad_genre"], pred["specific_genre"]
 
         gpt_spec = gpt.get(i)
-        consensus = (
-            gpt_spec in SPEC_TO_BROAD and gpt_spec == gem.get(i) and gpt_spec != spec
-        )
+        consensus = gpt_spec in SPEC_TO_BROAD and gpt_spec == gem.get(i) and gpt_spec != spec
 
         if consensus:
             new_broad = SPEC_TO_BROAD[gpt_spec]

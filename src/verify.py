@@ -8,9 +8,9 @@ islamic_book_description is an Informative book-summary, it will not fall for th
 
 import json
 import os
-from pathlib import Path
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEST = ROOT / "data" / "test.json"
@@ -28,9 +28,7 @@ for d in defs:
     fam[d["broad_genre"]].append(d)
 TAX = "\n".join(
     f"## {b}\n"
-    + "\n".join(
-        f"- {x['specific_genre']}: {x['specific_genre_definition']}" for x in fam[b]
-    )
+    + "\n".join(f"- {x['specific_genre']}: {x['specific_genre_definition']}" for x in fam[b])
     for b in fam
 )
 SYS = (
@@ -55,11 +53,8 @@ def make_call():
             """Send one prompt to the provider and return the raw reply."""
             r = cl.models.generate_content(
                 model="gemini-3.6-flash",
-                contents=SYS
-                + f"\n\nArabic text:\n{text[:1500]}\n\nBest specific_genre:",
-                config=types.GenerateContentConfig(
-                    temperature=0, max_output_tokens=400
-                ),
+                contents=SYS + f"\n\nArabic text:\n{text[:1500]}\n\nBest specific_genre:",
+                config=types.GenerateContentConfig(temperature=0, max_output_tokens=400),
             )
             return r.text or ""
 

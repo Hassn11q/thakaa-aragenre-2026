@@ -8,17 +8,16 @@ built from the released definitions + Arabic knowledge, no dataset labels.
 
 import json
 import re
-from pathlib import Path
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
 from openai import OpenAI
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFS = ROOT / "data" / "test_genre_definitions.json"
 OUT = ROOT / "work" / "enriched_definitions.json"
-client = OpenAI(
-    base_url="http://0.0.0.0:9224/v1", api_key="local", timeout=60.0, max_retries=0
-)
+client = OpenAI(base_url="http://0.0.0.0:9224/v1", api_key="local", timeout=60.0, max_retries=0)
 LLM = "/gemma-4-31b"
 
 
@@ -37,9 +36,7 @@ def main():
             for s in fam[x["broad_genre"]]
             if s["specific_genre"] != x["specific_genre"]
         ]
-        sib_defs = "\n".join(
-            f"- {s}: {by_spec[s]['specific_genre_definition']}" for s in sibs[:12]
-        )
+        sib_defs = "\n".join(f"- {s}: {by_spec[s]['specific_genre_definition']}" for s in sibs[:12])
         prompt = (
             f"Genre: {x['specific_genre']}\nDefinition: {x['specific_genre_definition']}\n\n"
             f"Same-family sibling genres (must be told apart from these):\n{sib_defs}\n\n"

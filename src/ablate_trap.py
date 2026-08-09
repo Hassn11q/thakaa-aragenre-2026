@@ -14,8 +14,8 @@ Comparing A -> B isolates the instruction, and B -> C isolates the taxonomy.
 
 import json
 import os
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from openai import OpenAI
 

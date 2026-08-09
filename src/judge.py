@@ -15,10 +15,11 @@ import json
 import os
 import re
 import sys
-import numpy as np
-from pathlib import Path
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+import numpy as np
 from openai import OpenAI
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,15 +35,11 @@ FALLBACK_PREDICTIONS = Path(
 OUT = Path(os.environ.get("OUT", ROOT / "work" / "judge_predictions.json"))
 SCORES = ROOT / "work" / "judge_scores.json"
 ALPHA = float(os.environ.get("ALPHA", "0.75"))
-MAX_CANDIDATES = int(
-    os.environ.get("MAX_CANDIDATES", "12")
-)  # cap candidates shown to the judge
+MAX_CANDIDATES = int(os.environ.get("MAX_CANDIDATES", "12"))  # cap candidates shown to the judge
 TEXT_CAP = 6000
 WORKERS = int(os.environ.get("WORKERS", "24"))
 
-client = OpenAI(
-    base_url="http://0.0.0.0:9224/v1", api_key="local", timeout=45.0, max_retries=0
-)
+client = OpenAI(base_url="http://0.0.0.0:9224/v1", api_key="local", timeout=45.0, max_retries=0)
 LLM = "/gemma-4-31b"
 SYS = (
     "You are a world-class Arabic philologist and corpus linguist. Given an Arabic text and a "
@@ -127,9 +124,7 @@ def setwise_scores(text, defs, k, cue=""):
             continue
     if txt is None:
         return None
-    arrs = re.findall(
-        r"\[[^\[\]]*\]", txt
-    )  # CoT: scores are the LAST array; plain: the only one
+    arrs = re.findall(r"\[[^\[\]]*\]", txt)  # CoT: scores are the LAST array; plain: the only one
     for cand in reversed(arrs):
         try:
             arr = [float(x) for x in json.loads(cand)][:k]
@@ -139,9 +134,7 @@ def setwise_scores(text, defs, k, cue=""):
             continue
     nums = re.findall(r"\d+", txt)
     if len(nums) >= k:
-        return np.array(
-            [float(x) for x in nums[-k:]]
-        )  # last k numbers = the score line
+        return np.array([float(x) for x in nums[-k:]])  # last k numbers = the score line
     return None
 
 
@@ -175,16 +168,11 @@ def main():
     for d in defrows:
         fam[d["broad_genre"]].append(d["specific_genre"])
 
-    broad_by_id = {
-        x["id"]: x["broad_genre"] for x in json.loads(BROAD_GATE.read_text())
-    }
+    broad_by_id = {x["id"]: x["broad_genre"] for x in json.loads(BROAD_GATE.read_text())}
     spec_fallback_by_id = {
-        x["id"]: x["specific_genre"]
-        for x in json.loads(FALLBACK_PREDICTIONS.read_text())
+        x["id"]: x["specific_genre"] for x in json.loads(FALLBACK_PREDICTIONS.read_text())
     }
-    text_by_id = {
-        r["id"]: (r.get("text") or "")[:TEXT_CAP] for r in json.loads(TEST.read_text())
-    }
+    text_by_id = {r["id"]: (r.get("text") or "")[:TEXT_CAP] for r in json.loads(TEST.read_text())}
 
     top20 = {}
     for f in sorted((ROOT / "work").glob(CANDIDATE_GLOB)):
@@ -207,9 +195,7 @@ def main():
         sibs = fam[b]
         if b in SHOW_ALL:
             return list(sibs)
-        infam = [
-            s for s in top20.get(rid, []) if s in set(sibs)
-        ]  # retrieval-ranked, in-family
+        infam = [s for s in top20.get(rid, []) if s in set(sibs)]  # retrieval-ranked, in-family
         if not infam:
             return [spec_fallback_by_id[rid]]
         return infam[:TOP_K]
@@ -231,9 +217,7 @@ def main():
         for p in range(PASSES):
             rot = p % k  # deterministic rotation as the permutation
             order = list(range(rot, k)) + list(range(rot))
-            sc = setwise_scores(
-                text_by_id.get(rid, ""), [defs[o] for o in order], k, cue
-            )
+            sc = setwise_scores(text_by_id.get(rid, ""), [defs[o] for o in order], k, cue)
             if sc is None:
                 continue
             inv = np.zeros(k)
@@ -268,9 +252,7 @@ def main():
         g, sc = per[rid]
         adj = np.array([sc[i] - ALPHA * prior.get(g[i], 0.0) for i in range(len(g))])
         spec = g[int(adj.argmax())]
-        preds.append(
-            {"id": rid, "broad_genre": SPEC_TO_BROAD[spec], "specific_genre": spec}
-        )
+        preds.append({"id": rid, "broad_genre": SPEC_TO_BROAD[spec], "specific_genre": spec})
 
     OUT.write_text(json.dumps(preds, ensure_ascii=False, indent=2))
     SCORES.write_text(
@@ -286,9 +268,7 @@ def main():
             ensure_ascii=False,
         )
     )
-    print(
-        f"[hier] wrote {len(preds)} -> {OUT}; MAX_CANDIDATES={MAX_CANDIDATES} ALPHA={ALPHA}"
-    )
+    print(f"[hier] wrote {len(preds)} -> {OUT}; MAX_CANDIDATES={MAX_CANDIDATES} ALPHA={ALPHA}")
     print(
         "[hier] specific top12:",
         Counter(p["specific_genre"] for p in preds).most_common(12),

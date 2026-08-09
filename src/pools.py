@@ -16,9 +16,7 @@ def parse_args():
     """Parse the command-line arguments."""
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--test", type=Path, default=ROOT / "data" / "test.json")
-    ap.add_argument(
-        "--base", type=Path, default=ROOT / "artifacts" / "base_predictions.json"
-    )
+    ap.add_argument("--base", type=Path, default=ROOT / "artifacts" / "base_predictions.json")
     ap.add_argument(
         "--gpt",
         type=Path,
