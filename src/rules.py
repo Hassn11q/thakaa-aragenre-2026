@@ -6,7 +6,7 @@ fixes both the broad gate and the specific label (e.g. mushaf orthography => qur
 => hadith). Everything else keeps the judge's prediction.
 
 Usage:
-  python src/rules.py --pred work/judge_predictions.json --out work/judge_predictions_ruled.json
+  python src/rules.py --pred artifacts/base_predictions.json --out work/base_predictions_ruled.json
   python src/rules.py --pred <p> --measure     # report per-rule coverage + how many it flips
 """
 

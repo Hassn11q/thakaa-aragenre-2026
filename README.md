@@ -63,7 +63,6 @@ verifiers. Roughly $50 of API calls for the full test set.
 cp .env.example .env                     # add GEMINI_API_KEY and OPENAI_API_KEY
 
 python src/pools.py                      # id pools for the verifiers
-python src/embed.py                      # encode texts and definitions
 python src/retrieve.py                   # candidate sets
 python src/judge.py                      # base predictions
 COT=1 OUT=artifacts/cot_predictions.json python src/judge.py

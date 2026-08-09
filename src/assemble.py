@@ -13,10 +13,10 @@ Reproduces submissions/test_win2.json exactly from the cached model outputs.
 Usage:
   python src/assemble.py \
       --base artifacts/base_predictions.json \
-      --gpt work/verify_gpt.json \
-      --gemini work/verify_gemini.json \
-      --cot work/cot_predictions.json \
-      --out work/test_final.json
+      --gpt artifacts/verify_gpt.json \
+      --gemini artifacts/verify_gemini.json \
+      --cot artifacts/cot_predictions.json \
+      --out work/predictions.json
 """
 
 import argparse
