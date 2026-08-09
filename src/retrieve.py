@@ -18,6 +18,12 @@ import torch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# Set RETRIEVE_DEVICE to cuda:1 or cpu when the default GPU is busy or absent.
+DEVICE = os.environ.get(
+    "RETRIEVE_DEVICE", "cuda:0" if torch.cuda.is_available() else "cpu"
+)
+DTYPE = torch.float16 if DEVICE.startswith("cuda") else torch.float32
+MAX_SEQ_LEN = int(os.environ.get("MAX_SEQ_LEN", "512"))
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
 SHARD = os.environ.get(
@@ -33,7 +39,6 @@ CHAR_CAP = 8000  # pre-truncate very long texts; genre signal is in the opening 
 
 def main():
     """Rank the genre definitions against each text and write the candidate sets."""
-    from transformers import BitsAndBytesConfig
     from sentence_transformers import SentenceTransformer
 
     allrows = json.loads(TEST.read_text())
@@ -48,21 +53,13 @@ def main():
     texts = [(r.get("text") or "")[:CHAR_CAP] for r in rows]
     q_in = [QPROMPT + t for t in texts]
 
-    bnb = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_use_double_quant=True,
-    )
     model = SentenceTransformer(
         "Qwen/Qwen3-Embedding-8B",
         trust_remote_code=True,
-        device="cuda:0",
-        model_kwargs={"quantization_config": bnb, "torch_dtype": torch.float16},
+        device=DEVICE,
+        model_kwargs={"torch_dtype": DTYPE},
     )
-    model.max_seq_length = (
-        512  # cap activations under the ~14 GB free; genre signal is early in the text
-    )
+    model.max_seq_length = MAX_SEQ_LEN
 
     def embed(strs):
         """Encode a list of strings into L2-normalised vectors."""
