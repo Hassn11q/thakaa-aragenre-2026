@@ -2,9 +2,9 @@
 
 Broad is already reliable (leaderboard broad macro 0.84 / acc 0.88), so gate on the v2 broad
 prediction and choose the specific genre ONLY among that broad family's siblings:
-  - families with <= MAX_CANDIDATES specifics (Learning 12, Creative 7, Religious 6, Interactive 4,
+  - small families: show every sibling definition
     Legal 3) -> show ALL siblings, so the correct label can never be missed by retrieval;
-  - Informative (42) -> narrow with the Phase-A top-20 retrieval, keep the top MAX_CANDIDATES in-family.
+  - large families: narrow with the retrieval ranking and keep the top TOP_K in-family.
 Then one setwise topic-aware gemma call scores the candidates; marginal calibration + argmax.
 
 This removes cross-family distractors (the main residual error) and eliminates within-family
@@ -23,6 +23,8 @@ import numpy as np
 from openai import OpenAI
 
 ROOT = Path(__file__).resolve().parents[1]
+# Point JUDGE_URL at your own OpenAI-compatible endpoint; JUDGE_MODEL names the served model.
+JUDGE_URL = os.environ.get("JUDGE_URL", "http://127.0.0.1:9224/v1")
 CANDIDATE_GLOB = "candidates_*of*.json"
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
@@ -35,12 +37,16 @@ FALLBACK_PREDICTIONS = Path(
 OUT = Path(os.environ.get("OUT", ROOT / "work" / "judge_predictions.json"))
 SCORES = ROOT / "work" / "judge_scores.json"
 ALPHA = float(os.environ.get("ALPHA", "0.75"))
-MAX_CANDIDATES = int(os.environ.get("MAX_CANDIDATES", "12"))  # cap candidates shown to the judge
 TEXT_CAP = 6000
 WORKERS = int(os.environ.get("WORKERS", "24"))
 
-client = OpenAI(base_url="http://0.0.0.0:9224/v1", api_key="local", timeout=45.0, max_retries=0)
-LLM = "/gemma-4-31b"
+client = OpenAI(
+    base_url=JUDGE_URL,
+    api_key=os.environ.get("JUDGE_API_KEY", "local"),
+    timeout=45.0,
+    max_retries=0,
+)
+LLM = os.environ.get("JUDGE_MODEL", "/gemma-4-31b")
 SYS = (
     "You are a world-class Arabic philologist and corpus linguist. Given an Arabic text and a "
     "numbered list of candidate genre DEFINITIONS from the SAME broad family, identify the ONE genre "
@@ -86,6 +92,9 @@ CUES = {
 }
 
 
+FAILURES = []  # scoring calls that exhausted their retries
+
+
 def setwise_scores(text, defs, k, cue=""):
     """Score all candidate definitions for one text in a single request."""
     cot = os.environ.get("COT", "0") == "1"
@@ -106,6 +115,7 @@ def setwise_scores(text, defs, k, cue=""):
         )
         mx = 96
     txt = None
+    last_error = None
     for _ in range(3):  # retry transient errors under high concurrency
         try:
             r = client.chat.completions.create(
@@ -120,9 +130,11 @@ def setwise_scores(text, defs, k, cue=""):
             )
             txt = r.choices[0].message.content.strip()
             break
-        except Exception:
+        except Exception as exc:
+            last_error = exc
             continue
     if txt is None:
+        FAILURES.append(last_error)
         return None
     arrs = re.findall(r"\[[^\[\]]*\]", txt)  # CoT: scores are the LAST array; plain: the only one
     for cand in reversed(arrs):
@@ -254,6 +266,19 @@ def main():
         spec = g[int(adj.argmax())]
         preds.append({"id": rid, "broad_genre": SPEC_TO_BROAD[spec], "specific_genre": spec})
 
+    if FAILURES:
+        rate = len(FAILURES) / max(len(ids), 1)
+        print(
+            f"[hier] WARNING: {len(FAILURES)} of {len(ids)} texts could not be scored "
+            f"({rate:.1%}); those fell back to retrieval order. Last error: {FAILURES[-1]}",
+            file=sys.stderr,
+        )
+        if rate > 0.05:
+            raise SystemExit(
+                f"refusing to write {OUT}: {rate:.1%} of texts were never scored, so the "
+                "output would mostly be retrieval order rather than judge decisions"
+            )
+
     OUT.write_text(json.dumps(preds, ensure_ascii=False, indent=2))
     SCORES.write_text(
         json.dumps(
@@ -268,7 +293,7 @@ def main():
             ensure_ascii=False,
         )
     )
-    print(f"[hier] wrote {len(preds)} -> {OUT}; MAX_CANDIDATES={MAX_CANDIDATES} ALPHA={ALPHA}")
+    print(f"[hier] wrote {len(preds)} -> {OUT}; ALPHA={ALPHA}")
     print(
         "[hier] specific top12:",
         Counter(p["specific_genre"] for p in preds).most_common(12),

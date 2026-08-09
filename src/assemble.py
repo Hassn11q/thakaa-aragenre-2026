@@ -8,7 +8,7 @@ Takes the base judge predictions and applies, in order:
      chain-of-thought judge pass (broad-locked).
   3. High-precision surface rules (quran mushaf orthography, hadith isnad, Interactive markers).
 
-Reproduces submissions/test_win2.json exactly from the cached model outputs.
+Rebuilds submissions/final_submission.json exactly from the cached model outputs.
 
 Usage:
   python src/assemble.py \

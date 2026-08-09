@@ -8,6 +8,20 @@ fixes both the broad gate and the specific label (e.g. mushaf orthography => qur
 Usage:
   python src/rules.py --pred artifacts/base_predictions.json --out work/base_predictions_ruled.json
   python src/rules.py --pred <p> --measure     # report per-rule coverage + how many it flips
+
+Known defects, left in place deliberately
+-----------------------------------------
+These rules ran exactly as written when the submission was produced, so they are kept
+verbatim; changing them alters 22 of the 27,972 predictions and the repository would no
+longer reproduce the scored file. Three are worth knowing about if you reuse this code:
+
+  * QMARK includes U+0671 (alef wasla), which also appears in tafsir, so two waslas are
+    enough to force `quran`. A stricter class would use the mushaf pause marks alone.
+  * OPIN ends with a character class containing an emoji written with U+FE0F; inside a
+    class the variation selector becomes its own alternative, so a bare U+FE0F matches.
+    This makes the short-emoji branch fire more often than "emoji plus a praise word".
+  * HADITH_START contains `[َا|ي]`, where `|` is a literal inside the class rather than
+    alternation. Harmless here, but not what was intended.
 """
 
 import argparse

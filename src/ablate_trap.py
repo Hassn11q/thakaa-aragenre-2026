@@ -9,7 +9,7 @@ anti-trap rule". This script runs the missing arm:
 
 Comparing A -> B isolates the instruction, and B -> C isolates the taxonomy.
 
-  PROVIDER=gpt python src/ablate_trap.py
+  POOL=<ids.json> python src/ablate_trap.py
 """
 
 import json

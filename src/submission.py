@@ -17,10 +17,10 @@ It never edits label content beyond the deterministic broad<-specific derivation
 refuses to write a ZIP if any check fails. No dev labels or heuristics are involved.
 
 Usage:
-  python scripts/build_submission.py \
+  python src/submission.py \
     --input-file  path/to/test.json \
     --definitions-file path/to/test_genre_definitions.json \
-    --predictions-file outputs/experiments/<run>/predictions_dev.json \
+    --predictions-file outputs/experiments/<run>/work/predictions.json \
     --out-json submissions/test_final.json \
     --out-zip  submissions/test_final.zip
 """

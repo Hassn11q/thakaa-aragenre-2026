@@ -1,10 +1,20 @@
 cff-version: 1.2.0
-message: If you use this work, please cite the paper below.
-title: "Thaka at AraGenre 2026: Definition-Guided LLM Judging with Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification"
+message: If you use this software, please cite the paper below.
+title: "Thaka at AraGenre 2026 system"
 authors:
   - family-names: Alqaeri
     given-names: Hassan
   - family-names: Alamr
     given-names: Meshal
-year: 2026
 license: MIT
+repository-code: "https://github.com/Hassn11q/thaka-aragenre-2026"
+preferred-citation:
+  type: conference-paper
+  title: "Thaka at AraGenre 2026: Definition-Guided LLM Judging with Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification"
+  authors:
+    - family-names: Alqaeri
+      given-names: Hassan
+    - family-names: Alamr
+      given-names: Meshal
+  collection-title: "Proceedings of ArabicNLP 2026"
+  year: 2026

@@ -1,14 +1,11 @@
-"""Phase A of the shipped genre-general system on the hidden TEST set.
+"""Rank the 74 genre definitions against every test text.
 
-Qwen3-Embedding-8B encodes each Arabic test text and each candidate's SPECIFIC definition
-only (spec_def framing). Cosine top-k specific genres per text are saved for the setwise
-gemma judge (Phase B). Fully genre-general: no genre NAME enters any text, so it transfers
-to the unseen test genres.
+Qwen3-Embedding-8B encodes each Arabic text and each candidate's specific definition, and the
+cosine top-k specific genres per text are written for the setwise judge to score. No genre
+name ever enters the encoded text, so the ranking transfers to unseen genres.
 
-Weights are the true Qwen3-Embedding-8B loaded in 4-bit NF4 with fp16 compute (all three
-local vLLM installs are ABI/CUDA-broken, and fp16 weights do not fit the ~15 GB free per GPU
-left by another user's training job). 4-bit is retrieval-equivalent here: only the cosine
-top-k ranking is used, and NF4 preserves embedding direction.
+Runs in fp16 on GPU and float32 on CPU; set RETRIEVE_DEVICE to choose, MAX_SEQ_LEN to cap
+sequence length, and SHARD ("i/n") to split the work across processes.
 """
 
 import json

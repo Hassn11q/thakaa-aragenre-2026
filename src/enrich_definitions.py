@@ -7,6 +7,7 @@ built from the released definitions + Arabic knowledge, no dataset labels.
 """
 
 import json
+import os
 import re
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -15,10 +16,12 @@ from pathlib import Path
 from openai import OpenAI
 
 ROOT = Path(__file__).resolve().parents[1]
+# Point JUDGE_URL at your own OpenAI-compatible endpoint; JUDGE_MODEL names the served model.
+JUDGE_URL = os.environ.get("JUDGE_URL", "http://127.0.0.1:9224/v1")
 DEFS = ROOT / "data" / "test_genre_definitions.json"
 OUT = ROOT / "work" / "enriched_definitions.json"
 client = OpenAI(base_url="http://0.0.0.0:9224/v1", api_key="local", timeout=60.0, max_retries=0)
-LLM = "/gemma-4-31b"
+LLM = os.environ.get("JUDGE_MODEL", "/gemma-4-31b")
 
 
 def main():

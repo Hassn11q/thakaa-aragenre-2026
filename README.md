@@ -62,6 +62,8 @@ verifiers. Roughly $50 of API calls for the full test set.
 ```sh
 cp .env.example .env                     # add GEMINI_API_KEY and OPENAI_API_KEY
 
+# The judge reads artifacts/broad_gate.json, which this repository ships but cannot
+# regenerate; see artifacts/README.md. Point JUDGE_URL/JUDGE_MODEL at your own endpoint.
 python src/pools.py                      # id pools for the verifiers
 python src/retrieve.py                   # candidate sets
 python src/judge.py                      # base predictions
