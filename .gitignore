@@ -1,0 +1,7 @@
+.env
+work/*
+!work/.gitkeep
+__pycache__/
+*.pyc
+*.npy
+.desloppify/
