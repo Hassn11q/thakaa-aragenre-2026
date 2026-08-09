@@ -1,9 +1,9 @@
-# Final assembly / reproduction (no GPU, no API keys needed)
-numpy>=1.26
+# Reproducing the submitted run (./reproduce.sh) needs only the Python standard library.
+# The packages below are required only to re-run the pipeline from scratch.
 
-# Full pipeline from scratch
 torch>=2.1                 # Qwen3-Embedding-8B inference
 transformers>=4.44
 sentence-transformers>=3.0
-openai>=1.40               # local vLLM judge (OpenAI-compatible) + GPT consensus verifier
-google-genai>=0.3          # Gemini consensus verifier
+numpy>=1.26
+openai>=1.40               # vLLM judge endpoint (OpenAI-compatible) and the GPT verifier
+google-genai>=0.3          # Gemini verifier

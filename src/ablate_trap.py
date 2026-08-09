@@ -19,6 +19,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from openai import OpenAI
 
+_CLIENT = None
+
 ROOT = Path(__file__).resolve().parents[1]
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
@@ -46,11 +48,17 @@ SYS = (
 )
 
 
-cl = OpenAI()
+def _client():
+    """Create the API client on first use so importing needs no credentials."""
+    global _CLIENT
+    if _CLIENT is None:
+        _CLIENT = OpenAI()
+    return _CLIENT
 
 
 def classify(text):
     """Return the broad genre the model assigns to a single text."""
+    cl = _client()
     for _ in range(3):
         try:
             r = cl.chat.completions.create(

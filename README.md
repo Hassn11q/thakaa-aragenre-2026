@@ -42,10 +42,11 @@ beat a direct six-way classifier by a wide margin (0.7139 vs 0.6206).
 
 ## Reproduce the submitted run
 
-The model outputs are cached in `artifacts/`, so this needs no GPU and no API keys.
+The model outputs are cached in `artifacts/`, so this needs no GPU, no API keys, and no
+third-party packages. Python 3.9+ and the standard library are enough.
 
 ```sh
-pip install -r requirements.txt
+# no dependencies needed for this step
 cp /path/to/test.json data/test.json     # not redistributed here
 ./reproduce.sh
 ```
