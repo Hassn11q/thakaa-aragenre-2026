@@ -207,7 +207,7 @@ the mean via cross-family false positives: Bible passages filed as literature, n
 as legal, informal comments filed as book descriptions.
 
 \subsection{Full-Context Multi-Model Consensus Correction}
-We re-predict the specific genre for suspect instances with two frontier instruction models
+We re-predict the specific genre with two frontier instruction models
 (GPT-5.6~Luna~\citep{gpt56luna2026} and Gemini-3.6~Flash~\citep{gemini36flash2026}),
 \emph{feeding each the entire 74-definition taxonomy} ($\approx$5.7K tokens) grouped by
 broad genre, and asking for the single best specific label. This follows the classical ensemble argument that combining diverse,
@@ -226,13 +226,14 @@ explains the effect alone: the instruction states the convention, the taxonomy s
 realises it. Scripture misfiled as fiction (\ar{هؤلاء امراء بني عيسو}, Genesis~36) still moves to
 Religious, and base-family agreement rises in four of the six families (Appendix~\ref{app:trap}).
 
-\paragraph{Conservative application.} A correction is applied only where both models agree
-on the same specific label differing from the base. Broad-changing moves are gated to
-verified-safe directions (Legal$\rightarrow$Informative for wire news,
-Informative$\rightarrow$Interactive for comments, Creative/Informative$\rightarrow$Religious
-for scripture); read-verified-unreliable directions (e.g., Informative$\rightarrow$Learning,
-which over-fires student-writing on academic prose) are rejected. Within-family
-(broad-preserving) refinements are applied wherever both models agree.
+\paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
+second only over the 8{,}041 where the first disagrees with the base, and a correction is
+applied only where both name the same label. Broad-changing moves are gated to seven
+read-verified directions, led by Informative$\rightarrow$Interactive for comments and
+Legal$\rightarrow$Informative for wire news (Appendix~\ref{app:subs}); unreliable directions
+(e.g.\ Informative$\rightarrow$Learning, which over-fires student-writing on academic prose)
+are rejected, 718 moves in all. Within-family refinements are applied wherever both models
+agree.
 
 \subsection{Attractor Drain (Specific Macro)}
 Manual reading revealed five large ``attractor'' classes that absorb texts the judge cannot
@@ -616,6 +617,22 @@ guard the correction stages rather than adding score.
 Submission 871127 applies the chain-of-thought pass to every instance and scores 0.7131,
 below the 0.7139 base; the same pass restricted to attractor classes is what the drain uses.
 Chain-of-thought helps here only where it is aimed.
+
+\paragraph{Gated broad moves.} Of the 3{,}300 instances where both verifiers agree against the
+base, 2{,}122 stay inside the base family and are applied as refinements. Of the 1{,}178 that
+would cross families, 460 fall in a read-verified direction and are applied:
+Informative$\rightarrow$Interactive 195, Legal$\rightarrow$Informative 80,
+Creative$\rightarrow$Religious 58, Informative$\rightarrow$Religious 58,
+Creative$\rightarrow$Informative 44, Interactive$\rightarrow$Religious 20,
+Legal$\rightarrow$Interactive 5. The remaining 718 are rejected, the largest groups being
+Informative$\rightarrow$Learning (219), Creative$\rightarrow$Interactive (122) and
+Learning$\rightarrow$Informative (99).
+
+\paragraph{Preserved rule defects.} Three regexes in \texttt{src/rules.py} do not match their
+intent: the Qur'anic class also admits U+0671, the opinion class lets a bare variation selector
+match, and one character class contains a literal \texttt{|}. They ran as written when the
+submission was produced, so we keep them verbatim and document them in the code; correcting all
+three changes 22 of the 27{,}972 final predictions.
 
 \paragraph{Orthographic signals.} Share of each group carrying heavy diacritisation (a mark on
 over 10\% of its Arabic characters) or at least one emoji, over the final predictions:
