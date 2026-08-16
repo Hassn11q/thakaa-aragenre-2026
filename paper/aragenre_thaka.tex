@@ -91,8 +91,8 @@ direction-verified), with a three-arm ablation separating the effect of the taxo
 that of an explicit type-vs-topic instruction.
 \item An attractor-drain step targeting the macro-F1 failure mode of over-predicting
 generic classes.
-\item A winning result (0.7352 Hierarchical Macro~F1, rank~1 of all participating teams),
-with each component scored as a submission.
+\item A winning result: 0.7352 Hierarchical Macro~F1, rank~1 of 18 teams, with each component
+scored as a submission.
 \end{enumerate}
 
 \noindent Code and prompts: \url{https://github.com/Hassn11q/thakaa-aragenre-2026}. The main
@@ -210,7 +210,7 @@ as legal, informal comments filed as book descriptions.
 \subsection{Full-Context Multi-Model Consensus Correction}
 We re-predict the specific genre with two frontier instruction models
 (GPT-5.6~Luna~\citep{gpt56luna2026} and Gemini-3.6~Flash~\citep{gemini36flash2026}),
-\emph{feeding each the entire 74-definition taxonomy} ($\approx$5.7K tokens) grouped by
+\emph{feeding each the entire 74-definition taxonomy} ($\approx$2.9K tokens) grouped by
 broad genre, and asking for the single best specific label. This follows the classical ensemble argument that combining diverse,
 independently-erring predictors beats any single predictor~\citep{dietterich2000ensemble}, in its LLM
 form~\citep{verga2024poll,wang2024moa}. (A third model, Claude~Sonnet~5~\citep{sonnet5_2026}, was
@@ -263,7 +263,7 @@ and \texttt{google-genai} SDKs for the verifiers; versions and URLs in
 Appendix~\ref{app:hparams}.
 \paragraph{Metrics.} Macro F1, Weighted F1 and Accuracy at both tiers; the official ranking metric is
 Hierarchical Macro F1, the mean of Broad and Specific Macro F1.
-\paragraph{Cost.} Consensus sends a $\approx$6.2K-token prompt per instance, about
+\paragraph{Cost.} Consensus sends a $\approx$3.0K-token prompt per instance, about
 US\$1.05--1.48 per 1{,}000 instances and \$50 in total; wall-clock timings are in
 Appendix~\ref{app:hparams}. The base pipeline needs no paid API.
 
@@ -312,10 +312,10 @@ Base (ours) & .714 & .549 & .584 & .591 & .879 & .900 & .900 \\
 \bottomrule
 \end{tabular}
 \caption{Official metrics on the hidden test, rounded to three decimals (Sp/Br =
-Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). We beat the prior \#1 on six of
-seven; the exception is Broad Macro~F1 (.898 vs.\ .900), and we lead Specific Macro~F1 by
-$+.039$. Rank is from the final official standings; $^{\ddagger}$is the strongest rival on the
-public leaderboard, snapshot of 30 July 2026.}
+Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). We beat the second-placed system on
+six of seven; the exception is Broad Macro~F1 (.898 vs.\ .900), and we lead Specific Macro~F1
+by $+.039$. $^{\ddagger}$is the rank-2 team in the final standings (submission 870633,
+0.7169); the full 18-team leaderboard is in \texttt{artifacts/final\_leaderboard.tsv}.}
 \label{tab:metrics}
 \end{table}
 
@@ -384,21 +384,28 @@ the distinguishing features are phonetic and largely absent from written lyrics.
 \textbf{Official submission.} The results we report are those of submission 872515,
 evaluated 1~August 2026, which scored 0.7352 Hierarchical Macro~F1 (Specific Macro 0.5725,
 Weighted 0.6125, Accuracy 0.6189; Broad Macro 0.8979, Weighted 0.9142, Accuracy 0.9138) over
-27{,}972 of 27{,}972 gold instances with no missing prediction. Every hidden-test number in
+27{,}972 of 27{,}972 gold instances with no missing prediction, ranking 1st of the 18 teams in
+the final standings (\texttt{artifacts/final\_leaderboard.tsv}). Every hidden-test number in
 Table~\ref{tab:ablation} and Appendix~\ref{app:negative} is likewise an official scored
 submission rather than a local estimate; the submission IDs are listed in
 Appendix~\ref{app:subs}.
 All inference is zero-shot with no task-specific training. \textbf{Data:} we use only the
-official AraGenre inputs and definition files; the full 74-entry \texttt{test\_genre\_definitions.json} is fed to every model verbatim. Three
-surface rules and one prompt clause do name specific labels (\texttt{quran}, \texttt{hadith},
-\texttt{*\_book\_description}); nothing else is hard-coded. \textbf{Models:} the base retriever is Qwen3-Embedding-8B (4-bit NF4
+official AraGenre inputs and definition files, and no external labelled data. The consensus
+verifiers receive the 74 definitions verbatim. The judge does not: by default it appends a
+one-line Arabic discriminator to each definition and prepends per-family cue lists, both
+author-written from the released definitions and Arabic linguistic knowledge, and both naming
+genres explicitly (\texttt{src/discriminators.py}, \texttt{src/judge.py}). The surface rules
+name a further seven labels. No test label or annotation informs any of it, but the pipeline is
+not label-agnostic and we do not claim it is. \textbf{Models:} the base retriever is Qwen3-Embedding-8B (4-bit NF4
 weights with fp16 compute, 4096-dim, cosine over L2-normalised vectors, sequence length
 capped at 512 tokens); the judge is a Gemma-family model
 (\texttt{gemma-4-31b}) served via vLLM with setwise 0--100 scoring; the consensus verifiers
 are GPT-5.6~Luna and Gemini-3.6~Flash, each queried with the full-taxonomy prompt.
-\textbf{Settings:} decoding temperature 0 with seed 42 throughout; the retriever caches the
-top 20 specific genres per text and the judge scores at most 6 in-family candidates in a single
-setwise pass; marginal correction $\alpha{=}0.5$. \textbf{Pipeline and code:} the retriever, judge,
+\textbf{Settings:} the judge decodes at temperature 0 with seed 42; the Gemini verifier runs at
+temperature 0 and the GPT verifier at \texttt{reasoning\_effort=low} with no temperature set.
+The retriever caches the top 20 specific genres per text; the judge scores every sibling in the
+four small families and the top 6 retrieved elsewhere, in a single setwise pass, with marginal
+correction $\alpha{=}0.5$. \textbf{Pipeline and code:} the retriever, judge,
 full-context consensus verifiers (\texttt{src/verify.py}), chain-of-thought drain, and the
 submission builder (\texttt{src/submission.py}, which enforces
 $\text{broad}{=}\text{parent}(\text{specific})$ and validates that all 27{,}972 IDs are
@@ -406,7 +413,8 @@ present with exact labels) are released in the project repository. \textbf{Two c
 (0.6812), an earlier retrieval-gated system we submitted and scored, reused verbatim rather
 than regenerated by the released code; and the base
 predictions additionally carry an Interactive-recall reassignment applied during the
-evaluation phase that was never preserved as a script; re-running the released judge over the
+evaluation phase by a separate automatic judge pass (\texttt{src/interactive\_judge.py}), which
+we release but which is not wired into \texttt{reproduce.sh}; re-running the released judge over the
 same candidate sets reproduces 93.5\% of the base specific labels and 97.1\% of the broad
 labels. Both files ship in \texttt{artifacts/}, so the submitted predictions rebuild exactly
 (27{,}972/27{,}972) from cached outputs, but the base stage is a cached input rather than
@@ -575,14 +583,16 @@ cached per text and narrowed to at most 6 in-family candidates (all siblings for
 small families). Judge: \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
 temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction $\alpha{=}0.5$.
 Consensus verifiers: GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
-Gemini-3.6~Flash ($\leq$400 output tokens), both at temperature 0 with the full 74-definition taxonomy
-($\approx$5.7K tokens) in the system prompt and the text truncated to 1500 characters. The judge prompt asks for a
+Gemini-3.6~Flash (temperature 0, $\leq$400 output tokens), each given the full 74-definition taxonomy
+(2{,}884 tokens under \texttt{o200k\_base}, giving a mean prompt of 3{,}034 tokens and a maximum
+of 5{,}185) in the system prompt, and the text truncated to 1500 characters. The judge prompt asks for a
 JSON array of integer scores over the candidate definitions; the consensus prompt asks for a single exact
 \texttt{specific\_genre} identifier and states that a factual description \emph{of} a book is a
 \texttt{*\_book\_description}, not the book's subject genre.
 
-\paragraph{Throughput.} A consensus call takes 2.0--2.8\,s; at 24--32 workers the full GPT
-pass over 27{,}972 instances takes 35\,min and the 8{,}041-instance Gemini pass 18\,min.
+\paragraph{Throughput.} A consensus call takes 2.0--2.8\,s. At the released default of 20
+concurrent workers the 8{,}041-instance Gemini pass took 19\,min of wall clock; the full GPT
+pass over 27{,}972 instances was run at higher concurrency.
 
 \section{Official Submission Record}
 \label{app:subs}
