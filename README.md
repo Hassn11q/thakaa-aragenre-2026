@@ -1,70 +1,128 @@
 # Thakaa at AraGenre 2026
 
-First-place system for the [AraGenre 2026](https://www.codabench.org/competitions/16356) shared
-task on hierarchical Arabic genre classification (ArabicNLP 2026).
+Code and cached model outputs for the first-place system in the
+[AraGenre 2026](https://www.codabench.org/competitions/16356) shared task on hierarchical
+definition-guided Arabic genre classification (ArabicNLP 2026).
 
-Each Arabic text gets one of 6 broad genres and one of 74 specific genres. The 74 specific
-genres never appear in the training data and are described only by English definitions, so
-nothing can be learned from labels. This system does no task training.
+**Paper:** [`paper/aragenre_thaka.pdf`](paper/aragenre_thaka.pdf) · **Submission:** 872515 ·
+**Rank:** 1 of 18 teams
+
+Every text is assigned one broad genre out of 6 and one specific genre out of 74. The 74
+specific genres never occur in the released training data and are given only as English
+definitions, so no label can be learned from examples. The system does no task-specific
+training.
+
+- [Result](#result)
+- [Quickstart](#quickstart)
+- [Requirements](#requirements)
+- [Method](#method)
+- [Reproducing the paper](#reproducing-the-paper)
+- [Running the pipeline from scratch](#running-the-pipeline-from-scratch)
+- [What this artifact cannot regenerate](#what-this-artifact-cannot-regenerate)
+- [Repository layout](#repository-layout)
+- [Data, licensing and intended use](#data-licensing-and-intended-use)
+- [Citing](#citing)
 
 ## Result
 
-Hidden test set, 27,972 instances:
+Official evaluation, hidden test set, 27,972 instances, no missing predictions.
 
-| Metric | Score |
+| Metric | Ours | Rank 2 |
+| --- | --- | --- |
+| **Hierarchical Macro F1** (ranking metric) | **0.7352** | 0.7169 |
+| Specific Macro F1 | **0.5725** | 0.5339 |
+| Specific Weighted F1 | **0.6125** | 0.5813 |
+| Specific Accuracy | **0.6189** | 0.5987 |
+| Broad Macro F1 | 0.8979 | **0.9000** |
+| Broad Weighted F1 | **0.9142** | 0.9123 |
+| Broad Accuracy | **0.9138** | 0.9113 |
+
+The full 18-team standings are in [`artifacts/final_leaderboard.tsv`](artifacts/final_leaderboard.tsv).
+
+## Quickstart
+
+Rebuilds the exact file that was scored. No GPU, no API keys, no network, no third-party
+packages. Runs in about a second.
+
+```sh
+cp /path/to/test.json data/test.json     # the organisers' to distribute; see data/README.md
+./reproduce.sh
+```
+
+```
+identical predictions: 27972/27972
+```
+
+## Requirements
+
+| Path | Needs |
 | --- | --- |
-| Hierarchical Macro F1 (official ranking metric) | **0.7352** |
-| Specific Macro F1 | 0.5725 |
-| Specific Weighted F1 | 0.6125 |
-| Specific Accuracy | 0.6189 |
-| Broad Macro F1 | 0.8979 |
-| Broad Weighted F1 | 0.9142 |
-| Broad Accuracy | 0.9138 |
+| `./reproduce.sh` and every checker | Python 3.9+, standard library only |
+| `src/retrieve.py` | CUDA GPU, `torch`, `transformers`, `sentence-transformers`, `bitsandbytes` |
+| `src/judge.py`, `src/interactive_judge.py` | an OpenAI-compatible endpoint serving the judge model |
+| `src/verify.py`, `src/ablate_trap.py` | `OPENAI_API_KEY` and `GEMINI_API_KEY`; about US$50 for the full test set |
 
-## How it works
+`pip install -r requirements.txt` covers the second group onward. Nothing reads a `.env` file;
+export variables in your shell.
+
+## Method
 
 ```
 Arabic text
   ├─ retrieve.py    Qwen3-Embedding-8B ranks the 74 English definitions → candidate set
-  ├─ judge.py       Gemma judge scores candidates setwise, restricted to one broad family
+  ├─ judge.py       Gemma judge scores candidates setwise inside one broad family
   ├─ rules.py       surface overrides (mushaf orthography, isnad openings, emoji posts)
   │                 → 0.7139
   ├─ verify.py      GPT-5.6 and Gemini-3.6 re-predict with all 74 definitions in context;
-  │                 a correction lands only when both models agree against the base
+  │                 a correction lands only where both models agree against the base
   ├─ assemble.py    attractor drain: over-predicted generic classes are redistributed to
-  │                 within-family siblings by a chain-of-thought re-judge
+  │                 within-family siblings by a chain-of-thought re-judge, then the
+  │                 surface rules are re-applied as a guard
   └─ submission.py  forces broad = parent(specific), validates every id, writes the zip
                     → 0.7352
 ```
 
-Broad genre is never predicted directly. It is derived from the specific prediction, which
-beat a direct six-way classifier by a wide margin (0.7139 vs 0.6206).
+Three findings the paper reports in full:
 
-## Reproduce the submitted run
+**Derive the broad label, never predict it.** Forcing `broad = parent(specific)` beat a direct
+six-way broad classifier by 0.093 Hierarchical Macro F1 (0.7139 against 0.6206).
 
-The model outputs are cached in `artifacts/`, so this needs no GPU, no API keys, and no
-third-party packages. Python 3.9+ and the standard library are enough.
+**Show the model every label, not just the top of the hierarchy.** Given only the 6 broad
+definitions, all three frontier models we tried filed a book *about* religion under Religious.
+A three-arm ablation over 1,403 book descriptions separates the causes: an explicit
+type-versus-topic instruction removes 41% of those errors (394 → 233), and supplying all 74
+definitions removes a further 49% (233 → 119). Neither factor alone explains the effect.
+
+**Agreement between two models beats either alone.** A single model disagreed with the base
+pipeline on 28.8% of specific labels, far too noisy to apply. Requiring both models to name the
+same label reduced that to corrections worth taking.
+
+Approaches that lost — uniform-prior and optimal-transport calibration, plain self-consistency,
+an unrestricted chain-of-thought pass, cross-lingual rerankers — are reported with their scores
+in the paper's appendix and in `artifacts/final_leaderboard.tsv`.
+
+## Reproducing the paper
+
+Each checker reads cached outputs and prints the figure the paper quotes.
 
 ```sh
-# no dependencies needed for this step
-cp /path/to/test.json data/test.json     # not redistributed here
-./reproduce.sh
+python3 src/trap_table.py           # topic-trap ablation      394 -> 233 -> 119
+python3 src/dialect_markers.py      # song-lyric dialect ceiling      87-99%
+python3 src/orthographic_signals.py # diacritic and emoji coverage    77% / 47%
+python3 src/judge_rerun_check.py    # judge reproduction       93.5% / 97.1%
 ```
 
-The script rebuilds the submission and checks it against the file that scored 0.7352.
-Expected output: `identical predictions: 27972/27972`.
+`trap_table.py` and `judge_rerun_check.py` need no data at all; the other two read
+`data/test.json`.
 
-## Run the pipeline from scratch
+## Running the pipeline from scratch
 
-Needs a CUDA GPU for the retriever, a vLLM endpoint for the judge, and API keys for the two
-verifiers. Roughly $50 of API calls for the full test set.
-
-Everything below writes into `work/`, so the cached files in `artifacts/` stay intact and
-`./reproduce.sh` keeps reproducing the scored submission. The last two commands assemble your
-own outputs instead of the cached ones, so you can compare the two.
+Everything writes into `work/`, so the cached files in `artifacts/` stay intact and
+`./reproduce.sh` keeps reproducing the scored submission. The final command assembles your own
+outputs, so you can diff them against ours.
 
 ```sh
-export OPENAI_API_KEY=...   GEMINI_API_KEY=...   # read from the environment, not from .env
+export OPENAI_API_KEY=...   GEMINI_API_KEY=...
 export JUDGE_URL=...        JUDGE_MODEL=...      # your own OpenAI-compatible endpoint
 
 python src/retrieve.py                   # candidate sets -> work/candidates_*.json
@@ -80,62 +138,50 @@ python src/assemble.py --base work/judge_predictions.json --gpt work/verify_gpt.
   --gemini work/verify_gemini.json --cot work/cot_predictions.json --out work/my_predictions.json
 ```
 
-Two caveats. `src/judge.py` reads `artifacts/broad_gate.json`, which this repository ships but
-cannot regenerate (see `artifacts/README.md`), so a from-scratch run inherits that gate. And
-`artifacts/base_predictions.json` additionally carries the `src/interactive_judge.py` pass, which
-is not in the sequence above; re-running the judge alone reproduces about 93.5% of its specific
-labels.
+## What this artifact cannot regenerate
 
-## Verify the paper's numbers
+Stated plainly, because the reproduction above is exact and these gaps are not.
 
-Each of these reads cached outputs only. No GPU, no API keys, no third-party packages.
+**The broad gate.** `src/judge.py` restricts its scoring to a broad family taken from
+`artifacts/broad_gate.json`. That file is submission 866538, an earlier system of ours that
+scored 0.6812; it is shipped and reused, not regenerated. A from-scratch run inherits it.
 
-```sh
-python3 src/trap_table.py           # topic-trap ablation, 394 -> 233 -> 119
-python3 src/dialect_markers.py      # song-lyric dialect ceiling, 87-99% carry no marker
-python3 src/orthographic_signals.py # diacritic and emoji coverage behind the no-preprocessing choice
-python3 src/judge_rerun_check.py    # 93.5% specific / 97.1% broad judge reproduction
-```
+**The base predictions.** `artifacts/base_predictions.json` is a `src/judge.py` run plus the
+`src/interactive_judge.py` reassignment applied during the evaluation phase. Re-running the
+judge alone recovers 93.5% of its specific labels and 97.1% of its broad labels; run
+`python3 src/judge_rerun_check.py` to confirm that yourself.
 
-`trap_table.py` needs no data at all; the other three read `data/test.json`.
+Two inputs to the topic-trap ablation, `artifacts/trap_pool.json` and
+`artifacts/trap_arm_a.json`, also have no producer in this repository. See
+[`artifacts/README.md`](artifacts/README.md) for the provenance of every cached file.
 
-`src/ablate_trap.py` and `src/enrich_definitions.py` need API access and produced cached inputs;
-`src/enrich_definitions.py` produced none of the shipped artifacts and is included only for
-completeness. `src/discriminators.py` is **not** an offline generator: it is a static table of 74
-hand-written Arabic cues that `src/judge.py` appends to every definition at run time (`ENRICH=1`
-by default), so it is part of the submitted system.
-`src/interactive_judge.py` is the reassignment pass that `artifacts/base_predictions.json`
-carries; it needs the judge endpoint.
-
-## Layout
+## Repository layout
 
 | Path | Contents |
 | --- | --- |
-| `src/` | pipeline, one stage per file, plus the checkers under "Verify the paper's numbers" |
-| `artifacts/` | cached model outputs, enough to rebuild the submission offline |
-| `submissions/` | the file that was scored |
-| `data/` | genre definitions; `test.json` is the organisers' to distribute |
-| `paper/` | system description paper, LaTeX and PDF |
-| `work/` | scratch space for intermediate files |
+| `src/` | one stage per file, plus the four checkers above |
+| `artifacts/` | cached model outputs, the final leaderboard, and a README describing each |
+| `submissions/` | the file that was scored, JSON and zip |
+| `data/` | the released genre definitions; `test.json` is not redistributed |
+| `paper/` | system description paper, LaTeX source and PDF |
+| `work/` | scratch space, gitignored |
 
-## What we learned
+## Data, licensing and intended use
 
-**Derive the broad label, do not predict it.** Forcing `broad = parent(specific)` beat a
-direct six-way broad classifier by 0.09 Hierarchical Macro F1.
+The hidden evaluation set belongs to the shared-task organisers and is **not** redistributed
+here; `data/test.json` is gitignored. Only the released genre definitions ship. Every file in
+`artifacts/` contains ids and labels, never source text.
 
-**Show the model every label, not just the top of the hierarchy.** Given only the 6 broad
-definitions, all three frontier models we tried filed a book *about* religion under Religious.
-An ablation over 1,403 book descriptions separates the two causes: an explicit
-type-versus-topic instruction removes 41% of those errors, and supplying all 74 definitions
-removes 46% of what remains. Neither alone accounts for the effect.
+The code is MIT (see [LICENSE](LICENSE)). The AraGenre data is governed by the shared task's own
+terms. The models the pipeline calls — Qwen3-Embedding-8B, a Gemma-family judge, GPT-5.6 Luna,
+Gemini-3.6 Flash — carry their own licences and terms.
 
-**Agreement between two models beats either model alone.** A single model disagreed with the
-base pipeline on about 29% of specific labels, far too noisy to apply. Requiring both models
-to name the same label cut that to a set of corrections worth taking.
-
-**Things that lost.** Uniform-prior and optimal-transport calibration, plain self-consistency,
-cross-lingual rerankers, and hand-written regex rules all scored below the 0.7139 base. The
-numbers are in the paper's appendix.
+This system was built for one benchmark. It classifies text type, not quality, correctness or
+orthodoxy, and the taxonomy covers religiously and culturally sensitive categories where a
+misclassification carries no judgement of the text. Five of the 74 classes separate song lyrics
+by regional dialect, a distinction that is largely phonetic and mostly absent from writing:
+87-99% of the texts we assign to them carry no marker from their dialect's own cue list. Treat
+fine-grained output as triage rather than a verdict.
 
 ## Citing
 
@@ -144,13 +190,11 @@ numbers are in the paper's appendix.
   title     = {Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Context
                Multi-Model Consensus for Hierarchical Arabic Genre Classification},
   author    = {Alqaeri, Hassan and Alamr, Meshal},
-  booktitle = {Proceedings of ArabicNLP 2026},
+  booktitle = {Proceedings of the 4th Arabic Natural Language Processing Conference (ArabicNLP 2026)},
+  address   = {Budapest, Hungary},
+  publisher = {Association for Computational Linguistics},
   year      = {2026}
 }
 ```
 
-Please also cite the shared task overview paper (El-Haj et al., 2026).
-
-## License
-
-MIT, see [LICENSE](LICENSE).
+Please also cite the shared task overview paper, El-Haj et al. (2026).
