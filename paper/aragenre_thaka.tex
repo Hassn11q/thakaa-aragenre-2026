@@ -52,13 +52,13 @@ Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification}
 We describe the winning system for the AraGenre~2026 shared task on hierarchical,
 definition-guided Arabic genre classification, where each of 27{,}972 hidden-test
 Arabic segments must be assigned one of 6 broad genres and one of 74 fine-grained
-specific genres whose English definitions are provided but whose label set is
-\emph{disjoint} from the released training data (fully zero-shot). Our approach uses
+specific genres whose English definitions are provided but whose specific-label inventory is
+\emph{disjoint} from the released training data, the 6 broad genres being shared. Our approach uses
 no task training. A \textbf{family-restricted, definition-guided LLM judge} performs
 setwise scoring of candidate genres within a hierarchically constrained decoding
 scheme, reaching 0.7139 Hierarchical Macro~F1. From the public scoreboard we diagnose
 that our system already led on Specific Macro~F1 but trailed on Broad Macro~F1, and we
-close that gap with a \textbf{full-context multi-model consensus} correction stage:
+narrow that gap with a \textbf{full-context multi-model consensus} correction stage:
 two instruction models are each shown the \emph{entire} 74-definition taxonomy
 and re-predict the specific genre; corrections are applied only where both models agree
 against the base system. Feeding the full taxonomy makes the models far more resistant to a topic trap (confusing
@@ -85,7 +85,7 @@ Our contributions are:
 \itemsep0em
 \item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139 Hierarchical Macro~F1 with no task training.
 \item A scoreboard-driven diagnosis showing the two tiers must be optimised differently,
-and that our residual error was concentrated in the broad tier.
+and that our deficit against the leading system sat entirely in the broad tier.
 \item A full-context multi-model consensus correction, applied conservatively (agreement-gated,
 direction-verified), with a three-arm ablation separating the effect of the taxonomy from
 that of an explicit type-vs-topic instruction.
@@ -333,7 +333,7 @@ splits (Appendix~\ref{app:convention}).
 \section{Analysis}
 Broad Macro is dominated by minority-class false positives, Specific Macro by rare-class
 recall, so gains on both compound through the mean. Broad-only prompting
-produced 180 unanimous topic-trap errors even across all three models we tried, which the full
+produced 157 topic-trap errors that all three models we tried made unanimously, which the full
 taxonomy dissolved; and any single strong model disagreed with the base on $\sim$29\% of
 specifics, too noisy to trust, whereas two-model exact-label agreement filtered this to
 reliable corrections. A direct six-way broad classifier regressed to 0.6206 and unpruned
@@ -492,7 +492,7 @@ access. The table below reports the two original arms. Table~\ref{tab:trap} repo
 verdict still agrees with the base system's broad family. Broad-only prompting collapses on families whose
 members are \emph{about} another family's subject matter (Learning, Informative), which is exactly the topic
 trap; the full taxonomy repairs it. On the 1{,}403 book-description instances, joint Religious assignments
-fall from 235 (broad-only) to 37 (full taxonomy), an 84\% reduction.
+fall from 235 (broad-only) to 34 (full taxonomy) on the same pool, an 86\% reduction.
 
 \begin{table}[h]
 \centering\small
