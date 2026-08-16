@@ -7,7 +7,7 @@ authors:
   - family-names: Alamr
     given-names: Meshal
 license: MIT
-repository-code: "https://github.com/Hassn11q/thakaa-aragenre-2026"
+repository-code: "https://github.com/Hassan11q/thakaa-aragenre-2026"
 preferred-citation:
   type: conference-paper
   title: "Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification"

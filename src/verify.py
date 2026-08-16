@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
-POOL = Path(os.environ.get("POOL", ROOT / "work" / "broad_pool.json"))
+POOL = Path(os.environ.get("POOL", ROOT / "artifacts" / "all_ids.json"))
 PROVIDER = os.environ.get("PROVIDER", "gpt")
 OUT = Path(os.environ.get("OUT", ROOT / "work" / f"verify_{PROVIDER}.json"))
 WORKERS = int(os.environ.get("WORKERS", "20"))

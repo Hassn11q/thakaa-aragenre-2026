@@ -34,6 +34,11 @@ def main():
     ap.add_argument("--preds", type=Path, default=ROOT / "submissions" / "final_submission.json")
     a = ap.parse_args()
 
+    if not a.test.exists():
+        raise SystemExit(
+            f"missing {a.test} (not redistributed; get it from the organisers). "
+            "This table is computed over the test texts, so it needs them."
+        )
     text = {r["id"]: (r.get("text") or "") for r in json.loads(a.test.read_text())}
     preds = json.loads(a.preds.read_text())
 

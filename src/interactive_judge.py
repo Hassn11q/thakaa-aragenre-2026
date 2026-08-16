@@ -43,7 +43,11 @@ SYS = ("You decide if an Arabic text is an INTERACTIVE online text written BY a 
        '"book_reviews" | null}.')
 
 
+FAILURES = []  # calls that exhausted their retries
+
+
 def judge(text):
+    err = None
     for _ in range(3):
         try:
             r = client.chat.completions.create(
@@ -55,8 +59,10 @@ def judge(text):
             if m:
                 o = json.loads(m[-1])
                 return bool(o.get("interactive")), o.get("type")
-        except Exception:
+        except Exception as e:  # transient endpoint errors are retried
+            err = e
             continue
+    FAILURES.append(repr(err))
     return None, None
 
 
@@ -95,6 +101,14 @@ def main():
     out = [{"id": i, "broad_genre": s2b[cur[i]["specific_genre"]], "specific_genre": cur[i]["specific_genre"]} for i in ids]
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2))
     from collections import Counter
+    if FAILURES:
+        rate = len(FAILURES) / max(len(bl), 1)
+        if rate > 0.05:
+            raise SystemExit(
+                f"[intjudge] refusing to write: {len(FAILURES)} of {len(bl)} calls failed "
+                f"({rate:.1%}). Last error: {FAILURES[-1]}"
+            )
+        print(f"[intjudge] WARNING: {len(FAILURES)} of {len(bl)} calls failed", flush=True)
     print(f"[intjudge] flips->Interactive {flips}; wrote {OUT}")
     print("[intjudge] broad:", Counter(p["broad_genre"] for p in out).most_common())
 
