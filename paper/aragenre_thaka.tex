@@ -364,7 +364,13 @@ on. Our code, prompts, cached model outputs and submission builder will be relea
 \url{https://github.com/Hassn11q/thakaa-aragenre-2026} upon publication.
 
 \section*{Limitations}
-All reported numbers are official evaluation-phase submissions; we ran none post hoc.
+Every hidden-test \emph{score} we report is an official evaluation-phase submission
+(Appendix~\ref{app:subs}); we made no submission after the deadline. Two kinds of number are
+not submissions and should not be read as such. The instruction-only arm of the three-arm
+ablation (\S\ref{sec:system}) was run after the evaluation phase closed, so that comparison is
+post hoc; and the descriptive tables in Appendices~\ref{app:errors}, \ref{app:trap},
+\ref{app:drain} and~\ref{app:subs} are analyses of the submitted outputs, computed locally
+rather than scored.
 The hidden test has no released gold labels and the development set is near-degenerate, so
 component decisions were validated on the public leaderboard and by manual reading rather
 than on held-out gold. Our reported progression therefore doubles as the selection signal:
