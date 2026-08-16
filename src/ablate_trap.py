@@ -24,7 +24,7 @@ _CLIENT = None
 ROOT = Path(__file__).resolve().parents[1]
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
-POOL = Path(os.environ.get("POOL", ROOT / "work" / "broad_pool.json"))
+POOL = Path(os.environ.get("POOL", ROOT / "artifacts" / "trap_pool.json"))
 OUT = Path(os.environ.get("OUT", ROOT / "work" / "trap_arm_b.json"))
 WORKERS = int(os.environ.get("WORKERS", "24"))
 
