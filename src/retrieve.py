@@ -4,8 +4,10 @@ Qwen3-Embedding-8B encodes each Arabic text and each candidate's specific defini
 cosine top-k specific genres per text are written for the setwise judge to score. No genre
 name ever enters the encoded text, so the ranking transfers to unseen genres.
 
-Runs in fp16 on GPU and float32 on CPU; set RETRIEVE_DEVICE to choose, MAX_SEQ_LEN to cap
-sequence length, and SHARD ("i/n") to split the work across processes.
+Loaded in 4-bit NF4 by default, which is the configuration the submitted run used; only the
+cosine top-k ranking is consumed, and NF4 preserves embedding direction. Set
+RETRIEVE_PRECISION=fp16 for full precision, RETRIEVE_DEVICE to pick a device, MAX_SEQ_LEN to
+cap sequence length, and SHARD ("i/n") to split the work across processes.
 """
 
 import json
@@ -20,6 +22,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DEVICE = os.environ.get("RETRIEVE_DEVICE", "cuda:0" if torch.cuda.is_available() else "cpu")
 DTYPE = torch.float16 if DEVICE.startswith("cuda") else torch.float32
 MAX_SEQ_LEN = int(os.environ.get("MAX_SEQ_LEN", "512"))
+# The submitted run used 4-bit NF4, so that is the default here. Set RETRIEVE_PRECISION=fp16
+# for full precision, which needs roughly 16 GB of free VRAM and drops the bitsandbytes
+# dependency, but will not reproduce the submitted candidate sets exactly.
+PRECISION = os.environ.get("RETRIEVE_PRECISION", "4bit")
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
 SHARD = os.environ.get("SHARD", "0/1")  # "i/n": which contiguous slice of rows to process
@@ -51,11 +57,21 @@ def main():
     texts = [(r.get("text") or "")[:CHAR_CAP] for r in rows]
     q_in = [QPROMPT + t for t in texts]
 
+    model_kwargs = {"torch_dtype": DTYPE}
+    if PRECISION == "4bit":
+        from transformers import BitsAndBytesConfig
+
+        model_kwargs["quantization_config"] = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+        )
     model = SentenceTransformer(
         "Qwen/Qwen3-Embedding-8B",
         trust_remote_code=True,
         device=DEVICE,
-        model_kwargs={"torch_dtype": DTYPE},
+        model_kwargs=model_kwargs,
     )
     model.max_seq_length = MAX_SEQ_LEN
 

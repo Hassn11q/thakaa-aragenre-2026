@@ -5,3 +5,7 @@ __pycache__/
 *.pyc
 *.npy
 .desloppify/
+
+# the organisers own the hidden evaluation set; never redistribute it
+data/test.json
+.ruff_cache/

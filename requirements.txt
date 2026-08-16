@@ -4,6 +4,8 @@
 torch>=2.1                 # Qwen3-Embedding-8B inference
 transformers>=4.44
 sentence-transformers>=3.0
+accelerate>=1.1.0          # required by the default 4-bit retrieval path
+bitsandbytes>=0.43         # 4-bit NF4, the precision the submitted run used
 numpy>=1.26
 openai>=1.99               # needs reasoning_effort in chat.completions (used by src/verify.py)
 google-genai>=0.3          # Gemini verifier

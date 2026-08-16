@@ -25,6 +25,9 @@ from openai import OpenAI
 ROOT = Path(__file__).resolve().parents[1]
 # Point JUDGE_URL at your own OpenAI-compatible endpoint; JUDGE_MODEL names the served model.
 JUDGE_URL = os.environ.get("JUDGE_URL", "http://127.0.0.1:9224/v1")
+# BOOTSTRAP=1 judges across all families to create the broad gate from scratch.
+BOOTSTRAP = os.environ.get("BOOTSTRAP", "0") == "1"
+BOOTSTRAP_TOP_K = int(os.environ.get("BOOTSTRAP_TOP_K", "8"))
 CANDIDATE_GLOB = "candidates_*of*.json"
 TEST = ROOT / "data" / "test.json"
 DEFS = ROOT / "data" / "test_genre_definitions.json"
@@ -180,10 +183,17 @@ def main():
     for d in defrows:
         fam[d["broad_genre"]].append(d["specific_genre"])
 
-    broad_by_id = {x["id"]: x["broad_genre"] for x in json.loads(BROAD_GATE.read_text())}
-    spec_fallback_by_id = {
-        x["id"]: x["specific_genre"] for x in json.loads(FALLBACK_PREDICTIONS.read_text())
-    }
+    if BOOTSTRAP:
+        # No gate yet: judge over the retrieval ranking across all families and let the
+        # chosen specific genre define the broad family. This is how broad_gate.json is
+        # produced when starting from nothing.
+        broad_by_id, spec_fallback_by_id = {}, {}
+    else:
+        broad_by_id = {x["id"]: x["broad_genre"] for x in json.loads(BROAD_GATE.read_text())}
+        spec_fallback_by_id = {
+            x["id"]: x["specific_genre"]
+            for x in json.loads(FALLBACK_PREDICTIONS.read_text())
+        }
     text_by_id = {r["id"]: (r.get("text") or "")[:TEXT_CAP] for r in json.loads(TEST.read_text())}
 
     top20 = {}
@@ -203,6 +213,8 @@ def main():
 
     def candidates(rid):
         """Return the candidate genres allowed for one text."""
+        if BOOTSTRAP:
+            return top20.get(rid, [])[:BOOTSTRAP_TOP_K]
         b = broad_by_id[rid]
         sibs = fam[b]
         if b in SHOW_ALL:
@@ -222,7 +234,7 @@ def main():
         k = len(cands)
         if k == 1:
             return cands, np.array([1.0])
-        cue = CUES.get(broad_by_id[rid], "")
+        cue = CUES.get(broad_by_id.get(rid, ""), "") if not BOOTSTRAP else ""
         defs = [defmap[s] for s in cands]
         acc = np.zeros(k, dtype=float)
         n = 0

@@ -1,4 +1,4 @@
-# Thaka at AraGenre 2026
+# Thakaa at AraGenre 2026
 
 First-place system for the [AraGenre 2026](https://www.codabench.org/competitions/16356) shared
 task on hierarchical Arabic genre classification (ArabicNLP 2026).
@@ -76,6 +76,20 @@ PROVIDER=gemini POOL=artifacts/gpt_disagree_ids.json OUT=artifacts/verify_gemini
 ./reproduce.sh
 ```
 
+## Verify the paper's numbers
+
+Each of these reads cached outputs only. No GPU, no API keys, no third-party packages.
+
+```sh
+python3 src/trap_table.py           # topic-trap ablation, 394 -> 233 -> 126
+python3 src/dialect_markers.py      # song-lyric dialect ceiling, 87-99% carry no marker
+python3 src/orthographic_signals.py # diacritic and emoji coverage behind the no-preprocessing choice
+```
+
+`src/ablate_trap.py`, `src/discriminators.py` and `src/enrich_definitions.py` are the offline
+generators behind those cached files; they need API access and are not required to check any
+number in the paper.
+
 ## Layout
 
 | Path | Contents |
@@ -109,8 +123,8 @@ numbers are in the paper's appendix.
 ## Citing
 
 ```bibtex
-@inproceedings{thaka-aragenre-2026,
-  title     = {Thaka at AraGenre 2026: Definition-Guided LLM Judging with Full-Context
+@inproceedings{thakaa-aragenre-2026,
+  title     = {Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Context
                Multi-Model Consensus for Hierarchical Arabic Genre Classification},
   author    = {Alqaeri, Hassan and Alamr, Meshal},
   booktitle = {Proceedings of ArabicNLP 2026},
