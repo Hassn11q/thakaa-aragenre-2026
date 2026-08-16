@@ -61,8 +61,8 @@ that our system already led on Specific Macro~F1 but trailed on Broad Macro~F1, 
 narrow that gap with a \textbf{full-context multi-model consensus} correction stage:
 two instruction models are each shown the \emph{entire} 74-definition taxonomy
 and re-predict the specific genre; corrections are applied only where both models agree
-against the base system. Feeding the full taxonomy makes the models far more resistant to a topic trap (confusing
-a book \emph{about} religion with religious scripture). A final attractor-drain step redistributes over-predicted generic classes to starved rare
+against the base system. Feeding the full taxonomy almost halves the residual topic-trap errors, where a book
+\emph{about} religion is taken for religious scripture. A final attractor-drain step redistributes over-predicted generic classes to starved rare
 classes. The system scores \textbf{0.7352 Hierarchical Macro~F1, ranking 1st}, $+0.018$
 over the next team and improving every metric over our base.
 \end{abstract}
@@ -96,8 +96,9 @@ scored as a submission.
 \end{enumerate}
 
 \noindent Code and prompts: \url{https://github.com/Hassn11q/thakaa-aragenre-2026}. The main
-challenges were a fully disjoint label set, a topic trap (writing \emph{about} a subject
-vs.\ the subject's genre), and classes with no written signal (song dialects, textbook levels).
+challenges were a specific-label inventory disjoint from training, a topic trap (writing
+\emph{about} a subject vs.\ the subject's genre), and classes with no written signal (song
+dialects, textbook levels).
 
 \section{Related Work}
 \paragraph{Arabic and hierarchy-aware HTC.} Arabic pretrained models~\citep{antoun2020arabert,antoun2021aragpt2}
@@ -194,8 +195,8 @@ high-precision surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; both estimated to fire at $>$98\% precision by
 inspecting a sample of firings, as the test split has no gold; emoji/hashtag short posts $\rightarrow$
-Interactive subtypes). We also supply 74 offline-generated per-genre contrastive
-discriminators; hyperparameters are in Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores \textbf{0.7139}.
+Interactive subtypes). The judge also sees 74 hand-written per-genre contrastive
+discriminators appended to the definitions; hyperparameters are in Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores \textbf{0.7139}.
 
 \subsection{Diagnosis from the Scoreboard}
 \label{sec:diag}
@@ -344,8 +345,8 @@ reliable corrections. A direct six-way broad classifier regressed to 0.6206 and 
 all fell below the 0.7139 base (Appendix~\ref{app:negative}).
 
 \paragraph{Error analysis (hidden test).} Three types dominate: cross-family topic leaks (a description
-\emph{of} a religious book attracting Religious, and scripture misfiled as fiction), attractor
-over-prediction, and ceiling classes where 87--99\% of the texts we label as song lyrics carry no marker from
+\emph{of} a religious book attracting Religious, and scripture filed as an encyclopedia entry),
+attractor over-prediction, and ceiling classes where 87--99\% of the texts we label as song lyrics carry no marker from
 that dialect's own cue list. Examples in
 Appendix~\ref{app:errors}.
 
