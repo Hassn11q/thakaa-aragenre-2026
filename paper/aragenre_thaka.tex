@@ -507,7 +507,7 @@ GPT-5.6 alone, so one model's behaviour is compared across prompts; joint two-mo
 follow below. Because the full-taxonomy prompt also
 carries an explicit type-vs-topic instruction, we added a third arm (broad definitions only \emph{plus}
 that instruction) to separate the two factors; on the 1{,}403 book-description instances, GPT-5.6 calls
-394 of them Religious with neither, 233 with the instruction alone, and 126 with the full taxonomy;
+394 of them Religious with neither, 233 with the instruction alone, and 119 with the full taxonomy;
 \texttt{src/trap\_table.py} rebuilds these three counts from cached verifier outputs with no API
 access. The table below reports the two original arms. Table~\ref{tab:trap} reports how often each model's
 verdict still agrees with the base system's broad family. Broad-only prompting collapses on families whose
@@ -579,8 +579,9 @@ both scored below the base (Appendix~\ref{app:negative}).
 Retriever: Qwen3-Embedding-8B loaded in 4-bit NF4 with fp16 compute (the configuration the
 submitted run used; only the cosine ranking is consumed and NF4 preserves embedding
 direction), 4096-dim, L2-normalised, \texttt{max\_seq\_length} 512, the top 20 specific genres
-cached per text and narrowed to at most 6 in-family candidates (all siblings for the four
-small families). Judge: \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
+cached per text; the judge scores every sibling in the four small families (Creative 7,
+Religious 6, Interactive 4, Legal 3) and the top 6 retrieved in-family candidates in the two
+large ones. Judge: \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
 temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction $\alpha{=}0.5$.
 Consensus verifiers: GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
 Gemini-3.6~Flash (temperature 0, $\leq$400 output tokens), each given the full 74-definition taxonomy
