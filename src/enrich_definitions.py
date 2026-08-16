@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 JUDGE_URL = os.environ.get("JUDGE_URL", "http://127.0.0.1:9224/v1")
 DEFS = ROOT / "data" / "test_genre_definitions.json"
 OUT = ROOT / "work" / "enriched_definitions.json"
-client = OpenAI(base_url="http://0.0.0.0:9224/v1", api_key="local", timeout=60.0, max_retries=0)
+client = OpenAI(base_url=JUDGE_URL, api_key="local", timeout=60.0, max_retries=0)
 LLM = os.environ.get("JUDGE_MODEL", "/gemma-4-31b")
 
 

@@ -1,4 +1,4 @@
-# Thaka at AraGenre 2026 — system description paper
+# Thakaa at AraGenre 2026 — system description paper
 
 Source for the ArabicNLP 2026 system description paper of the 1st-place AraGenre system
 (0.7352 Hierarchical Macro F1).
