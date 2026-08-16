@@ -39,7 +39,8 @@ FALLBACK_PREDICTIONS = Path(
 )  # specific used only when a big family filters empty
 OUT = Path(os.environ.get("OUT", ROOT / "work" / "judge_predictions.json"))
 SCORES = ROOT / "work" / "judge_scores.json"
-ALPHA = float(os.environ.get("ALPHA", "0.75"))
+# The submitted run used 0.5; 0.75 over-flattened once the label space grew to 74 classes.
+ALPHA = float(os.environ.get("ALPHA", "0.5"))
 TEXT_CAP = 6000
 WORKERS = int(os.environ.get("WORKERS", "24"))
 

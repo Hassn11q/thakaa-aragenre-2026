@@ -153,7 +153,7 @@ lyrics, niche job domains).
 \node[io] (text) {Arabic text $\langle$id, text$\rangle$};
 \node[base,below=of text] (embed) {Qwen3-Embedding-8B retriever\\ \scriptsize (Arabic $\leftrightarrow$ English defs) $\rightarrow$ candidates};
 \node[base,below=of embed] (judge) {Family-restricted \texttt{gemma-4-31b} judge\\ \scriptsize broad gate $\rightarrow$ setwise scoring within family};
-\node[base,below=of judge] (rules) {Rank guard + high-precision surface rules};
+\node[base,below=of judge] (rules) {Marginal correction + high-precision surface rules};
 \node[res,below=of rules] (basep) {Base prediction \;\textbf{0.7139}};
 \draw[ar] (text)--(embed); \draw[ar] (embed)--(judge);
 \draw[ar] (judge)--(rules); \draw[ar] (rules)--(basep);
@@ -188,10 +188,8 @@ that broad family (all siblings for small families, top-$k$ retrieved for large 
 ones), so that $\text{broad}=\text{parent}(\text{specific})$ and broad \emph{accuracy} equals the
 family-accuracy of the specific prediction (Broad Macro~F1 does not: it averages per-class
 F1, and the gap between the two is what \S\ref{sec:diag} exploits); (iii) the judge scores each candidate 0--100
-against its definition and we take the argmax, with averaging over candidate
-orderings to counter listwise position bias~\citep{sun2023rankgpt} and light marginal
-calibration; (iv) a
-conservative embedding-rank guard reverts low-confidence judge overrides; and (v) a few
+against its definition in one setwise call~\citep{sun2023rankgpt} and we take the argmax after
+a light marginal correction; and (iv) a few
 high-precision surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; both estimated to fire at $>$98\% precision by
@@ -388,10 +386,9 @@ weights with fp16 compute, 4096-dim, cosine over L2-normalised vectors, sequence
 capped at 512 tokens); the judge is a Gemma-family model
 (\texttt{gemma-4-31b}) served via vLLM with setwise 0--100 scoring; the consensus verifiers
 are GPT-5.6~Luna and Gemini-3.6~Flash, each queried with the full-taxonomy prompt.
-\textbf{Settings:} decoding temperature 0 with a fixed seed throughout; retrieval $k{=}12$
-narrowed to $\leq$6 family-restricted candidates; permutation self-consistency $K{=}3$ on
-confusable families; marginal calibration $\alpha{=}0.5$ with SLD rare-class correction;
-embedding-rank guard at rank~3. \textbf{Pipeline and code:} the retriever, judge,
+\textbf{Settings:} decoding temperature 0 with seed 42 throughout; the retriever caches the
+top 20 specific genres per text and the judge scores at most 6 in-family candidates in a single
+setwise pass; marginal correction $\alpha{=}0.5$. \textbf{Pipeline and code:} the retriever, judge,
 full-context consensus verifiers (\texttt{src/verify.py}), chain-of-thought drain, and the
 submission builder (\texttt{src/submission.py}, which enforces
 $\text{broad}{=}\text{parent}(\text{specific})$ and validates that all 27{,}972 IDs are
@@ -546,21 +543,23 @@ applied first and the drain fires on 383 of these instances.}
 
 \section{Calibration}
 \label{app:calib}
-Marginal calibration rescales each candidate's score by a tempered estimate of its corpus-level prior,
-$\tilde{p}(y) \propto \hat{p}(y)^{\alpha}$ with $\alpha{=}0.5$; $\alpha$ was chosen on the released training
-labels, where $\alpha{=}0.75$ over-flattened once the label space grew from 7 to 74 classes. Rare-class
-correction uses the EM procedure of \citet{saerens2002sld}, which iteratively re-estimates the class priors of
-an unlabelled test set and reweights the classifier posteriors accordingly; we run it to convergence on the
-judge posteriors. Both are applied before the argmax and neither changes the broad family.
+The correction subtracts a scaled per-genre mean from each candidate's score,
+$\tilde{s}(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre $y$
+received over the whole test set and $\alpha{=}0.5$. It damps genres the judge rates generously
+everywhere, which is what starves rare siblings. We started from $\alpha{=}0.75$, chosen on the
+released training labels; it over-flattened once the label space grew from 7 to 74 classes.
+The correction is applied before the argmax and never changes the broad family. Two
+alternatives we tried instead of it, uniform-prior calibration and entropic optimal transport,
+both scored below the base (Appendix~\ref{app:negative}).
 
 \section{Hyperparameters and Prompts}
 \label{app:hparams}
 Retriever: Qwen3-Embedding-8B loaded in 4-bit NF4 with fp16 compute (the configuration the
 submitted run used; only the cosine ranking is consumed and NF4 preserves embedding
 direction), 4096-dim, L2-normalised, \texttt{max\_seq\_length} 512, the top 20 specific genres
-cached per text, retrieval $k{=}12$ narrowed to a family-restricted candidate set of at most 6. Judge: \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring,
-temperature 0, fixed seed, 3 retries with JSON-regex fallback, permutation self-consistency $K{=}3$ on confusable
-families, marginal calibration $\alpha{=}0.5$ with SLD rare-class correction, embedding-rank guard at rank~3.
+cached per text and narrowed to at most 6 in-family candidates (all siblings for the four
+small families). Judge: \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
+temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction $\alpha{=}0.5$.
 Consensus verifiers: GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
 Gemini-3.6~Flash ($\leq$400 output tokens), both at temperature 0 with the full 74-definition taxonomy
 ($\approx$5.7K tokens) in the system prompt and the text truncated to 1500 characters. The judge prompt asks for a
