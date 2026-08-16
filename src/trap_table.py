@@ -6,10 +6,11 @@ with "an explicit anti-trap rule". The third arm separates them:
 
   A  broad definitions only, no instruction      artifacts/trap_arm_a.json
   B  broad definitions only, plus the instruction artifacts/trap_arm_b.json
-  C  all 74 definitions, plus the instruction     artifacts/verify_gpt.json
+  C  all 74 definitions, plus the instruction     artifacts/trap_arm_c.json
 
-A -> B isolates the instruction, B -> C isolates the taxonomy. All three arms use the same
-model and the same pool (artifacts/trap_pool.json); the table counts how often each arm files
+A -> B isolates the instruction, B -> C isolates the taxonomy. All three arms use the same model and
+the same 2,635-instance pool (artifacts/trap_pool.json), so the comparison is like for like;
+artifacts/verify_gpt.json is the separate all-instance run used by the deployed pipeline; the table counts how often each arm files
 a book description under Religious.
 
 Run:  python3 src/trap_table.py
@@ -27,7 +28,7 @@ def main():
     ap.add_argument("--pool", type=Path, default=ROOT / "artifacts" / "trap_pool.json")
     ap.add_argument("--arm-a", type=Path, default=ROOT / "artifacts" / "trap_arm_a.json")
     ap.add_argument("--arm-b", type=Path, default=ROOT / "artifacts" / "trap_arm_b.json")
-    ap.add_argument("--arm-c", type=Path, default=ROOT / "artifacts" / "verify_gpt.json")
+    ap.add_argument("--arm-c", type=Path, default=ROOT / "artifacts" / "trap_arm_c.json")
     ap.add_argument("--base", type=Path, default=ROOT / "artifacts" / "base_predictions.json")
     ap.add_argument("--defs", type=Path, default=ROOT / "data" / "test_genre_definitions.json")
     a = ap.parse_args()
