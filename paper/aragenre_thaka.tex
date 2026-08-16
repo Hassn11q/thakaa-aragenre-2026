@@ -203,7 +203,8 @@ The leaderboard exposed the structure (Table~\ref{tab:metrics}): our base led on
 Specific Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90).
 As the ranking metric is their mean, the entire deficit was in the broad tier. Broad
 accuracy (0.9003) exceeding broad macro (0.8792) indicated a minority broad class dragged
-the mean via cross-family false positives: Bible passages filed as literature, news filed
+the mean via cross-family false positives: Bible passages filed as poetry or encyclopedia
+entries, news filed
 as legal, informal comments filed as book descriptions.
 
 \subsection{Full-Context Multi-Model Consensus Correction}
@@ -221,10 +222,10 @@ even when it was an Informative \emph{book description}. The full-taxonomy promp
 three-arm ablation over the same 1{,}403 book-description instances to separate the two factors
 (one model, GPT-5.6, identical pool): with broad definitions only and no such instruction, 394 are
 called Religious; adding the instruction alone removes 41\% of those (394$\rightarrow$233); supplying
-the full taxonomy removes a further 46\% (233$\rightarrow$126). Both factors matter and neither
+the full taxonomy removes a further 49\% (233$\rightarrow$119). Both factors matter and neither
 explains the effect alone: the instruction states the convention, the taxonomy shows the label that
-realises it. Scripture misfiled as fiction (\ar{هؤلاء امراء بني عيسو}, Genesis~36) still moves to
-Religious, and base-family agreement rises in four of the six families (Appendix~\ref{app:trap}).
+realises it. Scripture filed as an encyclopedia entry (\ar{هؤلاء امراء بني عيسو}, Genesis~36) is moved to
+\texttt{bible}, and base-family agreement rises in five of the six families (Appendix~\ref{app:trap}).
 
 \paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
 second only over the 8{,}041 where the first disagrees with the base, and a correction is
@@ -248,7 +249,8 @@ first, leaving the drain 383. Relative to the base, the final system changes 459
 
 \section{Experimental Setup}
 \paragraph{Data splits.} We train nothing; every system is applied unchanged to the hidden test. An input is \texttt{\{"id","text"\}} with Arabic text such as
-\ar{مطلوب سائق لديه رخصة قيادة} (``driver wanted, must hold a licence''); the required output pairs it with
+\ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486, ``bus driver
+wanted, 24-seater, for a company in Dubai, Jebel Ali''); the required output pairs it with
 \texttt{broad\_genre} = Informative and \texttt{specific\_genre} =
 \texttt{drivers\_and\_} \texttt{delivery\_jobs}.
 \paragraph{Preprocessing.} None. Normalisation erases the two orthographic signals that
@@ -333,7 +335,8 @@ splits (Appendix~\ref{app:convention}).
 \section{Analysis}
 Broad Macro is dominated by minority-class false positives, Specific Macro by rare-class
 recall, so gains on both compound through the mean. Broad-only prompting
-produced 157 topic-trap errors that all three models we tried made unanimously, which the full
+produced 157 topic-trap errors on the book descriptions that all three models we tried made
+unanimously, which the full
 taxonomy dissolved; and any single strong model disagreed with the base on $\sim$29\% of
 specifics, too noisy to trust, whereas two-model exact-label agreement filtered this to
 reliable corrections. A direct six-way broad classifier regressed to 0.6206 and unpruned
@@ -459,10 +462,12 @@ definitions, which is why supplying the full taxonomy, rather than the broad lab
 changes model behaviour so sharply.
 \section{Error Analysis Examples}
 \label{app:errors}
-Three error types dominate. (i)~\emph{Cross-family topic leaks}: a description \emph{of} a religious book
-(\ar{يهدف هذا الكتاب إلى قراءة سيرة الرسول}) is \texttt{islamic\_book\_description} (Informative) yet attracts
-Religious, while scripture misfiled as fiction (\ar{هؤلاء امراء بني عيسو}, Genesis~36) moves the other way;
-consensus corrects both. (ii)~\emph{Attractor over-prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
+Three error types dominate. (i)~\emph{Cross-family topic leaks}: a description \emph{of} a
+religious book (\ar{يهدف هذا الكتاب إلى قراءة سيرة الرسول}, id 10041) is
+\texttt{islamic\_book\_description} (Informative), which our base and final systems both get
+right but which every broad-only verifier calls Religious; scripture leaks the other way
+(\ar{هؤلاء امراء بني عيسو}, Genesis~36, id 10798), where the base says
+\texttt{history\_encyclopedia} and consensus corrects it to \texttt{bible}. (ii)~\emph{Attractor over-prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
 (iii)~\emph{Ceiling classes}: for each of the five song-lyric classes, 87--99\% of the texts we
 assign to it contain no marker from that dialect's cue list
 (\texttt{src/dialect\_markers.py} in our repository ships the lists and reproduces the table;
@@ -483,7 +488,9 @@ distinction that NADI-style country-level tasks define~\citep{nadi2021}.
 \section{Full-Context vs.\ Broad-Only Prompting}
 \label{app:trap}
 Both consensus models were run over the same verification pool ($n=2{,}635$) once with only the
-6 broad definitions and once with all 74 specific definitions. Because the full-taxonomy prompt also
+6 broad definitions and once with all 74 specific definitions. Table~\ref{tab:trap} reports
+GPT-5.6 alone, so one model's behaviour is compared across prompts; joint two-model counts
+follow below. Because the full-taxonomy prompt also
 carries an explicit type-vs-topic instruction, we added a third arm (broad definitions only \emph{plus}
 that instruction) to separate the two factors; on the 1{,}403 book-description instances, GPT-5.6 calls
 394 of them Religious with neither, 233 with the instruction alone, and 126 with the full taxonomy;
@@ -492,7 +499,7 @@ access. The table below reports the two original arms. Table~\ref{tab:trap} repo
 verdict still agrees with the base system's broad family. Broad-only prompting collapses on families whose
 members are \emph{about} another family's subject matter (Learning, Informative), which is exactly the topic
 trap; the full taxonomy repairs it. On the 1{,}403 book-description instances, joint Religious assignments
-fall from 235 (broad-only) to 34 (full taxonomy) on the same pool, an 86\% reduction.
+fall from 235 (broad-only) to 32 (full taxonomy), an 86\% reduction.
 
 \begin{table}[h]
 \centering\small
@@ -501,14 +508,14 @@ fall from 235 (broad-only) to 34 (full taxonomy) on the same pool, an 86\% reduc
 Base family & $n$ & broad-only & full-taxonomy \\
 \midrule
 Informative & 1682 & 49\% & \textbf{78\%} \\
-Learning    &  305 & 18\% & \textbf{73\%} \\
-Interactive &  153 & 46\% & \textbf{73\%} \\
-Legal       &  281 & 53\% & \textbf{55\%} \\
-Creative    &  151 & 50\% & 47\% \\
-Religious   &   63 & 41\% & \textbf{46\%} \\
+Learning    &  305 & 18\% & \textbf{74\%} \\
+Interactive &  153 & 46\% & \textbf{72\%} \\
+Legal       &  281 & 53\% & \textbf{56\%} \\
+Creative    &  151 & 50\% & 48\% \\
+Religious   &   63 & 41\% & \textbf{48\%} \\
 \bottomrule
 \end{tabular}
-\caption{Share of instances where the verifier's broad verdict matches the base family, by
+\caption{Share of instances where GPT-5.6's broad verdict matches the base family, by
 prompt context. This measures \emph{agreement with the base system}, not accuracy: the hidden
 test has no released gold, so we can show that full context changes verifier behaviour and
 that the change is consistent with the taxonomy's own conventions, but we cannot certify it as
