@@ -9,9 +9,9 @@ These files let `reproduce.sh` rebuild the submitted predictions without a GPU o
 | `cot_predictions.json` | `COT=1 src/judge.py` | chain-of-thought pass used by the attractor drain |
 | `verify_gpt.json` | `PROVIDER=gpt src/verify.py` | full-taxonomy re-prediction, all 27,972 |
 | `verify_gemini.json` | `PROVIDER=gemini src/verify.py` | the 8,041 GPT-vs-base disagreements; 33 entries are `null` where the model never returned a parsable label |
-| `trap_pool.json` | `src/pools.py` | the 2,635-instance verification pool used by the three-arm topic-trap experiment; 1,403 of them are `*_book_description` |
+| `trap_pool.json` | a broad-suspect pool selected during the evaluation phase | The 2,635-instance verification pool used by the three-arm topic-trap experiment; 1,403 of them are `*_book_description`. **No producer ships here** — `src/pools.py` writes only `all_ids.json` and `gpt_disagree_ids.json`. |
 | `trap_arm_c.json` | `src/verify.py`, full taxonomy, pool run | arm C of the trap experiment, matched to arms A and B on the 2,635-instance pool |
-| `trap_arm_a.json` | `src/verify.py`, broad definitions only | arm A of the trap experiment: no type-versus-topic instruction |
+| `trap_arm_a.json` | a broad-only verifier prompt not included in this release | Arm A of the trap experiment: no type-versus-topic instruction, broad labels only. **No producer ships here** — `src/verify.py` always sends the full taxonomy and always returns a specific genre, so it cannot generate this file. |
 | `trap_arm_b.json` | `src/ablate_trap.py` | arm B: broad definitions plus the explicit type-versus-topic instruction. Arm C is `trap_arm_c.json`, the same-pool full-taxonomy run; `src/trap_table.py` rebuilds the 394/233/119 table from these files without any API access. `verify_gpt.json` is the separate all-instance run the deployed pipeline uses, and gives 126 on this subset. Arm B was run after the evaluation phase closed, so that comparison is post hoc. |
 | `judge_rerun_scores.json` | `src/judge.py` | a full 27,972-row re-run of the judge over the same candidate sets, released so the 93.5% specific / 97.1% broad figure above can be checked without a GPU |
 | `final_leaderboard.tsv` | the organisers' final standings | all 18 teams with their seven official metrics; the source for the paper's rank and for the rank-2 comparison in Table 2 |

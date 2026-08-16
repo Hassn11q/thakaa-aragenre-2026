@@ -59,42 +59,59 @@ Expected output: `identical predictions: 27972/27972`.
 Needs a CUDA GPU for the retriever, a vLLM endpoint for the judge, and API keys for the two
 verifiers. Roughly $50 of API calls for the full test set.
 
+Everything below writes into `work/`, so the cached files in `artifacts/` stay intact and
+`./reproduce.sh` keeps reproducing the scored submission. The last two commands assemble your
+own outputs instead of the cached ones, so you can compare the two.
+
 ```sh
-cp .env.example .env                     # add GEMINI_API_KEY and OPENAI_API_KEY
+export OPENAI_API_KEY=...   GEMINI_API_KEY=...   # read from the environment, not from .env
+export JUDGE_URL=...        JUDGE_MODEL=...      # your own OpenAI-compatible endpoint
 
-# The judge reads artifacts/broad_gate.json, which this repository ships but cannot
-# regenerate; see artifacts/README.md. Point JUDGE_URL/JUDGE_MODEL at your own endpoint.
-python src/pools.py                      # id pools for the verifiers
-python src/retrieve.py                   # candidate sets
-python src/judge.py                      # base predictions
-COT=1 OUT=artifacts/cot_predictions.json python src/judge.py
+python src/retrieve.py                   # candidate sets -> work/candidates_*.json
+python src/judge.py                      # base predictions -> work/judge_predictions.json
+COT=1 OUT=work/cot_predictions.json python src/judge.py
 
-PROVIDER=gpt POOL=artifacts/all_ids.json OUT=artifacts/verify_gpt.json python src/verify.py
-python src/pools.py --gpt artifacts/verify_gpt.json
-PROVIDER=gemini POOL=artifacts/gpt_disagree_ids.json OUT=artifacts/verify_gemini.json python src/verify.py
+python src/pools.py                      # -> artifacts/all_ids.json
+PROVIDER=gpt POOL=artifacts/all_ids.json OUT=work/verify_gpt.json python src/verify.py
+python src/pools.py --gpt work/verify_gpt.json
+PROVIDER=gemini POOL=artifacts/gpt_disagree_ids.json OUT=work/verify_gemini.json python src/verify.py
 
-./reproduce.sh
+python src/assemble.py --base work/judge_predictions.json --gpt work/verify_gpt.json \
+  --gemini work/verify_gemini.json --cot work/cot_predictions.json --out work/my_predictions.json
 ```
+
+Two caveats. `src/judge.py` reads `artifacts/broad_gate.json`, which this repository ships but
+cannot regenerate (see `artifacts/README.md`), so a from-scratch run inherits that gate. And
+`artifacts/base_predictions.json` additionally carries the `src/interactive_judge.py` pass, which
+is not in the sequence above; re-running the judge alone reproduces about 93.5% of its specific
+labels.
 
 ## Verify the paper's numbers
 
 Each of these reads cached outputs only. No GPU, no API keys, no third-party packages.
 
 ```sh
-python3 src/trap_table.py           # topic-trap ablation, 394 -> 233 -> 126
+python3 src/trap_table.py           # topic-trap ablation, 394 -> 233 -> 119
 python3 src/dialect_markers.py      # song-lyric dialect ceiling, 87-99% carry no marker
 python3 src/orthographic_signals.py # diacritic and emoji coverage behind the no-preprocessing choice
+python3 src/judge_rerun_check.py    # 93.5% specific / 97.1% broad judge reproduction
 ```
 
-`src/ablate_trap.py`, `src/discriminators.py` and `src/enrich_definitions.py` are the offline
-generators behind those cached files; they need API access and are not required to check any
-number in the paper.
+`trap_table.py` needs no data at all; the other three read `data/test.json`.
+
+`src/ablate_trap.py` and `src/enrich_definitions.py` need API access and produced cached inputs;
+`src/enrich_definitions.py` produced none of the shipped artifacts and is included only for
+completeness. `src/discriminators.py` is **not** an offline generator: it is a static table of 74
+hand-written Arabic cues that `src/judge.py` appends to every definition at run time (`ENRICH=1`
+by default), so it is part of the submitted system.
+`src/interactive_judge.py` is the reassignment pass that `artifacts/base_predictions.json`
+carries; it needs the judge endpoint.
 
 ## Layout
 
 | Path | Contents |
 | --- | --- |
-| `src/` | pipeline, one stage per file |
+| `src/` | pipeline, one stage per file, plus the checkers under "Verify the paper's numbers" |
 | `artifacts/` | cached model outputs, enough to rebuild the submission offline |
 | `submissions/` | the file that was scored |
 | `data/` | genre definitions; `test.json` is the organisers' to distribute |
