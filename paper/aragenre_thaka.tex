@@ -176,7 +176,7 @@ plus a within-family attractor drain correct both tiers, reaching 0.7352 (rank~1
 \end{figure}
 
 \subsection{Base: Family-Restricted Definition-Guided Judge}
-A locally served open Gemma-family model~\citep{gemma2024}, exposed by our vLLM endpoint
+Figure~\ref{fig:arch} summarises the pipeline. A locally served open Gemma-family model~\citep{gemma2024}, exposed by our vLLM endpoint
 under the identifier \texttt{gemma-4-31b}, acts as a setwise judge; we report the served
 identifier verbatim and pin it, together with the API model strings, in
 Appendix~\ref{app:hparams}. For each text:
@@ -189,7 +189,7 @@ ones), so that $\text{broad}=\text{parent}(\text{specific})$ and broad \emph{acc
 family-accuracy of the specific prediction (Broad Macro~F1 does not: it averages per-class
 F1, and the gap between the two is what \S\ref{sec:diag} exploits); (iii) the judge scores each candidate 0--100
 against its definition in one setwise call~\citep{sun2023rankgpt} and we take the argmax after
-a light marginal correction; and (iv) a few
+a light marginal correction (Appendix~\ref{app:calib}); and (iv) a few
 high-precision surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; both estimated to fire at $>$98\% precision by
@@ -502,18 +502,19 @@ distinction that NADI-style country-level tasks define~\citep{nadi2021}.
 \section{Full-Context vs.\ Broad-Only Prompting}
 \label{app:trap}
 Both consensus models were run over the same verification pool ($n=2{,}635$) once with only the
-6 broad definitions and once with all 74 specific definitions. Table~\ref{tab:trap} reports
-GPT-5.6 alone, so one model's behaviour is compared across prompts; joint two-model counts
-follow below. Because the full-taxonomy prompt also
-carries an explicit type-vs-topic instruction, we added a third arm (broad definitions only \emph{plus}
-that instruction) to separate the two factors; on the 1{,}403 book-description instances, GPT-5.6 calls
-394 of them Religious with neither, 233 with the instruction alone, and 119 with the full taxonomy;
-\texttt{src/trap\_table.py} rebuilds these three counts from cached verifier outputs with no API
-access. The table below reports the two original arms. Table~\ref{tab:trap} reports how often each model's
-verdict still agrees with the base system's broad family. Broad-only prompting collapses on families whose
-members are \emph{about} another family's subject matter (Learning, Informative), which is exactly the topic
-trap; the full taxonomy repairs it. On the 1{,}403 book-description instances, joint Religious assignments
-fall from 235 (broad-only) to 32 (full taxonomy), an 86\% reduction.
+6 broad definitions and once with all 74 specific definitions. Because the full-taxonomy prompt
+also carries an explicit type-vs-topic instruction, we added a third arm, broad definitions only
+\emph{plus} that instruction, to separate the two factors. On the 1{,}403 book-description
+instances GPT-5.6 calls 394 of them Religious with neither, 233 with the instruction alone and
+119 with the full taxonomy; \texttt{src/trap\_table.py} rebuilds these counts from cached
+verifier outputs with no API access.
+
+Table~\ref{tab:trap} reports how often GPT-5.6's broad verdict still agrees with the base
+system's family, one model across the two original prompts. Broad-only prompting collapses on
+families whose members are \emph{about} another family's subject matter (Learning,
+Informative), which is exactly the topic trap; the full taxonomy repairs it. Requiring both
+verifiers to agree, joint Religious assignments on the same 1{,}403 instances fall from 235
+under broad-only prompting to 32 under the full taxonomy, an 86\% reduction.
 
 \begin{table}[h]
 \centering\small
@@ -539,8 +540,9 @@ an accuracy gain. The dev contrast in \S\ref{sec:dev} is the gold-anchored count
 
 \section{Attractor Drain}
 \label{app:drain}
-The drain is deterministic: it fires when the base label is an attractor class and the chain-of-thought pass
-names a different sibling inside the same broad family. No score threshold or entropy criterion is used, and
+The drain is deterministic: it fires when the base label is an attractor class and the
+chain-of-thought pass names a different sibling inside the same broad family
+(Table~\ref{tab:drain}). No score threshold or entropy criterion is used, and
 broad is held fixed by construction.
 
 \begin{table}[h]
@@ -597,8 +599,9 @@ pass over 27{,}972 instances was run at higher concurrency.
 
 \section{Official Submission Record}
 \label{app:subs}
-Every hidden-test number we report is an official evaluation of a submitted file, so the
-progression is traceable to scored submissions rather than to local approximations.
+Every hidden-test number we report is an official evaluation of a submitted file
+(Table~\ref{tab:subs}), so the progression is traceable to scored submissions rather than to
+local approximations.
 
 \begin{table}[h]
 \centering\footnotesize
