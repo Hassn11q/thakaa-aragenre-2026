@@ -159,7 +159,7 @@ lyrics, niche job domains).
 \draw[ar] (judge)--(rules); \draw[ar] (rules)--(basep);
 % correction stages
 \node[corr,below=7mm of basep] (cons) {Full-context 2-model consensus\\ \scriptsize GPT-5.6 + Gemini-3.6, \emph{all 74 defs} $\rightarrow$ agree-gated fix};
-\node[corr,below=of cons] (drain) {Attractor drain\\ \scriptsize CoT within-family, broad-locked};
+\node[corr,below=of cons] (drain) {Attractor drain, then surface rules\\ \scriptsize CoT within-family, broad-locked; rules re-applied last};
 \node[res,below=of drain] (finalp) {Final \;\textbf{0.7352} \;(rank 1)};
 \draw[ar] (basep)--(cons); \draw[ar] (cons)--(drain); \draw[ar] (drain)--(finalp);
 % taxonomy side-note into consensus
@@ -237,11 +237,11 @@ which over-fires student-writing on academic prose) are rejected. Within-family
 (broad-preserving) refinements are applied wherever both models agree.
 
 \subsection{Attractor Drain (Specific Macro)}
-Manual reading revealed five large ``attractor'' classes (e.g.,
-\texttt{egyptian\_song\_lyrics}) that absorb texts the judge cannot confidently place,
-inflating those classes and starving rare siblings. The drain is deterministic: when the base label is an attractor class and an independent
+Manual reading revealed five large ``attractor'' classes that absorb texts the judge cannot
+place confidently, inflating them and starving rare siblings. The drain is deterministic: when the base label is an attractor class and an independent
 chain-of-thought re-judge~\citep{wei2022cot} names a different sibling in the same family, the
-sibling replaces it (broad never changes). On the base alone it moves 554 instances, 6--35\%
+sibling replaces it (broad never changes). The surface rules are then re-applied over the
+corrected labels, acting as a guard rather than a gain (Appendix~\ref{app:subs}). On the base alone it moves 554 instances, 6--35\%
 of each attractor class (Appendix~\ref{app:drain}); in the final pipeline consensus runs
 first, leaving the drain 383. Relative to the base, the final system changes 459 broad and
 2{,}890 specific labels (10.3\% of instances).
@@ -279,7 +279,7 @@ Baseline 1 (embedding similarity) & dev & 0.4658 \\
 Baseline 2 (RAG + multilingual LLM) & dev & 0.3899 \\
 Our judge (\texttt{gemma}) & dev & 0.8794 \\
 Our judge (GPT-5.6) & dev & 0.8943 \\
-\quad + consensus & dev & 0.8557 \\
+\quad \texttt{gemma} + consensus & dev & 0.8557 \\
 GPT-5.6 judge + attractor drain$^{\dagger}$ & dev & 0.9358 \\
 \midrule
 Genre-general zero-shot judge & test & 0.6067 \\
@@ -321,25 +321,25 @@ public leaderboard, snapshot of 30 July 2026.}
 
 \subsection{Development-Set Results and Component Transfer}
 \label{sec:dev}
-Re-running the pipeline on the development set (110 examples, official gold) separates
-what transfers from what does not. The drain transfers: its attractor classes are detected
-from the prediction distribution alone (\texttt{Analytical Reports} $1.40\times$ its gold
-frequency), with no class list carried over, and it adds $+0.042$. The consensus stage does
-not: dev has no \texttt{*\_book\_description} and no scripture classes, so the trap it repairs
-has zero instances, only two corrections fire, and both are wrong. Residual dev errors stem from a convention clash between splits
-(Appendix~\ref{app:convention}).
+Re-running the pipeline on dev (110 examples, official gold) separates what transfers from
+what does not. The drain transfers: it reads its attractor classes off the prediction
+distribution alone, with no class list carried over -- the two it fires on run at $1.30\times$
+and $1.25\times$ gold frequency -- and moves five labels for $+0.042$. The consensus stage does not: dev has no
+\texttt{*\_book\_description} and no scripture, so the trap it repairs has zero instances; two
+corrections fire and both are wrong. Residual dev errors stem from a convention clash between
+splits (Appendix~\ref{app:convention}).
 
 
 
 \section{Analysis}
-Broad Macro is dominated by minority-class false positives and Specific Macro by rare-class
-recall, so small verified gains on both compound through the mean. Broad-only prompting
+Broad Macro is dominated by minority-class false positives, Specific Macro by rare-class
+recall, so gains on both compound through the mean. Broad-only prompting
 produced 180 unanimous topic-trap errors even across all three models we tried, which the full
 taxonomy dissolved; and any single strong model disagreed with the base on $\sim$29\% of
 specifics, too noisy to trust, whereas two-model exact-label agreement filtered this to
 reliable corrections. A direct six-way broad classifier regressed to 0.6206 and unpruned
-74-way scoring to 0.6517; self-consistency (0.7134), optimal transport (0.7115) and
-uniform-prior calibration (0.7124) all fell below the 0.7139 base (Appendix~\ref{app:negative}).
+74-way scoring to 0.6517; self-consistency, optimal transport and uniform-prior calibration
+all fell below the 0.7139 base (Appendix~\ref{app:negative}).
 
 \paragraph{Error analysis (hidden test).} Three types dominate: cross-family topic leaks (a description
 \emph{of} a religious book attracting Religious, and scripture misfiled as fiction), attractor
