@@ -198,10 +198,25 @@ def main():
     text_by_id = {r["id"]: (r.get("text") or "")[:TEXT_CAP] for r in json.loads(TEST.read_text())}
 
     top20 = {}
-    for f in sorted((ROOT / "work").glob(CANDIDATE_GLOB)):
+    candidate_files = sorted((ROOT / "work").glob(CANDIDATE_GLOB))
+    for f in candidate_files:
         for it in json.loads(f.read_text())["topk"]:
             top20[it["id"]] = it["top_genres"]
     ids = [r["id"] for r in json.loads(TEST.read_text())]
+
+    # Without candidates the large families fall back to the gate for every row and the judge is
+    # never called, which would silently emit a copy of broad_gate.json. Refuse instead.
+    if not candidate_files:
+        raise SystemExit(
+            f"no candidate files matching work/{CANDIDATE_GLOB}; run src/retrieve.py first. "
+            "Refusing to run: without them this would copy the broad gate instead of judging."
+        )
+    missing = [i for i in ids if i not in top20]
+    if missing:
+        raise SystemExit(
+            f"{len(missing)} of {len(ids)} ids have no retrieval candidates "
+            f"(first: {missing[0]}); re-run src/retrieve.py over the whole test set."
+        )
 
     # v7: tight retrieval-pruned candidates. Enumerating whole families (v5) diluted the judge and
     # regressed (0.6517 vs v3's retrieval-pruned 0.6882). Papers agree: family ∩ retrieval-top-k wins.
