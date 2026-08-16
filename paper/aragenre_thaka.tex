@@ -392,8 +392,8 @@ are GPT-5.6~Luna and Gemini-3.6~Flash, each queried with the full-taxonomy promp
 narrowed to $\leq$6 family-restricted candidates; permutation self-consistency $K{=}3$ on
 confusable families; marginal calibration $\alpha{=}0.5$ with SLD rare-class correction;
 embedding-rank guard at rank~3. \textbf{Pipeline and code:} the retriever, judge,
-full-context consensus verifiers (\texttt{fullctx\_verify.py}), chain-of-thought drain, and
-the submission builder (\texttt{build\_submission.py}, to be released with the repository, which enforces
+full-context consensus verifiers (\texttt{src/verify.py}), chain-of-thought drain, and the
+submission builder (\texttt{src/submission.py}, which enforces
 $\text{broad}{=}\text{parent}(\text{specific})$ and validates that all 27{,}972 IDs are
 present with exact labels) are released in the project repository. \textbf{Two cached inputs.} The broad gate the judge restricts to is submission 866538
 (0.6812), an earlier retrieval-gated system we submitted and scored, reused verbatim rather
