@@ -49,22 +49,23 @@ Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification}
 \maketitle
 
 \begin{abstract}
-We describe the winning system for the AraGenre~2026 shared task on hierarchical,
-definition-guided Arabic genre classification, where each of 27{,}972 hidden-test
-Arabic segments must be assigned one of 6 broad genres and one of 74 fine-grained
-specific genres whose English definitions are provided but whose specific-label inventory is
-\emph{disjoint} from the released training data, the 6 broad genres being shared. Our approach uses no gradient-based training on
-the task, though the judge prompt does carry hand-written per-genre cues (\S\ref{sec:system}). A family-restricted, definition-guided LLM judge performs
-setwise scoring of candidate genres within a hierarchically constrained decoding
-scheme, reaching 0.7139 Hierarchical Macro~F1. From the public scoreboard we diagnose
-that our system already led on Specific Macro~F1 but trailed on Broad Macro~F1, and we
-narrow that gap with a full-context multi-model consensus correction stage:
-two instruction models are each shown the \emph{entire} 74-definition taxonomy
-and re-predict the specific genre; corrections are applied only where both models agree
-against the base system. Feeding the full taxonomy almost halves the residual topic-trap errors, where a book
-\emph{about} religion is taken for religious scripture. A final attractor-drain step redistributes over-predicted generic classes to starved rare
-classes. The system scores 0.7352 Hierarchical Macro~F1, ranking 1st, $+0.018$
-over the next team and improving every metric over our base.
+Genre is what a text does rather than what it is about, and sorting Arabic text this way is
+difficult when the labels themselves are unseen. AraGenre~2026 asks systems to assign each of
+27{,}972 hidden-test Arabic segments one of 6 broad and one of 74 fine-grained specific genres,
+described only by English definitions, with a specific-label inventory \emph{disjoint} from the
+released training data. We present a training-free pipeline that does no gradient-based
+training on the task, though the judge prompt does carry hand-written per-genre cues
+(\S\ref{sec:system}). A family-restricted, definition-guided LLM judge scores candidate genres
+setwise within a hierarchically constrained decoding scheme, reaching 0.7139 Hierarchical
+Macro~F1. From the public scoreboard we diagnose that our system already led on Specific
+Macro~F1 but trailed on Broad Macro~F1, and we narrow that gap with a full-context multi-model
+consensus stage: two instruction models each see the \emph{entire} 74-definition taxonomy and
+re-predict the specific genre, and a correction is applied only where both agree against the
+base. Feeding the full taxonomy almost halves the residual topic-trap errors, where a book
+\emph{about} religion is taken for religious scripture. A final attractor-drain step
+redistributes over-predicted generic classes to starved rare ones. The system scores 0.7352
+Hierarchical Macro~F1, ranking 1st of 18 teams; our ablations show that neither the
+instruction nor the full taxonomy suffices alone.
 \end{abstract}
 
 \section{Introduction}
@@ -369,7 +370,8 @@ ablation (\S\ref{sec:system}) was run after the evaluation phase closed, so that
 post hoc; and the descriptive tables in Appendices~\ref{app:errors}, \ref{app:trap},
 \ref{app:drain} and~\ref{app:subs} are analyses of the submitted outputs, computed locally
 rather than scored.
-The hidden test has no released gold labels and the development set is near-degenerate, so
+
+\paragraph{Validation.} The hidden test has no released gold labels and the development set is near-degenerate, so
 component decisions were validated on the public leaderboard and by manual reading rather
 than on held-out gold. Our reported progression therefore doubles as the selection signal:
 successive submissions were guided by leaderboard feedback, which risks fitting to the test
@@ -377,7 +379,9 @@ distribution. The one component we can test against gold is the drain, on dev, w
 bootstrap puts its gain above zero (95\% CI $[+0.010, +0.082]$). Every hidden-test gain is
 without an interval because that split has no released gold, so those gains should be read as
 leaderboard-measured rather than statistically certified, and we can offer no uncertainty
-estimate on the winning margin. Consensus correction incurs API cost
+estimate on the winning margin.
+
+\paragraph{Cost and ceilings.} Consensus correction incurs API cost
 proportional to test size. Song-dialect distinctions remain near the noise floor because
 the distinguishing features are phonetic and largely absent from written lyrics.
 
@@ -603,9 +607,12 @@ submitted run used; only the cosine ranking is consumed and NF4 preserves embedd
 direction), 4096-dim, L2-normalised, \texttt{max\_seq\_length} 512, the top 20 specific genres
 cached per text; the judge scores every sibling in the four small families (Creative 7,
 Religious 6, Interactive 4, Legal 3) and the top 6 retrieved in-family candidates in the two
-large ones. Judge: \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
+large ones.
+
+\paragraph{Judge.} \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
 temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction $\alpha{=}0.5$.
-Consensus verifiers: GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
+
+\paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
 Gemini-3.6~Flash (temperature 0, $\leq$400 output tokens), each given the full 74-definition taxonomy
 (2{,}884 tokens under \texttt{o200k\_base}, giving a mean prompt of 3{,}034 tokens and a maximum
 of 5{,}185) in the system prompt, and the text truncated to 1500 characters. The judge prompt asks for a
