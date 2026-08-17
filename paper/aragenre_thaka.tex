@@ -65,8 +65,8 @@ re-predict the specific genre, and a correction is applied only where both agree
 base. Feeding the full taxonomy almost halves the residual topic-trap errors, where a book
 \emph{about} religion is taken for religious scripture. A final attractor-drain step
 redistributes over-predicted generic classes to starved rare ones. The system scores 0.7352
-Hierarchical Macro~F1, ranking 1st of 18 teams; ablations show neither the instruction nor the
-full taxonomy suffices alone.
+Hierarchical Macro~F1, ranking 1st of 18 teams; our ablation attributes part of the
+topic-trap reduction to each of two factors.
 \end{abstract}
 
 \section{Introduction}
@@ -263,8 +263,8 @@ wanted, 24-seater, for a company in Dubai, Jebel Ali''); the required output pai
 \texttt{drivers\_and\_} \texttt{delivery\_jobs}.
 \paragraph{Preprocessing.} None. Normalisation erases the two orthographic signals that
 separate whole families here: heavy diacritisation marks 77\% of the texts we label
-\texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 47\% of Interactive
-posts against under 1\% (Appendix~\ref{app:hparams}).
+\texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
+against under 1\% elsewhere (Appendix~\ref{app:hparams}).
 \paragraph{Tools.} \texttt{transformers}, \texttt{sentence-transformers} and
 \texttt{bitsandbytes} for Qwen3-Embedding-8B, vLLM for the local judge, and the \texttt{openai}
 and \texttt{google-genai} SDKs for the verifiers; versions and URLs in
@@ -328,9 +328,10 @@ Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). We beat the second-pla
 \subsection{Development-Set Results and Component Transfer}
 \label{sec:dev}
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from
-what does not. The drain transfers: no class list is carried over from the test set, and
-the two dev classes it fires on are the two most over-predicted there ($1.30\times$ and
-$1.25\times$ gold frequency). It moves five labels for $+0.042$ (paired bootstrap over the 110
+what does not. The drain transfers: no class list is carried over from the test set, and the two dev classes
+it fires on are simply the two most-predicted ones, so they are identifiable without gold, as on
+test (their gold frequencies, $1.30\times$ and $1.25\times$, are reported only to show the
+over-prediction is real). It moves five labels for $+0.042$ (paired bootstrap over the 110
 dev items, 10k resamples: 95\% CI $[+0.010, +0.082]$). On the hidden test, by contrast, the
 five attractors were picked by reading (\S\ref{sec:system}). The consensus stage does not: dev has no
 \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero instances; two
@@ -383,7 +384,13 @@ without an interval because that split has no released gold, so those gains shou
 leaderboard-measured rather than statistically certified, and we can offer no uncertainty
 estimate on the winning margin.
 
-\paragraph{Cost and ceilings.} Consensus correction incurs API cost
+\paragraph{Cost and ceilings.} One comparison we cannot make is against a frontier verifier used
+alone: we ran GPT-5.6 over the full test set but never submitted its predictions as a system,
+so the claim that a cheap base judge with conservative correction beats direct full-taxonomy
+prediction is untested, and the $\sim$29\% disagreement rate is our only evidence that one
+model is too noisy to act on.
+
+Consensus correction incurs API cost
 proportional to test size. Song-dialect distinctions remain near the noise floor because
 the distinguishing features are phonetic and largely absent from written lyrics.
 
@@ -427,6 +434,12 @@ consensus and drain assembly (\texttt{src/assemble.py}), and the submission buil
 (\texttt{src/submission.py}), which enforces
 $\text{broad}{=}\text{parent}(\text{specific})$ and validates that all 27{,}972 IDs are
 present with exact labels.
+
+\textbf{What the release cannot regenerate.} Two inputs to the trap experiment have no
+producer here: the 2{,}635-instance verification pool, selected during the evaluation phase as
+the instances whose broad label we judged least secure, and the broad-only prompt behind arm~A.
+Both files ship, so \texttt{src/trap\_table.py} rebuilds the table offline, but neither
+selection can be re-derived from the code.
 
 \textbf{Two cached inputs.} The broad gate the judge restricts to is submission 866538
 (0.6812), an earlier retrieval-gated system we submitted and scored, reused verbatim rather
@@ -623,7 +636,7 @@ JSON array of integer scores over the candidate definitions; the consensus promp
 \texttt{*\_book\_description}, not the book's subject genre.
 
 \paragraph{Cost.} At list prices the consensus stage runs about US\$1.05--1.48 per 1{,}000
-instances, giving the \$50 total quoted in \S\ref{sec:setup}.
+calls, giving the \$50 total quoted in \S\ref{sec:setup} over its 36{,}013 calls.
 
 \paragraph{Throughput.} A consensus call takes 2.0--2.8\,s. At the released default of 20
 concurrent workers the 8{,}041-instance Gemini pass took 19\,min of wall clock; the full GPT
@@ -696,7 +709,9 @@ three changes 22 of the 27{,}972 final predictions.
 \paragraph{Orthographic signals.} Share of each group carrying heavy diacritisation (a mark on
 over 10\% of its Arabic characters) or at least one emoji, over the final predictions:
 \texttt{quran} 77\%/0\% ($n{=}691$), poetry 43\%/0\% ($n{=}1{,}606$), \texttt{hadith} 1\%/1\%
-($n{=}647$), book descriptions 1\%/0\% ($n{=}3{,}916$), Interactive 0\%/47\% ($n{=}1{,}103$).
+($n{=}647$), book descriptions 1\%/0\% ($n{=}3{,}916$), the whole Interactive family 0\%/28\%
+($n{=}1{,}978$; \texttt{twitter\_posts} 57\%, \texttt{youtube\_comments} 30\%,
+\texttt{app\_reviews} 11\%, \texttt{book\_reviews} 0\%).
 Both are properties of the text, so no gold is needed;
 \texttt{src/orthographic\_signals.py} reproduces the table.
 

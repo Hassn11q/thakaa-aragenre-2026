@@ -52,12 +52,8 @@ def main():
         "poetry": ["classical_poetry", "msa_poetry"],
         "hadith": ["hadith"],
         "book descriptions": book_desc,
-        "Interactive": [
-            "youtube_comments",
-            "facebook_comments",
-            "twitter_posts",
-            "instagram_comments",
-        ],
+        # the four classes the Interactive family actually contains
+        "Interactive": ["youtube_comments", "twitter_posts", "app_reviews", "book_reviews"],
     }
 
     print(f"{'group':20s}{'n':>7s}{'heavy diacritics':>18s}{'emoji':>8s}")
