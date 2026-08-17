@@ -68,8 +68,11 @@ over the next team and improving every metric over our base.
 \end{abstract}
 
 \section{Introduction}
-AraGenre~2026~\citep{aragenre2026} frames Arabic genre classification as a
-generalisation problem:
+Genre is what a text \emph{does} rather than what it is about: the same subject appears in a
+contract, a news report and a textbook, and only the first is useful to someone assembling a
+legal corpus. Sorting documents this way is what makes an archive filterable and a corpus
+assemblable by register, and Arabic has far less of this work behind it than English.
+AraGenre~2026~\citep{aragenre2026} frames the problem as one of generalisation:
 systems receive English genre definitions and limited synthetic training data, but the
 hidden benchmark contains noisier naturally occurring Arabic spanning Modern Standard
 Arabic, Classical Arabic, and multiple dialects, with \emph{previously unseen
@@ -355,7 +358,8 @@ Zero-shot hierarchical Arabic genre classification is achievable without task tr
 constrained definition-guided judge, an agreement-gated consensus and a rare-class attractor
 drain ranked 1st at 0.7352 Hierarchical Macro~F1. Our ablation shows the topic trap is
 suppressed jointly by a type-vs-topic instruction and by the full label inventory, neither
-alone. The remaining ceilings are song-lyric dialect and textbook reading level.
+alone. alone. Two ceilings remain and are where we would go next: song-lyric dialect, which needs a
+signal beyond the written form, and textbook reading level.
 
 \section*{Acknowledgements}
 We thank the AraGenre~2026 organisers for designing and running the shared task, for the
@@ -445,6 +449,15 @@ quality of religious or cultural texts. Second, dialect-related labels can encod
 and social signals; models trained on skewed corpora may under-serve lower-resourced
 dialects (e.g., the near-noise-floor separation of Sudanese and Iraqi song lyrics we
 report), which practitioners should weigh before deployment.
+
+\paragraph{Potential misuse.} Two uses of this system would concern us. The taxonomy separates
+song lyrics by regional dialect, so the same classifier can be pointed at ordinary prose and read
+as a guess at where a writer is from; dialect is not provenance, our own measurements show the
+written signal is mostly absent, and we would not treat the output as an author attribute. And
+because the labels distinguish religious from informative text, genre output could be used to
+route or suppress material by register rather than by content. The system assigns text types, it
+does not assess them, and a 0.57 Specific Macro~F1 is not a basis for an automated decision about
+a document or its author without a person in the loop.
 
 Our correction stage sends Arabic text to third-party hosted LLM APIs; because the inputs
 are already-public shared-task data, this poses no additional privacy exposure, but the
