@@ -329,7 +329,8 @@ Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). We beat the second-pla
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from
 what does not. The drain transfers: it reads its attractor classes off the prediction
 distribution alone, with no class list carried over -- the two it fires on run at $1.30\times$
-and $1.25\times$ gold frequency -- and moves five labels for $+0.042$. The consensus stage does not: dev has no
+and $1.25\times$ gold frequency -- and moves five labels for $+0.042$ (paired bootstrap over the 110 dev
+items, 10k resamples: 95\% CI $[+0.010, +0.082]$). The consensus stage does not: dev has no
 \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero instances; two
 corrections fire and both are wrong. Residual dev errors stem from a convention clash between
 splits (Appendix~\ref{app:convention}).
@@ -379,8 +380,11 @@ The hidden test has no released gold labels and the development set is near-dege
 component decisions were validated on the public leaderboard and by manual reading rather
 than on held-out gold. Our reported progression therefore doubles as the selection signal:
 successive submissions were guided by leaderboard feedback, which risks fitting to the test
-distribution, and we report no held-out confidence intervals or significance tests. The
-gains should be read as leaderboard-measured rather than statistically certified, and, absent gold, we can offer no uncertainty estimate on the winning margin. Consensus correction incurs API cost
+distribution. The one component we can test against gold is the drain, on dev, where a paired
+bootstrap puts its gain above zero (95\% CI $[+0.010, +0.082]$). Every hidden-test gain is
+without an interval because that split has no released gold, so those gains should be read as
+leaderboard-measured rather than statistically certified, and we can offer no uncertainty
+estimate on the winning margin. Consensus correction incurs API cost
 proportional to test size. Song-dialect distinctions remain near the noise floor because
 the distinguishing features are phonetic and largely absent from written lyrics.
 
