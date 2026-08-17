@@ -194,7 +194,7 @@ English definitions, and proposes candidate specific genres by cosine similarity
 (ii) Decoding is hierarchically constrained, all siblings for small families and top-$k$
 retrieved for large topical ones, so that $\text{broad}=\text{parent}(\text{specific})$ and
 broad \emph{accuracy} equals the family-accuracy of the specific prediction. Broad Macro~F1
-does not: it averages per-class F1, and the gap between the two is what \S\ref{sec:diag}
+does not: it averages per-class F1, and the gap between the two is what the diagnosis below
 exploits. (iii) The judge scores each candidate 0--100 against its definition in one setwise
 call~\citep{sun2023rankgpt}, and we take the argmax after a light marginal correction
 (Appendix~\ref{app:calib}). (iv) A few
