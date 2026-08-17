@@ -53,8 +53,8 @@ We describe the winning system for the AraGenre~2026 shared task on hierarchical
 definition-guided Arabic genre classification, where each of 27{,}972 hidden-test
 Arabic segments must be assigned one of 6 broad genres and one of 74 fine-grained
 specific genres whose English definitions are provided but whose specific-label inventory is
-\emph{disjoint} from the released training data, the 6 broad genres being shared. Our approach uses
-no task training. A \textbf{family-restricted, definition-guided LLM judge} performs
+\emph{disjoint} from the released training data, the 6 broad genres being shared. Our approach uses no gradient-based training on
+the task, though the judge prompt does carry hand-written per-genre cues (\S\ref{sec:system}). A \textbf{family-restricted, definition-guided LLM judge} performs
 setwise scoring of candidate genres within a hierarchically constrained decoding
 scheme, reaching 0.7139 Hierarchical Macro~F1. From the public scoreboard we diagnose
 that our system already led on Specific Macro~F1 but trailed on Broad Macro~F1, and we
@@ -133,7 +133,7 @@ genres in 6 families: Informative (42, dominated by 20 job domains and 13 book-d
 topics), Learning (12: textbooks by level, student writing by topic), Creative (7: 5 song
 dialects, classical vs.\ MSA poetry), Religious (6: Islamic and Christian), Interactive (4)
 and Legal (3). Missing predictions are counted
-incorrect; official dev baselines are in Table~\ref{tab:ablation}. Informative dominates ($\sim$50\% of predictions), and the specific
+incorrect; official dev baselines are in Table~\ref{tab:ablation}. Informative dominates our predictions ($\sim$50\%), and the specific
 tier's 74 classes make Macro~F1 highly sensitive to rare-class recall (e.g., dialect song
 lyrics, niche job domains).
 
@@ -267,8 +267,8 @@ and \texttt{google-genai} SDKs for the verifiers; versions and URLs in
 Appendix~\ref{app:hparams}.
 \paragraph{Metrics.} Macro F1, Weighted F1 and Accuracy at both tiers; the official ranking metric is
 Hierarchical Macro F1, the mean of Broad and Specific Macro F1.
-\paragraph{Cost.} Consensus sends a $\approx$3.0K-token prompt per instance, about
-US\$1.05--1.48 per 1{,}000 instances and \$50 in total; wall-clock timings are in
+\paragraph{Cost.} Consensus sends a $\approx$3.0K-token prompt per instance over
+36{,}013 calls (27{,}972 + 8{,}041), about US\$1.05--1.48 per 1{,}000 and \$50 in total; wall-clock timings are in
 Appendix~\ref{app:hparams}. The base pipeline needs no paid API.
 
 \section{Results}
@@ -358,7 +358,7 @@ Zero-shot hierarchical Arabic genre classification is achievable without task tr
 constrained definition-guided judge, an agreement-gated consensus and a rare-class attractor
 drain ranked 1st at 0.7352 Hierarchical Macro~F1. Our ablation shows the topic trap is
 suppressed jointly by a type-vs-topic instruction and by the full label inventory, neither
-alone. alone. Two ceilings remain and are where we would go next: song-lyric dialect, which needs a
+alone. Two ceilings remain and are where we would go next: song-lyric dialect, which needs a
 signal beyond the written form, and textbook reading level.
 
 \section*{Acknowledgements}
@@ -585,7 +585,7 @@ applied first and the drain fires on 383 of these instances.}
 \section{Calibration}
 \label{app:calib}
 The correction subtracts a scaled per-genre mean from each candidate's score,
-$\tilde{s}(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre $y$
+$s'(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre $y$
 received over the whole test set and $\alpha{=}0.5$. It damps genres the judge rates generously
 everywhere, which is what starves rare siblings. We started from $\alpha{=}0.75$, chosen on the
 released training labels; it over-flattened once the label space grew from 7 to 74 classes.
