@@ -64,8 +64,8 @@ re-predict the specific genre, and a correction is applied only where both agree
 base. Feeding the full taxonomy almost halves the residual topic-trap errors, where a book
 \emph{about} religion is taken for religious scripture. A final attractor-drain step
 redistributes over-predicted generic classes to starved rare ones. The system scores 0.7352
-Hierarchical Macro~F1, ranking 1st of 18 teams; our ablations show that neither the
-instruction nor the full taxonomy suffices alone.
+Hierarchical Macro~F1, ranking 1st of 18 teams; ablations show neither the instruction nor the
+full taxonomy suffices alone.
 \end{abstract}
 
 \section{Introduction}
@@ -183,15 +183,16 @@ plus a within-family attractor drain correct both tiers, reaching 0.7352 (rank~1
 \end{figure}
 
 \subsection{Base: Family-Restricted Definition-Guided Judge}
-Figure~\ref{fig:arch} summarises the pipeline. We serve \texttt{google/gemma-4-31B-it}~\citep{gemma4_2026} through vLLM under the local
-endpoint alias \texttt{gemma-4-31b}; it acts as a setwise judge. The API model strings are
-pinned in Appendix~\ref{app:hparams}. For each text:
+The base system turns the 74-way choice into a within-family one (Figure~\ref{fig:arch}):
+retrieval proposes candidates and a judge scores only siblings of a gated broad genre. The
+setwise judge is \texttt{google/gemma-4-31B-it}~\citep{gemma4_2026}, served through vLLM under
+the local alias \texttt{gemma-4-31b}; API model strings are pinned in
+Appendix~\ref{app:hparams}. For each text:
 (i) \texttt{Qwen3-Embedding-8B}~\citep{qwen3embedding2025} encodes the Arabic text and the
 English candidate definitions and proposes candidate specific genres by cosine similarity,
 bridging Arabic text and English definitions; (ii) decoding is hierarchically
-constrained: the broad genre is gated first and specific candidates are restricted to
-that broad family (all siblings for small families, top-$k$ retrieved for large topical
-ones), so that $\text{broad}=\text{parent}(\text{specific})$ and broad \emph{accuracy} equals the
+constrained, all siblings for small families and top-$k$ retrieved for large topical ones, so
+that $\text{broad}=\text{parent}(\text{specific})$ and broad \emph{accuracy} equals the
 family-accuracy of the specific prediction (Broad Macro~F1 does not: it averages per-class
 F1, and the gap between the two is what \S\ref{sec:diag} exploits); (iii) the judge scores each candidate 0--100
 against its definition in one setwise call~\citep{sun2023rankgpt} and we take the argmax after
