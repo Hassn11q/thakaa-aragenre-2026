@@ -663,19 +663,14 @@ JSON array of integer scores over the candidate definitions; the consensus promp
 \texttt{specific\_genre} identifier and states that a factual description \emph{of} a book is a
 \texttt{*\_book\_description}, not the book's subject genre.
 
-\paragraph{Software.} Lower bounds as declared by the released \texttt{requirements.txt}, which is
-authoritative: \texttt{torch}$\geq$2.1 (\url{https://pytorch.org}),
-\texttt{transformers}$\geq$4.44 (\url{https://github.com/huggingface/transformers}),
-\texttt{sentence-transformers}$\geq$3.0 (\url{https://sbert.net}),
-\texttt{accelerate}$\geq$1.1 (\url{https://github.com/huggingface/accelerate}),
-\texttt{bitsandbytes}$\geq$0.43
-(\url{https://github.com/bitsandbytes-foundation/bitsandbytes}),
-\texttt{numpy}$\geq$1.26, \texttt{openai}$\geq$1.99
-(\url{https://github.com/openai/openai-python}) and \texttt{google-genai}$\geq$0.3
-(\url{https://github.com/googleapis/python-genai}). The judge is served with vLLM
-(\url{https://github.com/vllm-project/vllm}); the retriever is Qwen3-Embedding-8B
-(\url{https://huggingface.co/Qwen/Qwen3-Embedding-8B}). Reproducing the submitted predictions
-with \texttt{reproduce.sh} needs none of these---only the Python 3.9+ standard library.
+\paragraph{Software.} \texttt{torch} $\geq$2.1, \texttt{transformers} $\geq$4.44
+(\url{https://github.com/huggingface/transformers}), \texttt{sentence-transformers} $\geq$3.0
+(\url{https://github.com/UKPLab/sentence-transformers}), \texttt{bitsandbytes} $\geq$0.43
+(\url{https://github.com/bitsandbytes-foundation/bitsandbytes}), vLLM
+(\url{https://github.com/vllm-project/vllm}), \texttt{openai} $\geq$1.99
+(\url{https://github.com/openai/openai-python}) and \texttt{google-genai} $\geq$0.3
+(\url{https://github.com/googleapis/python-genai}). Model weights: Qwen3-Embedding-8B
+(\url{https://huggingface.co/Qwen/Qwen3-Embedding-8B}).
 
 \paragraph{Cost.} At list prices the consensus stage runs about US\$1.05--1.48 per 1{,}000
 calls, giving the \$50 total quoted in \S\ref{sec:setup} over its 36{,}013 calls.
@@ -756,14 +751,5 @@ over 10\% of its Arabic characters) or at least one emoji, over the final predic
 \texttt{app\_reviews} 11\%, \texttt{book\_reviews} 0\%).
 Both are properties of the text, so no gold is needed;
 \texttt{src/orthographic\_signals.py} reproduces the table.
-
-\paragraph{Software.} \texttt{torch} $\geq$2.1, \texttt{transformers} $\geq$4.44
-(\url{https://github.com/huggingface/transformers}), \texttt{sentence-transformers} $\geq$3.0
-(\url{https://github.com/UKPLab/sentence-transformers}), \texttt{bitsandbytes} $\geq$0.43
-(\url{https://github.com/bitsandbytes-foundation/bitsandbytes}), vLLM
-(\url{https://github.com/vllm-project/vllm}), \texttt{openai} $\geq$1.99
-(\url{https://github.com/openai/openai-python}) and \texttt{google-genai} $\geq$0.3
-(\url{https://github.com/googleapis/python-genai}). Model weights: Qwen3-Embedding-8B
-(\url{https://huggingface.co/Qwen/Qwen3-Embedding-8B}).
 
 \end{document}
