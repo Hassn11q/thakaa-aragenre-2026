@@ -1,4 +1,4 @@
-"""Final assembly of the winning AraGenre 2026 submission (Thaka, 0.7352 Hierarchical Macro F1).
+"""Final assembly of the winning AraGenre 2026 submission (Thakaa, 0.7352 Hierarchical Macro F1).
 
 Takes the base judge predictions and applies, in order:
   1. Full-context two-model consensus corrections (GPT-5.6 Luna AND Gemini-3.6 Flash must agree
