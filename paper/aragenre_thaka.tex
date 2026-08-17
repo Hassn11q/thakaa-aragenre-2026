@@ -217,8 +217,8 @@ We re-predict the specific genre with two frontier instruction models
 \emph{feeding each the entire 74-definition taxonomy} ($\approx$2.9K tokens) grouped by
 broad genre, and asking for the single best specific label. This follows the classical ensemble argument that combining diverse,
 independently-erring predictors beats any single predictor~\citep{dietterich2000ensemble}, in its LLM
-form~\citep{verga2024poll,wang2024moa}. (A third model, Claude~Sonnet~5~\citep{sonnet5_2026}, was
-piloted but excluded on cost grounds.)
+form~\citep{verga2024poll,wang2024moa}. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the
+diagnostic pool but excluded from the deployed consensus on cost grounds.)
 
 \paragraph{What suppresses the topic trap.} With only the 6 broad definitions,
 all models fell into a \emph{topic trap}: text \emph{about} Islam $\rightarrow$ Religious,
@@ -337,6 +337,7 @@ splits (Appendix~\ref{app:convention}).
 
 
 \section{Analysis}
+\label{sec:analysis}
 Broad Macro is dominated by minority-class false positives, Specific Macro by rare-class
 recall, so gains on both compound through the mean. Broad-only prompting
 produced 157 topic-trap errors on the book descriptions that all three models we tried made
