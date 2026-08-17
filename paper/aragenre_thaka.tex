@@ -94,8 +94,8 @@ direction-verified), with a three-arm ablation separating the effect of the taxo
 that of an explicit type-vs-topic instruction.
 \item An attractor-drain step targeting the macro-F1 failure mode of over-predicting
 generic classes.
-\item A winning result: 0.7352 Hierarchical Macro~F1, rank~1 of 18 teams, with each component
-scored as a submission.
+\item Empirical validation on the hidden test: 0.7352 Hierarchical Macro~F1, ranked 1st of 18
+teams, each component scored as its own submission.
 \end{enumerate}
 
 \noindent Code and prompts: \url{https://github.com/Hassn11q/thakaa-aragenre-2026}. The main
@@ -201,13 +201,11 @@ discriminators appended to the definitions; hyperparameters are in Appendix~\ref
 
 \subsection{Diagnosis from the Scoreboard}
 \label{sec:diag}
-The leaderboard exposed the structure (Table~\ref{tab:metrics}): our base led on
-Specific Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90).
-As the ranking metric is their mean, the entire deficit was in the broad tier. Broad
-accuracy (0.9003) exceeding broad macro (0.8792) indicated a minority broad class dragged
-the mean via cross-family false positives: Bible passages filed as poetry or encyclopedia
-entries, news filed
-as legal, informal comments filed as book descriptions.
+The leaderboard exposed the structure (Table~\ref{tab:metrics}): our base led on Specific
+Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the whole
+deficit sat in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
+per-class performance; reading the errors showed cross-family false positives, with Bible
+passages filed as poetry or encyclopedia entries and news filed as legal.
 
 \subsection{Full-Context Multi-Model Consensus Correction}
 We re-predict the specific genre with two frontier instruction models
@@ -281,8 +279,7 @@ Appendix~\ref{app:hparams}. The base pipeline needs no paid API.
 \toprule
 System & Split & Hier.\ F1 \\
 \midrule
-Baseline 1 (embedding similarity) & dev & 0.4658 \\
-Baseline 2 (RAG + multilingual LLM) & dev & 0.3899 \\
+Official baselines (best of two) & dev & 0.4658 \\
 Our judge (\texttt{gemma}) & dev & 0.8794 \\
 Our judge (GPT-5.6) & dev & 0.8943 \\
 \quad \texttt{gemma} + consensus & dev & 0.8557 \\
@@ -348,18 +345,15 @@ specifics, too noisy to trust, whereas requiring two models to name the same lab
 the candidates to a far more conservative set. Every alternative we tried for the correction stage
 fell below the 0.7139 base; the scores are in Appendix~\ref{app:negative}.
 
-\paragraph{Error analysis (hidden test).} Three types dominate: cross-family topic leaks (a description
-\emph{of} a religious book attracting Religious, and scripture filed as an encyclopedia entry),
-attractor over-prediction, and ceiling classes where 87--99\% of the texts we label as song lyrics carry no marker from
-that dialect's own cue list. Examples in
-Appendix~\ref{app:errors}.
+\paragraph{Error analysis (hidden test).} Three types dominate: cross-family topic leaks,
+attractor over-prediction, and ceiling classes where 87--99\% of the texts we label as song
+lyrics carry no marker from that dialect's cue list. Examples in Appendix~\ref{app:errors}.
 
 \section{Conclusion}
 Training-free hierarchical Arabic genre classification is achievable: a constrained
 definition-guided judge, an agreement-gated consensus and a rare-class attractor drain ranked
-1st of 18 at 0.7352 Hierarchical Macro~F1. Our ablation estimates that a type-vs-topic
-instruction and the full label inventory each remove part of the topic trap, neither alone.
-Song-lyric dialect remains the clearest ceiling.
+1st of 18 at 0.7352 Hierarchical Macro~F1. The taxonomy matters because it gives the model a
+label to move an error \emph{to}; song-lyric dialect remains the clearest ceiling.
 
 \section*{Acknowledgements}
 We thank the AraGenre~2026 organisers for designing and running the shared task, for the
