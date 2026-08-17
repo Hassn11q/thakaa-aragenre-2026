@@ -54,16 +54,16 @@ definition-guided Arabic genre classification, where each of 27{,}972 hidden-tes
 Arabic segments must be assigned one of 6 broad genres and one of 74 fine-grained
 specific genres whose English definitions are provided but whose specific-label inventory is
 \emph{disjoint} from the released training data, the 6 broad genres being shared. Our approach uses no gradient-based training on
-the task, though the judge prompt does carry hand-written per-genre cues (\S\ref{sec:system}). A \textbf{family-restricted, definition-guided LLM judge} performs
+the task, though the judge prompt does carry hand-written per-genre cues (\S\ref{sec:system}). A family-restricted, definition-guided LLM judge performs
 setwise scoring of candidate genres within a hierarchically constrained decoding
 scheme, reaching 0.7139 Hierarchical Macro~F1. From the public scoreboard we diagnose
 that our system already led on Specific Macro~F1 but trailed on Broad Macro~F1, and we
-narrow that gap with a \textbf{full-context multi-model consensus} correction stage:
+narrow that gap with a full-context multi-model consensus correction stage:
 two instruction models are each shown the \emph{entire} 74-definition taxonomy
 and re-predict the specific genre; corrections are applied only where both models agree
 against the base system. Feeding the full taxonomy almost halves the residual topic-trap errors, where a book
 \emph{about} religion is taken for religious scripture. A final attractor-drain step redistributes over-predicted generic classes to starved rare
-classes. The system scores \textbf{0.7352 Hierarchical Macro~F1, ranking 1st}, $+0.018$
+classes. The system scores 0.7352 Hierarchical Macro~F1, ranking 1st, $+0.018$
 over the next team and improving every metric over our base.
 \end{abstract}
 
@@ -200,7 +200,7 @@ high-precision surface rules override the judge only on near-unambiguous markers
 openings $\rightarrow$ \texttt{hadith}; we screened samples by hand and saw no false
 positives, though without gold this is an impression, not a precision estimate; emoji/hashtag short posts $\rightarrow$
 Interactive subtypes). The judge also sees 74 hand-written per-genre contrastive
-discriminators appended to the definitions; hyperparameters are in Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores \textbf{0.7139}.
+discriminators appended to the definitions; hyperparameters are in Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores 0.7139.
 
 \paragraph{Diagnosis from the scoreboard.}
 \label{sec:diag}
