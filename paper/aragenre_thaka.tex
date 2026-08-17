@@ -62,11 +62,11 @@ Macro~F1. From the public scoreboard we diagnose that our system already led on 
 Macro~F1 but trailed on Broad Macro~F1, and we narrow that gap with a full-context multi-model
 consensus stage: two instruction models each see the \emph{entire} 74-definition taxonomy and
 re-predict the specific genre, and a correction is applied only where both agree against the
-base. Feeding the full taxonomy almost halves the residual topic-trap errors, where a book
+base. Feeding the full taxonomy almost halves the residual topic-trap calls, where a book
 \emph{about} religion is taken for religious scripture. A final attractor-drain step
 redistributes over-predicted generic classes to starved rare ones. The system scores 0.7352
-Hierarchical Macro~F1, ranking 1st of 18 teams; our ablation attributes part of the
-topic-trap reduction to each of two factors.
+Hierarchical Macro~F1, ranking 1st of 18 teams; our ablation attributes part of the topic-trap
+reduction to each of two factors.
 \end{abstract}
 
 \section{Introduction}
@@ -89,11 +89,12 @@ Our contributions are:
 \begin{enumerate}
 \itemsep0em
 \item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139 Hierarchical Macro~F1 with no task training.
-\item A scoreboard-driven diagnosis showing the two tiers must be optimised differently,
-and that our deficit against the leading system sat entirely in the broad tier.
+\item A scoreboard-driven diagnosis that the two tiers fail differently---broad macro through
+minority-class false positives, specific macro through rare-class recall---so correction must be
+tier-specific.
 \item A full-context multi-model consensus correction, applied conservatively (agreement-gated,
-direction-verified), with a three-arm ablation separating the effect of the taxonomy from
-that of an explicit type-vs-topic instruction.
+direction-verified), with a three-arm ablation showing that the taxonomy, not an explicit
+type-vs-topic instruction alone, is what suppresses the trap.
 \item An attractor-drain step targeting the macro-F1 failure mode of over-predicting
 generic classes.
 \item Empirical validation on the hidden test: 0.7352 Hierarchical Macro~F1, ranked 1st of 18
@@ -229,9 +230,9 @@ three-arm ablation over the same 1{,}403 instances to estimate each factor's inc
 effect
 (one model, GPT-5.6, identical pool): with broad definitions only and no such instruction, 394 are
 called Religious; adding the instruction alone removes 41\% of those (394$\rightarrow$233); supplying
-the full taxonomy removes a further 49\% (233$\rightarrow$119). Both factors matter and neither
-explains the effect alone: the instruction states the convention, the taxonomy shows the label that
-realises it. Scripture filed as an encyclopedia entry (\ar{هؤلاء امراء بني عيسو}, Genesis~36) is moved to
+the full taxonomy removes a further 49\% (233$\rightarrow$119). The two are not interchangeable:
+the instruction helps only on the book descriptions and over-fires elsewhere, whereas the taxonomy
+improves every subset of the pool (Table~\ref{tab:arms}). Scripture filed as an encyclopedia entry (\ar{هؤلاء امراء بني عيسو}, Genesis~36) is moved to
 \texttt{bible}, and base-family agreement rises in five of the six families (Appendix~\ref{app:trap}).
 
 \paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
@@ -265,12 +266,9 @@ wanted, 24-seater, for a company in Dubai, Jebel Ali''); the required output pai
 separate whole families here: heavy diacritisation marks 77\% of the texts we label
 \texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
 against under 1\% elsewhere (Appendix~\ref{app:subs}).
-\paragraph{Tools.} \texttt{transformers}, \texttt{sentence-transformers} and
-\texttt{bitsandbytes} for Qwen3-Embedding-8B, vLLM for the local judge, and the \texttt{openai}
-and \texttt{google-genai} SDKs for the verifiers; versions and URLs in
-Appendix~\ref{app:hparams}.
-\paragraph{Metrics.} Macro F1, Weighted F1 and Accuracy at both tiers; the official ranking metric is
-Hierarchical Macro F1, the mean of Broad and Specific Macro F1.
+\paragraph{Tools and metrics.} Qwen3-Embedding-8B under \texttt{sentence-transformers}, vLLM for
+the local judge, and the vendor SDKs for the verifiers; we report Macro F1, Weighted F1 and
+Accuracy at both tiers. Versions, URLs and hyperparameters are in Appendix~\ref{app:hparams}.
 \paragraph{Cost.} Consensus makes 36{,}013 calls (27{,}972 + 8{,}041) with a
 $\approx$3.0K-token prompt each, about US\$50 in total; rates and timings are in
 Appendix~\ref{app:hparams}. The base pipeline needs no paid API.
@@ -339,9 +337,8 @@ splits (Appendix~\ref{app:convention}).
 \label{sec:analysis}
 Broad Macro is dominated by minority-class false positives, Specific Macro by rare-class
 recall, so gains on both compound through the mean. Broad-only prompting
-produced 157 topic-trap errors on the book descriptions that all three models made unanimously,
-which the full
-taxonomy largely removed; and a single model disagreed with the base on $\sim$29\% of
+put 157 book descriptions under Religious unanimously across all three models, which the full
+taxonomy largely reversed; and a single model disagreed with the base on $\sim$29\% of
 specifics, too noisy to act on without a second. Every alternative we tried for the correction stage
 fell below the 0.7139 base; the scores are in Appendix~\ref{app:negative}.
 
@@ -544,6 +541,38 @@ also carries an explicit type-vs-topic instruction, we added a third arm, broad 
 instances GPT-5.6 calls 394 of them Religious with neither, 233 with the instruction alone and
 119 with the full taxonomy; \texttt{src/trap\_table.py} rebuilds these counts from cached
 verifier outputs with no API access.
+
+Table~\ref{tab:arms} splits the same three arms over the whole pool. Two things follow. First,
+the reduction is not a prior shift: from A to C the verifier calls Religious \emph{more} often on
+the instances the base already reads as Religious and less often on every other subset, so the
+separation between the two widens monotonically. Second, the instruction and the taxonomy are not
+interchangeable. The instruction pays off only on the book descriptions, where the competing label
+(\texttt{*\_book\_description}) is the trap's target; on the rest of the pool it over-fires,
+raising Religious calls by a quarter. Only the full taxonomy improves every subset at once. We read
+this as the instruction supplying a convention the model cannot act on until the taxonomy shows it
+a label that satisfies the convention. The caveat of Table~\ref{tab:trap} applies here too: the
+row labels come from the base system, so these are agreement counts, not accuracy.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrr}
+\toprule
+Religious calls & A & B & C \\
+\midrule
+book descriptions ($n{=}1{,}403$)  & 394 & 233 & \textbf{119} \\
+rest of pool ($n{=}1{,}169$)       & 121 & 152 & \textbf{61} \\
+base-Religious ($n{=}63$)          & 26 & 28 & \textbf{30} \\
+\midrule
+separation (pp)                    & 21 & 29 & \textbf{41} \\
+\bottomrule
+\end{tabular}
+\caption{The three arms over the full verification pool (GPT-5.6). A: broad definitions only.
+B: \mbox{+ type-vs-topic} instruction. C: \mbox{+ full 74-definition taxonomy}. The first two rows
+should fall and the third should rise; only C does both. Separation is the Religious-call rate on
+base-Religious instances minus the rate on the other 2{,}572. Rebuilt by
+\texttt{src/trap\_table.py}.}
+\label{tab:arms}
+\end{table}
 
 Table~\ref{tab:trap} reports how often GPT-5.6's broad verdict still agrees with the base
 system's family, one model across the two original prompts. Broad-only prompting collapses on

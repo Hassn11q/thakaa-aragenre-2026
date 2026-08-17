@@ -47,17 +47,39 @@ def main():
     ]
 
     book = [i for i in pool if base[i]["specific_genre"].endswith("_book_description")]
-    print(f"pool {len(pool)}, of which book descriptions {len(book)}\n")
-    print(f"{'arm':36s}{'called Religious':>18s}")
-    for name, verdicts, is_specific in arms:
-        religious = 0
-        for i in book:
+    religious = [i for i in pool if base[i]["broad_genre"] == "Religious"]
+    rest = [i for i in pool if i not in set(book) | set(religious)]
+    print(f"pool {len(pool)}: book {len(book)}, rest {len(rest)}, base-Religious {len(religious)}\n")
+
+    def called_religious(ids, verdicts, is_specific):
+        """How many of `ids` this arm puts under the Religious broad genre."""
+        n = 0
+        for i in ids:
             v = verdicts.get(i)
-            if v is None:
+            if v is None:  # the model returned nothing parsable
                 continue
-            broad = spec_to_broad.get(v, v) if is_specific else v
-            religious += broad == "Religious"
-        print(f"{name:36s}{religious:18d}")
+            n += (spec_to_broad.get(v, v) if is_specific else v) == "Religious"
+        return n
+
+    print(f"{'Religious calls':34s}{'A':>8s}{'B':>8s}{'C':>8s}")
+    for name, ids in [
+        ("book descriptions", book),
+        ("rest of pool", rest),
+        ("base-Religious", religious),
+    ]:
+        counts = [called_religious(ids, v, s) for _, v, s in arms]
+        print(f"{name + f' (n={len(ids)})':34s}" + "".join(f"{c:8d}" for c in counts))
+
+    # separation: the Religious-call rate on base-Religious minus the rate on everything else.
+    # A drop driven by a blanket bias away from Religious would leave this flat; it rises.
+    other = book + rest
+    seps = []
+    for _, v, s in arms:
+        hit = called_religious(religious, v, s) / len(religious)
+        false = called_religious(other, v, s) / len(other)
+        seps.append(100 * (hit - false))
+    print(f"\n{'separation (pp)':34s}" + "".join(f"{x:8.0f}" for x in seps))
+    print("\nBase labels are the system's own calls, not gold: read as agreement, not accuracy.")
 
 
 if __name__ == "__main__":
