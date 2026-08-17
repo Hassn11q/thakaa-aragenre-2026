@@ -187,16 +187,16 @@ The base system turns the 74-way choice into a within-family one (Figure~\ref{fi
 retrieval proposes candidates and a judge scores only siblings of a gated broad genre. The
 setwise judge is \texttt{google/gemma-4-31B-it}~\citep{gemma4_2026}, served through vLLM under
 the local alias \texttt{gemma-4-31b}; API model strings are pinned in
-Appendix~\ref{app:hparams}. For each text:
+Appendix~\ref{app:hparams}. Each text passes through four steps.
 (i) \texttt{Qwen3-Embedding-8B}~\citep{qwen3embedding2025} encodes the Arabic text and the
-English candidate definitions and proposes candidate specific genres by cosine similarity,
-bridging Arabic text and English definitions; (ii) decoding is hierarchically
-constrained, all siblings for small families and top-$k$ retrieved for large topical ones, so
-that $\text{broad}=\text{parent}(\text{specific})$ and broad \emph{accuracy} equals the
-family-accuracy of the specific prediction (Broad Macro~F1 does not: it averages per-class
-F1, and the gap between the two is what \S\ref{sec:diag} exploits); (iii) the judge scores each candidate 0--100
-against its definition in one setwise call~\citep{sun2023rankgpt} and we take the argmax after
-a light marginal correction (Appendix~\ref{app:calib}); and (iv) a few
+English definitions, and proposes candidate specific genres by cosine similarity.
+(ii) Decoding is hierarchically constrained, all siblings for small families and top-$k$
+retrieved for large topical ones, so that $\text{broad}=\text{parent}(\text{specific})$ and
+broad \emph{accuracy} equals the family-accuracy of the specific prediction. Broad Macro~F1
+does not: it averages per-class F1, and the gap between the two is what \S\ref{sec:diag}
+exploits. (iii) The judge scores each candidate 0--100 against its definition in one setwise
+call~\citep{sun2023rankgpt}, and we take the argmax after a light marginal correction
+(Appendix~\ref{app:calib}). (iv) A few
 high-precision surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; we screened samples by hand and saw no false
@@ -250,7 +250,7 @@ chain-of-thought re-judging pass~\citep{wei2022cot} names a different sibling in
 sibling replaces it (broad never changes). The surface rules are then re-applied over the
 corrected labels, acting as a guard rather than a gain (Appendix~\ref{app:subs}). On the base alone it moves 554 instances, 6--35\%
 of each attractor class (Appendix~\ref{app:drain}); in the final pipeline consensus runs
-first, leaving the drain 383. Relative to the base, the final system changes 459 broad and
+first, so the drain fires on 383. Relative to the base, the final system changes 459 broad and
 2{,}890 specific labels (10.3\% of instances).
 
 \section{Experimental Setup}
