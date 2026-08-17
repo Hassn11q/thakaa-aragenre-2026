@@ -110,17 +110,20 @@ literature models the label hierarchy explicitly~\citep{zhu2023hitin,cai2023hpt,
 These closed-label supervised setups do not transfer to AraGenre's unseen, definition-specified labels; we instead
 enforce the hierarchy structurally, forcing $\text{broad}=\text{parent}(\text{specific})$.
 
-\paragraph{Zero-shot HTC, LLM judging, and consensus.} Zero-shot HTC matches text to label semantics rather than
-fixed classes; prompt-ensembling~\citep{xia2025hieps}, LLM-enhanced prototypes~\citep{zhang2024hierprompt},
-LLM-refined taxonomies~\citep{golde2025refined}, consistency regularisation~\citep{consistencyreg2024} and
-reasoning-based HTC~\citep{jiang2025reasoning} inform our definition refinement and chain-of-thought pass. Our
-two-stage design retrieves candidate definitions~\citep{chen2024retrieval} then compares them with an
-LLM~\citep{sun2023rankgpt,zheng2023judging}, using Qwen3-Embedding~\citep{qwen3embedding2025} to bridge Arabic text
-and English definitions. Combining independent verdicts builds on ensembling~\citep{dietterich2000ensemble} and its
-LLM forms: juries~\citep{verga2024poll}, blending~\citep{jiang2023llmblender}, mixtures of
-agents~\citep{wang2024moa}, debate~\citep{du2023debate}, and self-consistency~\citep{wang2023selfconsistency}.
-Unlike juries voting on free-form text, we require \emph{exact-label} agreement, and find it
-reliable only with the full taxonomy in context.
+\paragraph{Zero-shot HTC, LLM judging, and consensus.} Prior systems reach an unseen label
+space through prompt ensembles~\citep{xia2025hieps}, LLM-built
+prototypes~\citep{zhang2024hierprompt} or rewritten taxonomies~\citep{golde2025refined}; we keep
+the definitions verbatim and vary only how much of the taxonomy is visible at once. Our
+two-stage design retrieves candidate definitions~\citep{chen2024retrieval} and compares them
+with an LLM~\citep{sun2023rankgpt,zheng2023judging}, with
+Qwen3-Embedding~\citep{qwen3embedding2025} bridging Arabic and English; the chain-of-thought
+pass follows reasoning-based HTC~\citep{jiang2025reasoning,consistencyreg2024}. Ensembling
+diverse predictors~\citep{dietterich2000ensemble} appears in LLM form as
+juries~\citep{verga2024poll}, blending~\citep{jiang2023llmblender}, mixtures of
+agents~\citep{wang2024moa}, debate~\citep{du2023debate} and
+self-consistency~\citep{wang2023selfconsistency}; those aggregate free-form text or resample one
+model, whereas we require two models to emit the \emph{same} label, which helps only with the
+full taxonomy in context.
 
 \section{Background}
 Each instance is \texttt{\{id, text\}}; systems output one \texttt{broad\_genre} (of 6:
@@ -199,7 +202,7 @@ positives, though without gold this is an impression, not a precision estimate; 
 Interactive subtypes). The judge also sees 74 hand-written per-genre contrastive
 discriminators appended to the definitions; hyperparameters are in Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores \textbf{0.7139}.
 
-\subsection{Diagnosis from the Scoreboard}
+\paragraph{Diagnosis from the scoreboard.}
 \label{sec:diag}
 The leaderboard exposed the structure (Table~\ref{tab:metrics}): our base led on Specific
 Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the whole
@@ -339,11 +342,10 @@ splits (Appendix~\ref{app:convention}).
 \label{sec:analysis}
 Broad Macro is dominated by minority-class false positives, Specific Macro by rare-class
 recall, so gains on both compound through the mean. Broad-only prompting
-produced 157 topic-trap errors on the book descriptions that all three models we tried made
-unanimously, which the full
-taxonomy largely removed; and any single strong model disagreed with the base on $\sim$29\% of
-specifics, too noisy to trust, whereas requiring two models to name the same label cut
-the candidates to a far more conservative set. Every alternative we tried for the correction stage
+produced 157 topic-trap errors on the book descriptions that all three models made unanimously,
+which the full
+taxonomy largely removed; and a single model disagreed with the base on $\sim$29\% of
+specifics, too noisy to act on without a second. Every alternative we tried for the correction stage
 fell below the 0.7139 base; the scores are in Appendix~\ref{app:negative}.
 
 \paragraph{Error analysis (hidden test).} Three types dominate: cross-family topic leaks,
