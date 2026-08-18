@@ -40,9 +40,10 @@
 Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification}
 
 \author{
-  Hassan Alqaeri \\ Thakaa, Advanced AI \& \\ Information Technology \\ \texttt{h.alqaeril@thakaait.net}
-  \And
-  Meshal Alamr \\ Thakaa, Advanced AI \& \\ Information Technology \\ \texttt{m.alamr@thakaait.net}
+  Hassan Alqaeri \quad Meshal Alamr \quad Abdullah Aldahlawi \\
+  Thakaa, Advanced Company for Information Technology \\
+  Riyadh, Saudi Arabia \\
+  \texttt{\{h.alqaeril, m.alamr, aldahlawi\}@thakaait.net}
 }
 
 \begin{document}
@@ -89,11 +90,13 @@ Our contributions are:
 \begin{enumerate}
 \itemsep0em
 \item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139 Hierarchical Macro~F1 with no task training.
-\item A scoreboard-driven diagnosis that the two tiers fail differently, so correction must be
-tier-specific (\S\ref{sec:analysis}).
+\item An account of why one predictor fails the two tiers differently -- broad accuracy is
+just the family-accuracy of the specific prediction, whereas Broad Macro~F1 is set by
+minority-class false positives -- so correction has to be tier-specific (\S\ref{sec:analysis}).
 \item A full-context multi-model consensus correction, applied conservatively (agreement-gated,
-direction-verified), with a three-arm ablation showing that the taxonomy, not an explicit
-type-vs-topic instruction alone, is what suppresses the trap.
+direction-verified), with a three-arm ablation separating two causes of the topic trap: an
+explicit type-vs-topic instruction and a visible label to move the error onto, each accounting
+for about half of the residual.
 \item An attractor-drain step targeting the macro-F1 failure mode of over-predicting
 generic classes.
 \item Empirical validation on the hidden test: 0.7352 Hierarchical Macro~F1, ranked 1st of 18
@@ -207,9 +210,9 @@ discriminators appended to the definitions; hyperparameters are in Appendix~\ref
 
 \paragraph{Diagnosis from the scoreboard.}
 \label{sec:diag}
-The leaderboard exposed the structure (Table~\ref{tab:metrics}): our base led on Specific
-Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the whole
-deficit sat in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
+The leaderboard exposed the structure: against the system then ahead of us, our base led on
+Specific Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the
+whole deficit sat in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
 per-class performance; reading the errors showed cross-family false positives, with Bible
 passages filed as poetry or encyclopedia entries and news filed as legal.
 
@@ -281,9 +284,9 @@ US\$50; rates and timings are in Appendix~\ref{app:hparams}. The base needs no p
 System & Split & Hier.\ F1 \\
 \midrule
 Official baseline (embedding sim.) & dev & 0.4658 \\
-Our judge (\texttt{gemma}) & dev & 0.8794 \\
+Our judge (Gemma-4-31B) & dev & 0.8794 \\
 Our judge (GPT-5.6) & dev & 0.8943 \\
-\quad \texttt{gemma} + consensus & dev & 0.8557 \\
+\quad Gemma-4-31B + consensus & dev & 0.8557 \\
 GPT-5.6 judge + attractor drain$^{\dagger}$ & dev & 0.9358 \\
 \midrule
 Genre-general zero-shot judge & test & 0.6067 \\
@@ -308,16 +311,15 @@ evaluation. $^{\dagger}$applied to the GPT-5.6 judge, tuned on dev, so not held 
 \toprule
 System & Hier & SpM & SpW & SpA & BrM & BrW & BrA \\
 \midrule
-Best rival$^{\ddagger}$ & .717 & .534 & .581 & .599 & \textbf{.900} & .912 & .911 \\
 Base (ours) & .714 & .549 & .584 & .591 & .879 & .900 & .900 \\
 \; + consensus & .722 & .553 & .592 & .598 & .892 & .910 & .910 \\
-\textbf{Final (rank 1)} & \textbf{.735} & \textbf{.573} & \textbf{.613} & \textbf{.619} & .898 & \textbf{.914} & \textbf{.914} \\
+\textbf{Final (rank 1)} & \textbf{.735} & \textbf{.573} & \textbf{.613} & \textbf{.619} & \textbf{.898} & \textbf{.914} & \textbf{.914} \\
 \bottomrule
 \end{tabular}
-\caption{Official metrics on the hidden test, rounded to three decimals (Sp/Br =
-Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). We beat the second-placed system
-($^{\ddagger}$, submission 870633) on six of seven; the exception is Broad Macro~F1
-(.898 vs.\ .900), and we lead Specific Macro~F1 by $+.039$.}
+\caption{Official metrics for our three scored systems on the hidden test, rounded to three
+decimals (Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). Consensus lifts the
+broad tier by $+.013$ Broad Macro~F1; the drain lifts the specific tier by a further $+.020$
+Specific Macro~F1.}
 \label{tab:metrics}
 \end{table}
 
@@ -362,68 +364,55 @@ the open models and libraries our pipeline builds on. Our code, cached model out
 \section*{Limitations}
 Every hidden-test \emph{score} we report is an official evaluation-phase submission
 (Appendix~\ref{app:subs}); we made no submission after the deadline. Two kinds of number are
-not submissions and should not be read as such. The instruction-only arm of the three-arm
-ablation (\S\ref{sec:system}) was run after the evaluation phase closed, so that comparison is
-post hoc; and the descriptive tables in Appendices~\ref{app:errors}, \ref{app:trap},
-\ref{app:drain} and~\ref{app:subs} are analyses of the submitted outputs, computed locally
-rather than scored.
+not: the instruction-only arm of the three-arm ablation (\S\ref{sec:system}) was run after the
+phase closed, so that comparison is post hoc, and the descriptive tables in
+Appendices~\ref{app:errors}, \ref{app:trap}, \ref{app:drain} and~\ref{app:subs} are local
+analyses of submitted outputs rather than scored runs.
 
-\paragraph{Validation.} The hidden test has no released gold labels and the development set is near-degenerate, so
-component decisions were validated on the public leaderboard and by manual reading rather
-than on held-out gold. Our reported progression therefore doubles as the selection signal:
-successive submissions were guided by leaderboard feedback, which risks fitting to the test
-distribution. The one component we can test against gold is the drain, on dev, where a paired
-bootstrap puts its gain above zero (95\% CI $[+0.010, +0.082]$). Every hidden-test gain is
-without an interval because that split has no released gold, so those gains should be read as
-leaderboard-measured rather than statistically certified, and we can offer no uncertainty
-estimate on the winning margin.
+\paragraph{Validation.} The hidden test has no released gold and the development set is
+near-degenerate, so components were selected on the public leaderboard and by manual reading.
+Our reported progression therefore doubles as the selection signal, which risks fitting the
+test distribution, and no hidden-test gain carries an interval; those gains should be read as
+leaderboard-measured rather than statistically certified. The one component testable against
+gold is the drain, where a paired bootstrap on dev puts its gain above zero (95\% CI
+$[+0.010, +0.082]$).
 
-\paragraph{An untested comparison.} We cannot compare against a frontier verifier used
-alone: we ran GPT-5.6 over the full test set but never submitted its predictions as a system,
-so the claim that a cheap base judge with conservative correction beats direct full-taxonomy
-prediction is untested, and the $\sim$29\% disagreement rate is our only evidence that one
-model is too noisy to act on.
+\paragraph{An untested comparison.} We ran GPT-5.6 over the full test set but never submitted
+its predictions as a system, so the claim that a cheap base judge with conservative correction
+beats direct full-taxonomy prediction is untested; the $\sim$29\% disagreement rate is our
+only evidence that one model is too noisy to act on.
 
-\paragraph{Cost and ceilings.} Consensus correction incurs API cost
-proportional to test size. Song-dialect distinctions remain near the noise floor because
-the distinguishing features are phonetic and largely absent from written lyrics.
+\paragraph{Cost and ceilings.} Consensus cost scales with test size. Song-dialect distinctions
+remain near the noise floor because the distinguishing features are phonetic and largely
+absent from written lyrics.
 
 \section*{Ethics Statement}
-This work uses only the publicly released AraGenre shared-task data and introduces no new
-data collection; we did not gather, store, or infer personal information, and any
-user-generated text (e.g., social-media posts) originates from the official benchmark. In
-line with the shared-task rules, all predictions are produced automatically by the system:
-no submitted label was hand-edited and we did not reverse-engineer the hidden evaluation
-labels. We did read model outputs and the corresponding texts to design automatic
-correction rules, and the rule-precision estimates in \S\ref{sec:system} come from that
-inspection; this is author inspection of system outputs, not annotation of the evaluation
-set, and no such judgement enters a submission except through a deterministic rule.
+This work uses only the publicly released AraGenre data and collects nothing new; any
+user-generated text originates from the official benchmark. In line with the shared-task
+rules, all predictions are produced automatically: no submitted label was hand-edited and we
+did not reverse-engineer the hidden evaluation labels. We did read system outputs and the
+corresponding texts to design the automatic rules, and the rule-precision estimates in
+\S\ref{sec:system} come from that inspection; this is author inspection of system outputs, not
+annotation of the evaluation set, and no such judgement enters a submission except through a
+deterministic rule.
 
-Genre classification is a comparatively low-risk task, but two considerations warrant care.
-First, the taxonomy spans religiously and culturally sensitive categories (Islamic and
-Christian scripture, dialectal varieties, regional song lyrics), and we treat these
-descriptively as text-type/register labels; misclassification carries no endorsement or
-value judgement, and the system is not intended to assess the authenticity, orthodoxy, or
-quality of religious or cultural texts. Second, dialect-related labels can encode regional
-and social signals; models trained on skewed corpora may under-serve lower-resourced
-dialects (e.g., the near-noise-floor separation of Sudanese and Iraqi song lyrics we
-report), which practitioners should weigh before deployment.
+The taxonomy spans religiously and culturally sensitive categories (Islamic and Christian
+scripture, dialectal varieties, regional song lyrics), which we treat descriptively as
+text-type labels: a misclassification carries no endorsement and no judgement on the
+authenticity, orthodoxy or quality of a text, and models trained on skewed corpora may
+under-serve lower-resourced dialects. Two misuses would concern us. Dialect is not provenance
+-- pointed at ordinary prose, the classifier reads as a guess at where a writer is from, and
+our own measurements show that the written signal is mostly absent. And because the labels
+separate religious from informative text, genre output could be used to route or suppress
+material by register rather than by content. The system assigns text types, it does not assess
+them, and a 0.57 Specific Macro~F1 is not a basis for an automated decision about a document or
+its author without a person in the loop.
 
-\paragraph{Potential misuse.} Two uses of this system would concern us. The taxonomy separates
-song lyrics by regional dialect, so the same classifier can be pointed at ordinary prose and read
-as a guess at where a writer is from; dialect is not provenance, our own measurements show the
-written signal is mostly absent, and we would not treat the output as an author attribute. And
-because the labels distinguish religious from informative text, genre output could be used to
-route or suppress material by register rather than by content. The system assigns text types, it
-does not assess them, and a 0.57 Specific Macro~F1 is not a basis for an automated decision about
-a document or its author without a person in the loop.
-
-Our correction stage sends Arabic text to third-party hosted LLM APIs; because the inputs
-are already-public shared-task data, this poses no additional privacy exposure, but the
-same pipeline should not be applied to private or sensitive text without review. The
-approach relies on large hosted models whose availability, cost, and behaviour may change,
-which limits equitable reproducibility; the base retriever-plus-open-judge pipeline is
-provided as a lower-cost, self-hostable alternative.
+Our correction stage sends Arabic text to third-party hosted LLM APIs; the inputs are
+already-public benchmark data, but the same pipeline should not be applied to private or
+sensitive text without review. Reliance on hosted models whose availability, cost and
+behaviour may change limits equitable reproducibility; the base retriever-plus-open-judge
+pipeline is provided as the self-hostable alternative.
 
 \bibliography{aragenre}
 
