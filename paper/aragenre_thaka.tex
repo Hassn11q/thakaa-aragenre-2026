@@ -505,7 +505,7 @@ changes model behaviour so sharply.
 Three error types dominate. (i)~\emph{Cross-family topic leaks}: a description \emph{of} a
 religious book (\ar{يهدف هذا الكتاب إلى قراءة سيرة الرسول}, id 10041) is
 \texttt{islamic\_book\_description} (Informative), which our base and final systems both get
-right but which every broad-only verifier calls Religious; scripture leaks the other way
+right but which all three verifiers call Religious under the broad-only prompt; scripture leaks the other way
 (\ar{هؤلاء امراء بني عيسو}, Genesis~36, id 10798), where the base says
 \texttt{history\_encyclopedia} and consensus corrects it to \texttt{bible}. (ii)~\emph{Attractor over-prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
 (iii)~\emph{Ceiling classes}: for each of the five song-lyric classes, 87--99\% of the texts we
