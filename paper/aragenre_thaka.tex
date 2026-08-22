@@ -37,7 +37,7 @@
 % ------------------------------------------
 
 \title{Thakaa at AraGenre 2026: Definition-Guided LLM Judging with\\
-Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification}
+Full-Taxonomy Agreement-Gated Correction for Hierarchical Arabic Genre Classification}
 
 \author{
   Hassan Alqaeri \quad Meshal Alamr \quad Abdullah Aldahlawi \\
@@ -53,19 +53,18 @@ We report the first-place system in AraGenre~2026 (0.7352 Hierarchical Macro~F1,
 task asks for one of 6 broad and one of 74 fine-grained specific genres for each of 27{,}972
 hidden-test Arabic segments, with every genre given only as an English prose definition and the
 specific-label inventory \emph{disjoint} from the released training data. Our pipeline is
-training-free: it makes no gradient updates on the task, though the judge prompt does carry
-hand-written per-genre cues. A family-restricted, definition-guided LLM judge scores candidate
-genres setwise under a hierarchically constrained decoding scheme, reaching 0.7139. The public
-scoreboard showed that this base already led on Specific Macro~F1 but trailed on Broad
-Macro~F1, so we target the broad tier with a full-context multi-model consensus stage: two
-instruction models each see the \emph{entire} 74-definition taxonomy and re-predict the
-specific genre, and a correction is applied only where both agree against the base. This lifts
-Broad Macro~F1 from 0.879 to 0.892 by suppressing a topic trap in which a book \emph{about}
-religion is taken for religious scripture. A three-arm ablation separates the trap's two
-causes: an explicit type-versus-topic instruction removes 41\% of the trapped calls
-($394\rightarrow233$), and showing the full taxonomy removes a further 49\%
-($233\rightarrow119$). A final attractor drain redistributes over-predicted generic classes to
-starved rare siblings, carrying the base from 0.7139 to the submitted 0.7352.
+free of parameter updates but not of task-specific effort: the judge prompt carries 74
+hand-written per-genre cues, and components were selected on the public leaderboard.
+A family-restricted, definition-guided LLM judge scores candidate genres setwise under a
+hierarchically constrained decoding scheme, reaching 0.7139. The scoreboard showed this base
+already led on Specific Macro~F1 but trailed on Broad Macro~F1, so we add a correction stage: two
+instruction models re-predict the specific genre, each shown the \emph{entire} 74-definition
+taxonomy, and a label is edited only where both agree against the base. This agreement-gated
+stage lifts Broad Macro~F1 from 0.879 to 0.892, largely by suppressing a topic trap in which a
+book \emph{about} religion is taken for scripture; a post-evaluation ablation attributes the
+suppression to an explicit type-versus-topic instruction ($394\rightarrow233$ trapped calls) and
+to the taxonomy itself ($233\rightarrow119$). A final attractor drain then carries the system to
+0.7352.
 \end{abstract}
 
 \section{Introduction}
@@ -79,30 +78,28 @@ hidden benchmark contains noisier naturally occurring Arabic spanning Modern Sta
 Arabic, Classical Arabic, and multiple dialects, with \emph{previously unseen
 genre--definition combinations}. Because the 74 specific test genres are disjoint from
 training, memorisation is useless and semantic understanding of communicative function
-is required. We placed 1st of 18 teams (Table~\ref{tab:metrics}). The official ranking metric is
-\[
-\text{Hier.\ F1} = \tfrac{1}{2}\left(\text{Broad F1}_{\text{macro}} + \text{Spec.\ F1}_{\text{macro}}\right).
-\]
+is required. We placed 1st of 18 teams (Table~\ref{tab:metrics}) on the official ranking metric,
+Hierarchical Macro~F1: the mean of Broad and Specific Macro~F1.
 
 Our contributions are:
+\label{sec:intro-contrib}
 \begin{enumerate}
 \itemsep0em
-\item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139 Hierarchical Macro~F1 with no task training.
-\item An account of why one predictor fails the two tiers differently -- broad accuracy is
-just the family-accuracy of the specific prediction, whereas Broad Macro~F1 is set by
-minority-class false positives -- so correction has to be tier-specific (\S\ref{sec:analysis}).
-\item A full-context multi-model consensus correction, applied conservatively (agreement-gated,
-direction-verified), with a three-arm ablation separating two causes of the topic trap: an
-explicit type-vs-topic instruction and a visible label to move the error onto, each accounting
-for about half of the residual.
-\item An attractor-drain step targeting the macro-F1 failure mode of over-predicting
-generic classes.
+\item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139
+Hierarchical Macro~F1 with no parameter updates.
+\item An account of why one predictor fails the two tiers differently: broad accuracy is the
+family-accuracy of the specific prediction, whereas Broad Macro~F1 is set by minority-class
+false positives, so correction must be tier-specific (\S\ref{sec:analysis}).
+\item An agreement-gated correction stage in which each verifier sees the full taxonomy, with a
+three-arm ablation splitting the topic trap between an explicit type-vs-topic instruction and a
+visible label to move the error onto.
+\item An attractor-drain step targeting the macro-F1 failure mode of heavily predicting a few
+generic classes; its only gold-verified estimate is on dev.
 \item Empirical validation on the hidden test: 0.7352 Hierarchical Macro~F1, ranked 1st of 18
-teams, each component scored as its own submission.
+teams, with the major system configurations scored as their own submissions.
 \end{enumerate}
 
-\noindent Code and artifacts: \url{https://github.com/Hassn11q/thakaa-aragenre-2026}. The main
-challenges were a specific-label inventory disjoint from training, a topic trap (writing
+\noindent The main challenges were a specific-label inventory disjoint from training, a topic trap (writing
 \emph{about} a subject vs.\ the subject's genre), and classes with no written signal (song
 dialects, textbook levels).
 
@@ -115,32 +112,31 @@ enforce the hierarchy structurally, forcing $\text{broad}=\text{parent}(\text{sp
 
 \paragraph{Zero-shot HTC, LLM judging, and consensus.} Prior systems reach an unseen label
 space through prompt ensembles~\citep{xia2025hieps}, LLM-built
-prototypes~\citep{zhang2024hierprompt} or rewritten taxonomies~\citep{golde2025refined}; we keep
-the definitions verbatim and vary only how much of the taxonomy is visible at once. Our
+prototypes~\citep{zhang2024hierprompt} or rewritten taxonomies~\citep{golde2025refined}; we
+leave the definitions unrewritten and vary how much of the taxonomy is visible, though the base
+judge appends hand-written cues to each (\S\ref{sec:system}). Our
 two-stage design retrieves candidate definitions~\citep{chen2024retrieval} and compares them
 with an LLM~\citep{sun2023rankgpt,zheng2023judging}, with
 Qwen3-Embedding~\citep{qwen3embedding2025} bridging Arabic and English; the chain-of-thought
 pass follows reasoning-based HTC~\citep{jiang2025reasoning,consistencyreg2024}. Ensembling
-diverse predictors~\citep{dietterich2000ensemble} appears in LLM form as
-juries~\citep{verga2024poll}, blending~\citep{jiang2023llmblender}, mixtures of
-agents~\citep{wang2024moa}, debate~\citep{du2023debate} and
-self-consistency~\citep{wang2023selfconsistency}; those aggregate free-form text or resample one
-model, whereas we require two models to emit the \emph{same} label, which helps only with the
-full taxonomy in context.
+diverse predictors~\citep{dietterich2000ensemble} appears in LLM form as juries, blending,
+mixtures of agents, debate and
+self-consistency~\citep{verga2024poll,jiang2023llmblender,wang2024moa,du2023debate,wang2023selfconsistency};
+those aggregate free-form text or resample one model, whereas we require two models to emit the
+\emph{same} label, which helps only with the full taxonomy in context.
 
 \section{Background}
 Each instance is \texttt{\{id, text\}}; systems output one \texttt{broad\_genre} (of 6:
 Informative, Creative, Interactive, Learning, Legal, Religious) and one
 \texttt{specific\_genre} (of 74), using exact taxonomy label names, each with an English
 definition. The released data are tiny and synthetic-like (train: 140 items / 7 specific genres;
-dev: 110 / 6), and the specific-label inventories are \emph{100\% disjoint} across train,
-dev and test, so no supervised label set transfers. The \emph{hidden test} has 27{,}972 naturally occurring instances over 74 specific
-genres in 6 families: Informative (42), Learning (12), Creative (7), Religious (6),
-Interactive (4) and Legal (3). Informative is dominated by 20 job domains and 13
-book-description topics; Creative holds 5 song dialects. Missing predictions are counted
-incorrect; the stronger official dev baseline is in Table~\ref{tab:ablation}. Informative dominates our predictions ($\sim$50\%), and the specific
-tier's 74 classes make Macro~F1 highly sensitive to rare-class recall (e.g., dialect song
-lyrics, niche job domains).
+dev: 110 / 6), and the specific-label inventories are \emph{100\% disjoint} across train, dev
+and test, so no supervised label set transfers. The \emph{hidden test} has 27{,}972 naturally
+occurring instances over 74 specific genres in 6 families: Informative (42), Learning (12),
+Creative (7), Religious (6), Interactive (4) and Legal (3); Informative is dominated by 20 job
+domains and 13 book-description topics, and Creative holds 5 song dialects. Missing predictions
+are counted incorrect. Informative dominates our predictions ($\sim$50\%), and the specific
+tier's 74 classes make Macro~F1 highly sensitive to rare-class recall.
 
 \section{System}
 \label{sec:system}
@@ -167,19 +163,20 @@ lyrics, niche job domains).
 \draw[ar] (text)--(embed); \draw[ar] (embed)--(judge);
 \draw[ar] (judge)--(rules); \draw[ar] (rules)--(basep);
 % correction stages
-\node[corr,below=8mm of basep] (cons) {Full-context 2-model consensus\\ \scriptsize GPT-5.6 + Gemini-3.6, \emph{all 74 defs} $\rightarrow$ agree-gated fix};
+\node[corr,below=8mm of basep] (cons) {Full-taxonomy agreement-gated correction\\ \scriptsize GPT-5.6 + Gemini-3.6, \emph{all 74 defs}; edit only if both agree};
 \node[corr,below=of cons] (drain) {Attractor drain, then surface rules\\ \scriptsize CoT within-family, broad-locked; rules re-applied last};
 \node[res,below=of drain] (finalp) {Final \;\textbf{0.7352} \;(rank 1)};
 \draw[ar] (basep)--(cons); \draw[ar] (cons)--(drain); \draw[ar] (drain)--(finalp);
 \begin{scope}[on background layer]
   \node[draw,dashed,rounded corners,fit=(text)(embed)(judge)(rules)(basep),
-        label={[anchor=south east]north east:{\scriptsize Base (no training)}}] {};
+        label={[anchor=south east]north east:{\scriptsize Base (no parameter updates)}}] {};
   \node[draw,dashed,rounded corners,fit=(cons)(drain)(finalp),
         label={[anchor=south east]north east:{\scriptsize Correction}}] {};
 \end{scope}
 \end{tikzpicture}}
-\caption{System overview. The base judge yields 0.7139; consensus verifiers that each see the
-\emph{entire} 74-definition taxonomy, then a within-family attractor drain, reach 0.7352 (rank~1).}
+\caption{System overview. The base judge yields 0.7139; an agreement-gated correction in which
+each verifier sees the \emph{entire} 74-definition taxonomy, then a within-family attractor
+drain, reach 0.7352 (rank~1).}
 \label{fig:arch}
 \end{figure}
 
@@ -200,26 +197,33 @@ call~\citep{sun2023rankgpt}, and we take the argmax after a light marginal corre
 (Appendix~\ref{app:calib}). (iv) A few
 high-precision surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
-openings $\rightarrow$ \texttt{hadith}; we screened samples by hand and saw no false
-positives, though without gold this is an impression, not a precision estimate; emoji/hashtag short posts $\rightarrow$
-Interactive subtypes). The judge also sees 74 hand-written per-genre contrastive
-discriminators appended to the definitions; hyperparameters are in Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores 0.7139.
+openings $\rightarrow$ \texttt{hadith}; hand-screened samples showed no false positives, an
+impression rather than a precision estimate; emoji/hashtag short posts $\rightarrow$
+Interactive subtypes). Appended to each definition the judge also sees a contrastive
+discriminator, one per test genre: a single Arabic line naming the surface or content signal
+that separates that genre from its family siblings (dialect phonology, mushaf orthography,
+isn\=ad, book-blurb phrasing, job-domain keywords). All 74 were written from the released
+English definitions and Arabic linguistic knowledge, without reference to any labelled data,
+and ship in \texttt{src/discriminators.py}; hyperparameters are in
+Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores 0.7139.
 
 \paragraph{Diagnosis from the scoreboard.}
 \label{sec:diag}
 The leaderboard exposed the structure: against the system then ahead of us, our base led on
 Specific Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the
 whole deficit sat in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
-per-class performance; reading the errors showed cross-family false positives, with Bible
-passages filed as poetry or encyclopedia entries and news filed as legal.
+per-class performance; reading our own predictions showed cross-family leakage, with Bible
+passages labelled poetry or encyclopedia entries and news labelled legal.
 
-\subsection{Correction: full-context multi-model consensus}
+\subsection{Correction: full-taxonomy agreement-gated re-prediction}
 We re-predict the specific genre with two frontier instruction models
 (GPT-5.6~Luna~\citep{gpt56luna2026} and Gemini-3.6~Flash~\citep{gemini36flash2026}),
 \emph{feeding each the entire 74-definition taxonomy} ($\approx$2.9K tokens) grouped by
-broad genre, and asking for the single best specific label. This follows the ensemble argument that combining diverse predictors beats any single
-one~\citep{dietterich2000ensemble}, in its LLM form~\citep{verga2024poll,wang2024moa}; we
-claim model diversity, not statistical independence. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the
+broad genre, and asking for the single best specific label. The two-model design is motivated by
+the ensemble argument that combining diverse predictors beats any single
+one~\citep{dietterich2000ensemble}, in its LLM form~\citep{verga2024poll,wang2024moa}, but we
+never submitted either verifier alone, so agreement here is a conservatism device and not
+evidence of an ensemble effect. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the
 diagnostic pool but excluded from the deployed consensus on cost grounds.)
 
 \paragraph{What suppresses the topic trap.} Given only the 6 broad definitions, all three
@@ -242,20 +246,21 @@ Legal$\rightarrow$Informative for wire news (Appendix~\ref{app:subs}); unreliabl
 are rejected, 718 moves in all. Within-family refinements are applied wherever both models
 agree.
 
-\subsection{Attractor drain: recovering starved rare classes}
-Reading our own hidden-test predictions during the evaluation phase revealed five large
-``attractor'' classes that absorb texts the judge cannot place, starving rare siblings. They
-come from that prediction distribution, not from held-out gold. The drain is deterministic: when the base label is an attractor class and a separate
+\subsection{Attractor drain: redistributing to low-frequency siblings}
+This stage is partly transductive. Reading our own hidden-test predictions during the
+evaluation phase revealed five large ``attractor'' classes that absorb texts the judge cannot
+place, leaving siblings rarely predicted; they come from that prediction distribution, not from
+held-out gold. The drain is deterministic: when the base label is an attractor class and a separate
 chain-of-thought re-judging pass~\citep{wei2022cot} names a different sibling in the same family, the
 sibling replaces it (broad never changes). The surface rules are then re-applied over the
-corrected labels, acting as a guard rather than a gain (Appendix~\ref{app:subs}). On the base alone it moves 554 instances, 6--35\%
+changed labels, acting as a guard rather than a gain (Appendix~\ref{app:subs}). On the base alone it moves 554 instances, 6--35\%
 of each attractor class (Appendix~\ref{app:drain}); in the final pipeline consensus runs
 first, so the drain fires on 383. Relative to the base, the final system changes 459 broad and
 2{,}890 specific labels (10.3\% of instances).
 
 \section{Experimental Setup}
 \label{sec:setup}
-\paragraph{Data splits.} We train nothing; every system is applied unchanged to the hidden test. An input is \texttt{\{"id","text"\}} with Arabic text such as
+\paragraph{Data splits.} We update no parameters; every system is applied unchanged to the hidden test. An input is \texttt{\{"id","text"\}} with Arabic text such as
 \ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486, ``bus driver
 wanted, 24-seater, for a company in Dubai, Jebel Ali''); the required output pairs it with
 \texttt{broad\_genre} = Informative and \texttt{specific\_genre} =
@@ -265,8 +270,8 @@ separate whole families here: heavy diacritisation marks 77\% of the texts we la
 \texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
 against under 1\% elsewhere (Appendix~\ref{app:subs}).
 \paragraph{Tools and metrics.} Qwen3-Embedding-8B under \texttt{sentence-transformers}, vLLM for
-the local judge, and the vendor SDKs for the verifiers; we report Macro F1, Weighted F1 and
-Accuracy at both tiers. Versions, URLs and hyperparameters are in Appendix~\ref{app:hparams}.
+the local judge, vendor SDKs for the verifiers; we report Macro F1, Weighted F1 and Accuracy at
+both tiers (Appendix~\ref{app:hparams}).
 \paragraph{Cost.} Consensus makes 36{,}013 calls at a $\approx$3.0K-token prompt each, about
 US\$50; rates and timings are in Appendix~\ref{app:hparams}. The base needs no paid API.
 
@@ -285,7 +290,7 @@ Our judge (GPT-5.6) & dev & 0.8943 \\
 \quad Gemma-4-31B + consensus & dev & 0.8557 \\
 GPT-5.6 judge + attractor drain$^{\dagger}$ & dev & 0.9358 \\
 \midrule
-Genre-general zero-shot judge & test & 0.6067 \\
+Genre-general judge, no retrieval & test & 0.6067 \\
 \quad + embedding retrieval gate & test & 0.6812 \\
 \quad family-restricted, derived broad & test & 0.6882 \\
 \textbf{\; + rules / calibration (base)} & test & \textbf{0.7139} \\
@@ -322,34 +327,30 @@ Macro~F1.}
 
 \subsection{Development-set results and component transfer}
 \label{sec:dev}
-Re-running the pipeline on dev (110 examples, official gold) separates what transfers from
-what does not. The drain transfers: no class list is carried over, and the two dev classes it fires on are the
-two most-predicted there, so no gold is needed to find them. It moves five labels for $+0.042$
-(paired bootstrap over the 110 dev items, 10k resamples: 95\% CI $[+0.010, +0.082]$). The consensus stage does not: dev has no
-\texttt{*\_book\_description} and no scripture, so the trap it repairs has zero instances; two
-corrections fire and both are wrong. Residual dev errors stem from a convention clash between
-splits (Appendix~\ref{app:convention}).
+Re-running the pipeline on dev (110 examples, official gold) separates what transfers from what
+does not. The drain transfers: no class list is carried over, and the two dev classes it fires
+on are the two most-predicted there, so no gold is needed to find them. It moves five labels for
+$+0.042$ (paired bootstrap, 10k resamples: 95\% CI $[+0.010, +0.082]$). The consensus stage does
+not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero
+instances, and both corrections that fire are wrong. Residual dev disagreements stem from a
+convention clash between splits (Appendix~\ref{app:convention}).
 
 \section{Analysis}
 \label{sec:analysis}
-Broad Macro is dominated by minority-class false positives, Specific Macro by rare-class
-recall, so gains on both compound through the mean. Broad-only prompting
-put 157 book descriptions under Religious unanimously across all three models, which the full
-taxonomy largely reversed; and a single model disagreed with the base on $\sim$29\% of
-specifics, too noisy to act on without a second. Every alternative we tried for the correction stage
-fell below the 0.7139 base; the scores are in Appendix~\ref{app:negative}.
+Because the two tiers fail differently (\S\ref{sec:intro-contrib}), gains on both compound
+through the mean. Broad-only prompting put 157 book descriptions under Religious
+unanimously across all three models, which the full taxonomy largely reversed; a single model
+disagreed with the base on $\sim$29\% of specifics. Every alternative we
+tried for the correction stage fell below the 0.7139 base (Appendix~\ref{app:negative}).
 
-\paragraph{Error analysis (hidden test).} Three types dominate: cross-family topic leaks,
-attractor over-prediction, and ceiling classes where 87--99\% of the texts we label as song
-lyrics carry no marker from that dialect's cue list. Examples in Appendix~\ref{app:errors}.
+\paragraph{Qualitative prediction audit.} Three patterns dominate: cross-family topic leaks,
+heavy attractor prediction, and ceiling classes where 87--99\% of texts we label as song lyrics
+carry no marker from that dialect's cue list (Appendix~\ref{app:errors}).
 
 \section{Conclusion}
-Training-free hierarchical Arabic genre classification is achievable: a constrained
-definition-guided judge, an agreement-gated consensus and a rare-class attractor drain ranked
-1st of 18 at 0.7352 Hierarchical Macro~F1. The taxonomy matters because it gives the model a
-label to move an error \emph{to}. Deriving the move directions and the attractor list from
-prediction statistics rather than from reading outputs, and finding written correlates for spoken
-dialect---our clearest ceiling---are the next steps.
+Hierarchical Arabic genre classification without parameter updates is achievable: a
+definition-guided judge, an agreement-gated correction and an attractor drain ranked 1st of 18
+at 0.7352.
 
 \section*{Limitations}
 
@@ -364,11 +365,19 @@ public leaderboard and by manual reading; our reported progression therefore dou
 selection signal, which risks fitting the test distribution. Because blind labels are
 unreleased, no hidden-test gain carries a confidence interval, and those gains should be read as
 leaderboard-measured rather than statistically certified. The one component testable against
-gold is the drain, where a paired bootstrap on dev puts its gain above zero (95\% CI
-$[+0.010, +0.082]$). \textbf{An untested comparison.} We ran GPT-5.6 over the full test set but
+gold is the drain, where a paired bootstrap on dev puts its gain above zero
+(\S\ref{sec:dev}). \textbf{Unmeasured components.} We never ran the judge with and without the 74 discriminators
+and per-family cue lists, so their contribution is unmeasured; they were written from the
+released definitions and Arabic linguistic knowledge, but we cannot separate their effect from
+the rest of the prompt. \textbf{Partly transductive.} Two design choices were derived by reading our own predictions
+over the blind inputs rather than from held-out gold: the five attractor classes
+(\S\ref{sec:system}) and the seven gated broad-move directions (Appendix~\ref{app:subs}). No
+hidden label was inspected, and no prediction was edited by hand---both choices enter the
+pipeline only through deterministic rules---but the method is not fully inductive, and neither
+choice is validated on gold. \textbf{An untested comparison.} We ran GPT-5.6 over the full test set but
 never submitted its predictions as a system, so the claim that a cheap base judge with
-conservative correction beats direct full-taxonomy prediction is untested; the $\sim$29\%
-disagreement rate is our only evidence that one model is too noisy to act on.
+conservative correction beats direct full-taxonomy prediction is untested; the disagreement
+rate reported in \S\ref{sec:analysis} is our only evidence that one model is too noisy to act on.
 \textbf{Cost and ceilings.} Consensus cost scales with test size, and song-dialect distinctions
 remain near the noise floor because the distinguishing features are phonetic and largely absent
 from written lyrics.
@@ -405,8 +414,7 @@ pipeline is provided as the self-hostable alternative.
 We thank the AraGenre~2026 organisers for designing and running the shared task, for the
 released taxonomy and definitions, and for their prompt support throughout the evaluation
 phase. We thank the anonymous reviewers for their comments. We also thank the maintainers of
-the open models and libraries our pipeline builds on. Our code, cached model outputs and submission builder are available at
-\url{https://github.com/Hassn11q/thakaa-aragenre-2026}.
+the open models and libraries our pipeline builds on.
 
 \bibliography{aragenre}
 
@@ -418,11 +426,12 @@ the open models and libraries our pipeline builds on. Our code, cached model out
 evaluated 1~August 2026, which scored 0.7352 Hierarchical Macro~F1 (Specific Macro 0.5725,
 Weighted 0.6125, Accuracy 0.6189; Broad Macro 0.8979, Weighted 0.9142, Accuracy 0.9138) over
 27{,}972 of 27{,}972 gold instances with no missing prediction, ranking 1st of the 18 teams in
-the organisers' final standings, which we transcribe in the repository for reference. Every hidden-test number in
+the organisers' final standings. Every hidden-test number in
 Table~\ref{tab:ablation} and Appendix~\ref{app:negative} is likewise an official scored
 submission rather than a local estimate; the submission IDs are listed in
 Appendix~\ref{app:subs}.
-All inference is zero-shot with no task-specific training.
+No parameters are updated at any stage; task-specific information enters only through the
+hand-written discriminators, dev-tuned prompts and leaderboard-guided component selection.
 
 \textbf{Data:} we use only the
 official AraGenre inputs and definition files, and no external labelled data. The consensus
@@ -454,11 +463,13 @@ consensus and drain assembly (\texttt{src/assemble.py}), and the submission buil
 $\text{broad}{=}\text{parent}(\text{specific})$ and validates that all 27{,}972 IDs are
 present with exact labels.
 
-\textbf{What the release cannot regenerate.} Two inputs to the trap experiment have no
-producer here: the 2{,}635-instance verification pool, selected during the evaluation phase as
-the instances whose broad label we judged least secure, and the broad-only prompt behind arm~A.
-The pool file and arm~A's cached outputs ship, so \texttt{src/trap\_table.py} rebuilds the
-table offline, but neither selection can be re-derived from the code.
+\textbf{Scope of reproducibility.} The final submission can be reconstructed exactly from the
+cached artifacts, but the base pipeline cannot be regenerated end to end. Two inputs to the trap
+experiment illustrate the gap: the 2{,}635-instance verification pool, selected during the
+evaluation phase as the instances whose broad label we judged least secure, and the broad-only
+prompt behind arm~A. Both the pool file and arm~A's cached outputs ship, so
+\texttt{src/trap\_table.py} rebuilds the table offline, but neither selection can be re-derived
+from the code.
 
 \textbf{Two cached inputs.} The broad gate the judge restricts to is submission 866538
 (0.6812), an earlier retrieval-gated system we submitted and scored, reused verbatim rather
@@ -494,14 +505,14 @@ necessarily penalised on dev, which bounds how far dev accuracy can be pushed wi
 split-specific rules. It also supports our central claim: the convention is carried by the
 definitions, which is why supplying the full taxonomy, rather than the broad labels alone,
 changes model behaviour so sharply.
-\section{Error Analysis Examples}
+\section{Prediction Audit Examples}
 \label{app:errors}
 Three error types dominate. (i)~\emph{Cross-family topic leaks}: a description \emph{of} a
 religious book (\ar{يهدف هذا الكتاب إلى قراءة سيرة الرسول}, id 10041) is
 \texttt{islamic\_book\_description} (Informative), which our base and final systems both get
 right but which all three verifiers call Religious under the broad-only prompt; scripture leaks the other way
 (\ar{هؤلاء امراء بني عيسو}, Genesis~36, id 10798), where the base says
-\texttt{history\_encyclopedia} and consensus corrects it to \texttt{bible}. (ii)~\emph{Attractor over-prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
+\texttt{history\_encyclopedia} and consensus changes it to \texttt{bible}. (ii)~\emph{Heavy attractor prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
 (iii)~\emph{Ceiling classes}: for each of the five song-lyric classes, 87--99\% of the texts we
 assign to it contain no marker from that dialect's cue list
 (\texttt{src/dialect\_markers.py} ships the lists and reproduces the table;
@@ -620,7 +631,7 @@ applied first and the drain fires on 383 of these instances.}
 The correction subtracts a scaled per-genre mean from each candidate's score,
 $s'(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre $y$
 received over the whole test set and $\alpha{=}0.5$. It damps genres the judge rates generously
-everywhere, which is what starves rare siblings. We started from $\alpha{=}0.75$, chosen on the
+everywhere, which is what leaves rare siblings seldom predicted. We started from $\alpha{=}0.75$, chosen on the
 released training labels; it over-flattened once the label space grew from 7 to 74 classes.
 The correction is applied before the argmax and never changes the broad family. Two
 alternatives we tried instead of it, uniform-prior calibration and entropic optimal transport,
@@ -675,7 +686,7 @@ local approximations.
 \toprule
 ID & System & Hier.\ F1 \\
 \midrule
-865908 & genre-general zero-shot judge      & 0.6067 \\
+865908 & genre-general judge, no retrieval   & 0.6067 \\
 866538 & \; + embedding retrieval gate       & 0.6812 \\
 867323 & \; family-restricted, derived broad & 0.6882 \\
 867376 & direct six-way broad judge          & 0.6206 \\
