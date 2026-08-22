@@ -232,16 +232,15 @@ incremental effect (one model, GPT-5.6, identical pool): with broad definitions 
 called Religious; adding the instruction alone removes 41\% of those (394$\rightarrow$233); supplying
 the full taxonomy removes a further 49\% (233$\rightarrow$119). The two are not interchangeable:
 the instruction helps only on the book descriptions and over-fires elsewhere, whereas the taxonomy
-improves every subset of the pool (Table~\ref{tab:arms}). Scripture filed as an encyclopedia entry (\ar{هؤلاء امراء بني عيسو}, Genesis~36) is moved to
+improves every subset of the pool (Table~\ref{tab:arms}). Scripture filed as an encyclopedia entry (\ar{هؤلاء امراء بني عيسو}, Genesis~36) is relabelled
 \texttt{bible}, and base-family agreement rises in five of the six families (Appendix~\ref{app:trap}).
 
 \paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
 second only over the 8{,}041 where the first disagrees with the base, and a correction is
 applied only where both name the same label. Broad-changing moves are gated to seven
-read-verified directions, led by Informative$\rightarrow$Interactive for comments and
-Legal$\rightarrow$Informative for wire news (Appendix~\ref{app:subs}); unreliable directions
-(e.g.\ Informative$\rightarrow$Learning, which over-fires student-writing on academic prose)
-are rejected, 718 moves in all. Within-family refinements are applied wherever both models
+read-verified directions; unreliable ones, such as
+Informative$\rightarrow$Learning, are rejected, 718 moves in all
+(Appendix~\ref{app:subs}). Within-family refinements are applied wherever both models
 agree.
 
 \subsection{Attractor drain: redistributing to low-frequency siblings}
@@ -327,8 +326,10 @@ together worth $+.020$ Specific Macro~F1.}
 \label{sec:dev}
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from what
 does not. The drain transfers: no class list is carried over, and the two dev classes it fires
-on are the two most-predicted there, so no gold is needed to find them. It moves five labels for
-$+0.042$ (paired bootstrap, 10k resamples: 95\% CI $[+0.010, +0.082]$). The correction stage does not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero
+on are the two most-predicted there, the same two under both judges, so no gold and no
+particular base is needed to find them. It moves five labels for $+0.042$ (paired bootstrap, 10k resamples: 95\% CI $[+0.010, +0.082]$), but four of
+the five are a single confusion, so that interval spans two error types rather than five, and
+Table~\ref{tab:ablation} scores the drain only on the GPT-5.6 judge. The correction stage does not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero
 instances, and both corrections that fire are wrong. Residual dev disagreements stem from a
 convention clash between splits (Appendix~\ref{app:convention}).
 
@@ -359,7 +360,10 @@ no released gold and the development set is near-degenerate, so components were 
 public leaderboard and by manual reading; our reported progression therefore doubles as the
 selection signal, which risks fitting the test distribution. Because blind labels are
 unreleased, no hidden-test gain carries a confidence interval, and those gains should be read as
-leaderboard-measured rather than statistically certified. The one component testable against
+leaderboard-measured rather than statistically certified. For scale: 19 of the 74 specific
+classes receive fewer than 200 predictions (the smallest, 33), and moving one class's F1 from 0
+to 1 shifts Specific Macro~F1 by 0.0135 and Hierarchical Macro~F1 by 0.0068, so our reported
+stage gains are on the order of two to three class-level effects. The one component testable against
 gold is the drain, where a paired bootstrap on dev puts its gain above zero
 (\S\ref{sec:dev}). \textbf{Unmeasured components.} We never ran the judge with and without the 74 discriminators
 and per-family cue lists, so their contribution is unmeasured; they were written from the
@@ -478,9 +482,10 @@ labels. Both files ship in \texttt{artifacts/}, so the submitted predictions reb
 (27{,}972/27{,}972) from cached outputs, but the base stage is a cached input rather than
 something the repository regenerates end to end.
 
-\textbf{Caveats:} the
-hosted API models are versioned by release date and are not guaranteed bit-reproducible
-across dates; the consensus stage incurs API cost proportional to the number of verified
+\textbf{Caveats:} the judge endpoint's serving precision was not
+recorded (Appendix~\ref{app:hparams}), so the base stage is not bit-reproducible even with a
+GPU; the hosted API models are versioned by release date and are not guaranteed
+bit-reproducible across dates; the consensus stage incurs API cost proportional to the number of verified
 instances (on the order of tens of US dollars for this test set). The base pipeline runs on
 a single CUDA GPU (embeddings) plus a remote vLLM endpoint (judge).
 
