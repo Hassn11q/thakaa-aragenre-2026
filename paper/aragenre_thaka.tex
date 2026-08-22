@@ -49,24 +49,23 @@ Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification}
 \maketitle
 
 \begin{abstract}
-Classifying a text by what it does, rather than by its subject, is difficult when the
-categories are specified only in prose and none of them appears in the training data.
-AraGenre~2026 asks systems to assign each of
-27{,}972 hidden-test Arabic segments one of 6 broad and one of 74 fine-grained specific genres,
-described only by English definitions, with a specific-label inventory \emph{disjoint} from the
-released training data. We present a training-free pipeline that does no gradient-based
-training on the task, though the judge prompt does carry hand-written per-genre cues
-(\S\ref{sec:system}). A family-restricted, definition-guided LLM judge scores candidate genres
-setwise within a hierarchically constrained decoding scheme, reaching 0.7139 Hierarchical
-Macro~F1. From the public scoreboard we diagnose that our system already led on Specific
-Macro~F1 but trailed on Broad Macro~F1, and we narrow that gap with a full-context multi-model
-consensus stage: two instruction models each see the \emph{entire} 74-definition taxonomy and
-re-predict the specific genre, and a correction is applied only where both agree against the
-base. Feeding the full taxonomy almost halves the residual topic-trap calls, where a book
-\emph{about} religion is taken for religious scripture. A final attractor-drain step
-redistributes over-predicted generic classes to starved rare ones. The system scores 0.7352
-Hierarchical Macro~F1, ranking 1st of 18 teams; our ablation attributes part of the topic-trap
-reduction to each of two factors.
+We report the first-place system in AraGenre~2026 (0.7352 Hierarchical Macro~F1, 18 teams). The
+task asks for one of 6 broad and one of 74 fine-grained specific genres for each of 27{,}972
+hidden-test Arabic segments, with every genre given only as an English prose definition and the
+specific-label inventory \emph{disjoint} from the released training data. Our pipeline is
+training-free: it makes no gradient updates on the task, though the judge prompt does carry
+hand-written per-genre cues. A family-restricted, definition-guided LLM judge scores candidate
+genres setwise under a hierarchically constrained decoding scheme, reaching 0.7139. The public
+scoreboard showed that this base already led on Specific Macro~F1 but trailed on Broad
+Macro~F1, so we target the broad tier with a full-context multi-model consensus stage: two
+instruction models each see the \emph{entire} 74-definition taxonomy and re-predict the
+specific genre, and a correction is applied only where both agree against the base. This lifts
+Broad Macro~F1 from 0.879 to 0.892 by suppressing a topic trap in which a book \emph{about}
+religion is taken for religious scripture. A three-arm ablation separates the trap's two
+causes: an explicit type-versus-topic instruction removes 41\% of the trapped calls
+($394\rightarrow233$), and showing the full taxonomy removes a further 49\%
+($233\rightarrow119$). A final attractor drain redistributes over-predicted generic classes to
+starved rare siblings, carrying the base from 0.7139 to the submitted 0.7352.
 \end{abstract}
 
 \section{Introduction}
@@ -316,9 +315,10 @@ Base (ours) & .714 & .549 & .584 & .591 & .879 & .900 & .900 \\
 \bottomrule
 \end{tabular}
 \caption{Official metrics for our three scored systems on the hidden test, rounded to three
-decimals (Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). Consensus lifts the
-broad tier by $+.013$ Broad Macro~F1; the drain lifts the specific tier by a further $+.020$
-Specific Macro~F1.}
+decimals (Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). Consensus on the
+verification pool lifts the broad tier by $+.013$ Broad Macro~F1; the final row folds in the safe
+broad expansion, consensus over the full set and the drain, together worth $+.020$ Specific
+Macro~F1.}
 \label{tab:metrics}
 \end{table}
 
