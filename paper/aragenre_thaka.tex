@@ -253,9 +253,8 @@ place, leaving siblings rarely predicted; they come from that prediction distrib
 held-out gold. The drain is deterministic: when the base label is an attractor class and a separate
 chain-of-thought re-judging pass~\citep{wei2022cot} names a different sibling in the same family, the
 sibling replaces it (broad never changes). The surface rules are then re-applied over the
-changed labels, acting as a guard rather than a gain (Appendix~\ref{app:subs}). On the base alone it moves 554 instances, 6--35\%
-of each attractor class (Appendix~\ref{app:drain}); in the final pipeline consensus runs
-first, so the drain fires on 383. Relative to the base, the final system changes 459 broad and
+changed labels, acting as a guard rather than a gain (Appendix~\ref{app:subs}). On the base alone it moves 554 instances
+(Appendix~\ref{app:drain}); in the final pipeline consensus runs first, so it fires on 383. Relative to the base, the final system changes 459 broad and
 2{,}890 specific labels (10.3\% of instances).
 
 \section{Experimental Setup}
@@ -287,21 +286,22 @@ System & Split & Hier.\ F1 \\
 Official baseline (embedding sim.) & dev & 0.4658 \\
 Our judge (Gemma-4-31B) & dev & 0.8794 \\
 Our judge (GPT-5.6) & dev & 0.8943 \\
-\quad Gemma-4-31B + consensus & dev & 0.8557 \\
+\quad + agreement-gated correction & dev & 0.8557 \\
 GPT-5.6 judge + attractor drain$^{\dagger}$ & dev & 0.9358 \\
 \midrule
 Genre-general judge, no retrieval & test & 0.6067 \\
 \quad + embedding retrieval gate & test & 0.6812 \\
-\quad family-restricted, derived broad & test & 0.6882 \\
-\textbf{\; + rules / calibration (base)} & test & \textbf{0.7139} \\
-\quad + 2-model consensus (pool) & test & 0.7224 \\
-\quad + safe broad expansion (full set) & test & 0.7256 \\
-\textbf{\; + full consensus + drain (final)} & test & \textbf{0.7352} \\
+\quad + family-restricted judging & test & 0.6882 \\
+\textbf{\; + marginal correction, rules (base)} & test & \textbf{0.7139} \\
+\quad + agreement-gated correction (subset) & test & 0.7224 \\
+\quad + cross-family moves, all instances & test & 0.7256 \\
+\textbf{\; + within-family refinements, drain} & test & \textbf{0.7352} \\
 \bottomrule
 \end{tabular}
 \caption{Main progression on both splits. Dev is near-degenerate (its 6 specific genres map
 one-to-one onto 6 broad, so all three F1 metrics coincide), so the hidden test is our primary
-evaluation. $^{\dagger}$applied to the GPT-5.6 judge, tuned on dev, so not held out.}
+evaluation. \emph{Subset} corrects only instances whose broad label the base judged least
+secure. $^{\dagger}$applied to the GPT-5.6 judge, tuned on dev, so not held out.}
 \label{tab:ablation}
 \end{table}
 
@@ -337,20 +337,19 @@ convention clash between splits (Appendix~\ref{app:convention}).
 
 \section{Analysis}
 \label{sec:analysis}
-Because the two tiers fail differently (\S\ref{sec:intro-contrib}), gains on both compound
-through the mean. Broad-only prompting put 157 book descriptions under Religious
-unanimously across all three models, which the full taxonomy largely reversed; a single model
-disagreed with the base on $\sim$29\% of specifics. Every alternative we
-tried for the correction stage fell below the 0.7139 base (Appendix~\ref{app:negative}).
+The two tiers fail differently, so gains on both compound through the mean. Broad-only
+prompting put 157 book descriptions under Religious unanimously across all three models, which
+the full taxonomy largely reversed; one model alone disagreed with the base on $\sim$29\% of
+specifics. Every alternative correction we tried fell below the base
+(Appendix~\ref{app:negative}).
 
 \paragraph{Qualitative prediction audit.} Three patterns dominate: cross-family topic leaks,
-heavy attractor prediction, and ceiling classes where 87--99\% of texts we label as song lyrics
-carry no marker from that dialect's cue list (Appendix~\ref{app:errors}).
+heavy attractor prediction, and ceiling classes where 87--99\% of texts we label as song
+lyrics carry no marker from that dialect's cue list (App.~\ref{app:errors}).
 
 \section{Conclusion}
-Hierarchical Arabic genre classification without parameter updates is achievable: a
-definition-guided judge, an agreement-gated correction and an attractor drain ranked 1st of 18
-at 0.7352.
+A definition-guided judge, an agreement-gated correction and an attractor drain placed 1st of
+18 at 0.7352, with no parameter updates at any stage.
 
 \section*{Limitations}
 
@@ -422,13 +421,12 @@ the open models and libraries our pipeline builds on.
 
 \section{Reproducibility}
 \label{app:repro}
-\textbf{Official submission.} The results we report are those of submission 872515,
+\textbf{Official submission.} The results we report are those of our final submission,
 evaluated 1~August 2026, which scored 0.7352 Hierarchical Macro~F1 (Specific Macro 0.5725,
 Weighted 0.6125, Accuracy 0.6189; Broad Macro 0.8979, Weighted 0.9142, Accuracy 0.9138) over
 27{,}972 of 27{,}972 gold instances with no missing prediction, ranking 1st of the 18 teams in
-the organisers' final standings. Every hidden-test number in
-Table~\ref{tab:ablation} and Appendix~\ref{app:negative} is likewise an official scored
-submission rather than a local estimate; the submission IDs are listed in
+the organisers' final standings. Every hidden-test number in Table~\ref{tab:ablation} and Appendix~\ref{app:negative} is
+likewise an official scored submission rather than a local estimate; the full record is in
 Appendix~\ref{app:subs}.
 No parameters are updated at any stage; task-specific information enters only through the
 hand-written discriminators, dev-tuned prompts and leaderboard-guided component selection.
@@ -471,8 +469,8 @@ prompt behind arm~A. Both the pool file and arm~A's cached outputs ship, so
 \texttt{src/trap\_table.py} rebuilds the table offline, but neither selection can be re-derived
 from the code.
 
-\textbf{Two cached inputs.} The broad gate the judge restricts to is submission 866538
-(0.6812), an earlier retrieval-gated system we submitted and scored, reused verbatim rather
+\textbf{Two cached inputs.} The broad gate the judge restricts to is the scored 0.6812
+system, an earlier retrieval-gated system we submitted and scored, reused verbatim rather
 than regenerated by the released code; and the base
 predictions additionally carry an Interactive-recall reassignment applied during the
 evaluation phase by a separate automatic judge pass (\texttt{src/interactive\_judge.py}), which
@@ -647,7 +645,9 @@ Religious 6, Interactive 4, Legal 3) and the top 6 retrieved in-family candidate
 large ones.
 
 \paragraph{Judge.} \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
-temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction $\alpha{=}0.5$.
+temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction
+$\alpha{=}0.5$. We did not record the serving precision of the judge endpoint; vLLM's default
+for this checkpoint is bfloat16. The retriever precision is given above.
 
 \paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
 Gemini-3.6~Flash (temperature 0, $\leq$400 output tokens), each given the full 74-definition taxonomy
@@ -657,14 +657,10 @@ JSON array of integer scores over the candidate definitions; the consensus promp
 \texttt{specific\_genre} identifier and states that a factual description \emph{of} a book is a
 \texttt{*\_book\_description}, not the book's subject genre.
 
-\paragraph{Software.} \texttt{torch} $\geq$2.1, \texttt{transformers} $\geq$4.44
-(\url{https://github.com/huggingface/transformers}), \texttt{sentence-transformers} $\geq$3.0
-(\url{https://github.com/UKPLab/sentence-transformers}), \texttt{bitsandbytes} $\geq$0.43
-(\url{https://github.com/bitsandbytes-foundation/bitsandbytes}), vLLM
-(\url{https://github.com/vllm-project/vllm}), \texttt{openai} $\geq$1.99
-(\url{https://github.com/openai/openai-python}) and \texttt{google-genai} $\geq$0.3
-(\url{https://github.com/googleapis/python-genai}). Model weights: Qwen3-Embedding-8B
-(\url{https://huggingface.co/Qwen/Qwen3-Embedding-8B}).
+\paragraph{Software.} \texttt{torch}, \texttt{transformers},
+\texttt{sentence-transformers} and \texttt{bitsandbytes} for the retriever, vLLM for the local
+judge, and the \texttt{openai} and \texttt{google-genai} SDKs for the verifiers; pinned
+versions accompany the code.
 
 \paragraph{Cost.} At list prices the consensus stage runs about US\$1.05--1.48 per 1{,}000
 calls, giving the \$50 total quoted in \S\ref{sec:setup} over its 36{,}013 calls.
@@ -682,42 +678,47 @@ local approximations.
 \begin{table}[h]
 \centering\footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{llr}
+\begin{tabular}{lr}
 \toprule
-ID & System & Hier.\ F1 \\
+System & Hier.\ F1 \\
 \midrule
-865908 & genre-general judge, no retrieval   & 0.6067 \\
-866538 & \; + embedding retrieval gate       & 0.6812 \\
-867323 & \; family-restricted, derived broad & 0.6882 \\
-867376 & direct six-way broad judge          & 0.6206 \\
-867451 & unpruned 74-way scoring             & 0.6517 \\
-867465 & \; + surface rules only             & 0.6881 \\
-870640 & \; base system                      & 0.7139 \\
-870841 & uniform-prior calibration           & 0.7124 \\
-870979 & self-consistency ($K{=}3$)          & 0.7134 \\
-870981 & entropic optimal transport          & 0.7115 \\
-871127 & chain-of-thought applied wholesale  & 0.7131 \\
-871609 & \; + 2-model consensus (pool)       & 0.7224 \\
-872511 & \; + safe broad expansion           & 0.7256 \\
-\textbf{872515} & \textbf{\; + full consensus + drain} & \textbf{0.7352} \\
+genre-general judge, no retrieval   & 0.6067 \\
+\; + embedding retrieval gate       & 0.6812 \\
+\; + family-restricted judging      & 0.6882 \\
+direct six-way broad judge          & 0.6206 \\
+unpruned 74-way scoring             & 0.6517 \\
+\; + surface rules only             & 0.6881 \\
+rule variant                        & 0.6891 \\
+prompt-ensemble blend               & 0.6883 \\
+Interactive-subtype judging         & 0.6942 \\
+hybrid judge variant                & 0.7128 \\
+\; base system                      & 0.7139 \\
+uniform-prior calibration           & 0.7124 \\
+self-consistency ($K{=}3$)          & 0.7134 \\
+entropic optimal transport          & 0.7115 \\
+chain-of-thought applied wholesale  & 0.7131 \\
+\; + agreement-gated corr.\ (subset)& 0.7224 \\
+\; + cross-family moves, all inst.\ & 0.7256 \\
+\textbf{\; + within-family refs, drain} & \textbf{0.7352} \\
 \bottomrule
 \end{tabular}
 \caption{Official submissions behind Table~\ref{tab:ablation} and Appendix~\ref{app:negative}.
-Submission 872515 is the final system: 27{,}972 predictions over 27{,}972 gold instances, none
-missing. Submissions were made sequentially over four days, so the progression is a record of
-scored configurations rather than a single controlled sweep.}
+The final system produced 27{,}972 predictions over 27{,}972 gold instances, none
+missing. We used 19 of our 26 permitted submissions; the 18 scored on the test phase are all
+listed here. Submissions were made sequentially over four days, so the progression is a record
+of scored configurations rather than a single controlled sweep.}
 \label{tab:subs}
 \end{table}
 
-\paragraph{Two readings this record supports.} Submission 867465 isolates the surface rules on
-top of 867323: they rewrite 32 labels (23 \texttt{quran}, 9 \texttt{hadith}) and leave the
+\paragraph{Two readings this record supports.} The 0.6881 row isolates the surface rules on top
+of the 0.6882 row: they rewrite 32 labels (23 \texttt{quran}, 9 \texttt{hadith}) and leave the
 score at 0.6881 against 0.6882. The rules are precise but score-neutral at that point, so the
 0.6882$\rightarrow$0.7139 gain belongs to the judge and calibration changes, not to them.
 They were kept for a different job: in the final pipeline they fire on 1{,}087 instances and
 agree with the base label on every one, so their whole net effect is to restore 75 labels that
 consensus or the drain had moved away (56 \texttt{youtube\_comments}, 19 \texttt{quran}). They
 guard the correction stages rather than adding score.
-Submission 871127 applies the chain-of-thought pass to every instance and scores 0.7131,
+The chain-of-thought row applies that pass to every instance and scores 0.7131,
 below the 0.7139 base; the same pass restricted to attractor classes is what the drain uses.
 Chain-of-thought helps here only where it is aimed.
 
