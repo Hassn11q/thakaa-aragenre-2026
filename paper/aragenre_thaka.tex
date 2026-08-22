@@ -575,8 +575,13 @@ Table~\ref{tab:trap} reports how often GPT-5.6's broad verdict still agrees with
 system's family, one model across the two original prompts. Broad-only prompting collapses on
 families whose members are \emph{about} another family's subject matter (Learning,
 Informative), which is exactly the topic trap; the full taxonomy repairs it. Requiring both
-verifiers to agree, joint Religious assignments on the same 1{,}403 instances fall from 235
-under broad-only prompting to 32 under the full taxonomy, an 86\% reduction.
+verifiers to agree, joint Religious assignments fall from 134 under broad-only prompting to 37
+under the full taxonomy, a 72\% reduction. That comparison is restricted to the 548 book
+descriptions for which the second verifier has a call under both prompts, since the deployed
+full-taxonomy run queries it only on the instances where the first verifier disagrees with the
+base; on all 1{,}403, the first verifier alone falls from 394 to 126.
+All three broad-only runs ship, and \texttt{src/broad\_only\_check.py} reproduces these counts
+and the 157 above without API access.
 
 \begin{table}[h]
 \centering\small
