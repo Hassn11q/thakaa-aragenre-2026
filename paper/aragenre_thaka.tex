@@ -79,7 +79,7 @@ hidden benchmark contains noisier naturally occurring Arabic spanning Modern Sta
 Arabic, Classical Arabic, and multiple dialects, with \emph{previously unseen
 genre--definition combinations}. Because the 74 specific test genres are disjoint from
 training, memorisation is useless and semantic understanding of communicative function
-is required. The official ranking metric is
+is required. We placed 1st of 18 teams (Table~\ref{tab:metrics}). The official ranking metric is
 \[
 \text{Hier.\ F1} = \tfrac{1}{2}\left(\text{Broad F1}_{\text{macro}} + \text{Spec.\ F1}_{\text{macro}}\right).
 \]
@@ -226,9 +226,8 @@ diagnostic pool but excluded from the deployed consensus on cost grounds.)
 \paragraph{What suppresses the topic trap.} Given only the 6 broad definitions, all three
 verification models fell into a \emph{topic trap} on the book descriptions: text \emph{about}
 Islam $\rightarrow$ Religious, even when it was an Informative \emph{book description}. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so we ran a
-three-arm ablation over the same 1{,}403 instances to estimate each factor's incremental
-effect
-(one model, GPT-5.6, identical pool): with broad definitions only and no such instruction, 394 are
+post-evaluation three-arm ablation over the same 1{,}403 instances to estimate each factor's
+incremental effect (one model, GPT-5.6, identical pool): with broad definitions only and no such instruction, 394 are
 called Religious; adding the instruction alone removes 41\% of those (394$\rightarrow$233); supplying
 the full taxonomy removes a further 49\% (233$\rightarrow$119). The two are not interchangeable:
 the instruction helps only on the book descriptions and over-fires elsewhere, whereas the taxonomy
