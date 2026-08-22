@@ -185,7 +185,7 @@ plus a within-family attractor drain correct both tiers, reaching 0.7352 (rank~1
 \label{fig:arch}
 \end{figure}
 
-\subsection{Base: Family-Restricted Definition-Guided Judge}
+\subsection{Base: family-restricted definition-guided judge}
 The base system turns the 74-way choice into a within-family one (Figure~\ref{fig:arch}):
 retrieval proposes candidates and a judge scores only siblings of a gated broad genre. The
 setwise judge is \texttt{google/gemma-4-31B-it}~\citep{gemma4_2026}, served through vLLM under
@@ -215,7 +215,7 @@ whole deficit sat in the broad tier. Broad accuracy (0.9003) exceeded broad macr
 per-class performance; reading the errors showed cross-family false positives, with Bible
 passages filed as poetry or encyclopedia entries and news filed as legal.
 
-\subsection{Full-Context Multi-Model Consensus Correction}
+\subsection{Correction: full-context multi-model consensus}
 We re-predict the specific genre with two frontier instruction models
 (GPT-5.6~Luna~\citep{gpt56luna2026} and Gemini-3.6~Flash~\citep{gemini36flash2026}),
 \emph{feeding each the entire 74-definition taxonomy} ($\approx$2.9K tokens) grouped by
@@ -245,7 +245,7 @@ Legal$\rightarrow$Informative for wire news (Appendix~\ref{app:subs}); unreliabl
 are rejected, 718 moves in all. Within-family refinements are applied wherever both models
 agree.
 
-\subsection{Attractor Drain (Specific Macro)}
+\subsection{Attractor drain: recovering starved rare classes}
 Reading our own hidden-test predictions during the evaluation phase revealed five large
 ``attractor'' classes that absorb texts the judge cannot place, starving rare siblings. They
 come from that prediction distribution, not from held-out gold. The drain is deterministic: when the base label is an attractor class and a separate
@@ -322,7 +322,7 @@ Specific Macro~F1.}
 \label{tab:metrics}
 \end{table}
 
-\subsection{Development-Set Results and Component Transfer}
+\subsection{Development-set results and component transfer}
 \label{sec:dev}
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from
 what does not. The drain transfers: no class list is carried over, and the two dev classes it fires on are the
