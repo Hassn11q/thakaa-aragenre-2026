@@ -147,11 +147,11 @@ lyrics, niche job domains).
 
 \begin{figure}[t]
 \centering
-\resizebox{\columnwidth}{!}{%
+\resizebox{0.836\columnwidth}{!}{%
 \begin{tikzpicture}[
   font=\small,
-  node distance=3.2mm,
-  box/.style={draw,rounded corners,align=center,inner sep=3pt,minimum height=7mm,fill=blue!5},
+  node distance=1.9mm,
+  box/.style={draw,rounded corners,align=center,inner sep=2.5pt,minimum height=5.6mm,fill=blue!5},
   base/.style={box,fill=blue!8},
   corr/.style={box,fill=orange!12},
   io/.style={align=center,font=\small\itshape},
@@ -167,20 +167,19 @@ lyrics, niche job domains).
 \draw[ar] (text)--(embed); \draw[ar] (embed)--(judge);
 \draw[ar] (judge)--(rules); \draw[ar] (rules)--(basep);
 % correction stages
-\node[corr,below=7mm of basep] (cons) {Full-context 2-model consensus\\ \scriptsize GPT-5.6 + Gemini-3.6, \emph{all 74 defs} $\rightarrow$ agree-gated fix};
+\node[corr,below=8mm of basep] (cons) {Full-context 2-model consensus\\ \scriptsize GPT-5.6 + Gemini-3.6, \emph{all 74 defs} $\rightarrow$ agree-gated fix};
 \node[corr,below=of cons] (drain) {Attractor drain, then surface rules\\ \scriptsize CoT within-family, broad-locked; rules re-applied last};
 \node[res,below=of drain] (finalp) {Final \;\textbf{0.7352} \;(rank 1)};
 \draw[ar] (basep)--(cons); \draw[ar] (cons)--(drain); \draw[ar] (drain)--(finalp);
-% taxonomy side-note into consensus
-\node[box,fill=orange!6,right=6mm of cons,text width=22mm] (tax) {74-def taxonomy (trap-resistant)};
-\draw[ar,dashed] (tax)--(cons);
 \begin{scope}[on background layer]
-  \node[draw,dashed,rounded corners,fit=(text)(basep),label=above:{\scriptsize Base (no training)}] {};
-  \node[draw,dashed,rounded corners,fit=(cons)(finalp)(tax),label=above:{\scriptsize Correction}] {};
+  \node[draw,dashed,rounded corners,fit=(text)(embed)(judge)(rules)(basep),
+        label={[anchor=south east]north east:{\scriptsize Base (no training)}}] {};
+  \node[draw,dashed,rounded corners,fit=(cons)(drain)(finalp),
+        label={[anchor=south east]north east:{\scriptsize Correction}}] {};
 \end{scope}
 \end{tikzpicture}}
-\caption{System overview. The base judge yields 0.7139; full-context two-model consensus
-plus a within-family attractor drain correct both tiers, reaching 0.7352 (rank~1).}
+\caption{System overview. The base judge yields 0.7139; consensus verifiers that each see the
+\emph{entire} 74-definition taxonomy, then a within-family attractor drain, reach 0.7352 (rank~1).}
 \label{fig:arch}
 \end{figure}
 
