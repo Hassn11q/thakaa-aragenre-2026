@@ -83,14 +83,13 @@ is required. We placed 1st of 18 teams (Table~\ref{tab:metrics}) on the official
 Hierarchical Macro~F1: the mean of Broad and Specific Macro~F1.
 
 Our contributions are:
-\label{sec:intro-contrib}
 \begin{enumerate}
 \itemsep0em
 \item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139
 Hierarchical Macro~F1 with no parameter updates.
 \item An account of why one predictor fails the two tiers differently: broad accuracy is the
-family-accuracy of the specific prediction, whereas Broad Macro~F1 is set by minority-class
-false positives, so correction must be tier-specific (\S\ref{sec:analysis}).
+family-accuracy of the specific prediction, whereas Broad Macro~F1 is sensitive to
+minority-class false positives, so correction must be tier-specific (\S\ref{sec:system}).
 \item An agreement-gated correction stage in which each verifier sees the full taxonomy, with a
 three-arm ablation splitting the topic trap between an explicit type-vs-topic instruction and a
 visible label to move the error onto.
@@ -208,7 +207,6 @@ and ship in \texttt{src/discriminators.py}; hyperparameters are in
 Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores 0.7139.
 
 \paragraph{Diagnosis from the scoreboard.}
-\label{sec:diag}
 The leaderboard exposed the structure: against the system then ahead of us, our base led on
 Specific Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the
 whole deficit sat in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
@@ -224,7 +222,7 @@ the ensemble argument that combining diverse predictors beats any single
 one~\citep{dietterich2000ensemble}, in its LLM form~\citep{verga2024poll,wang2024moa}, but we
 never submitted either verifier alone, so agreement here is a conservatism device and not
 evidence of an ensemble effect. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the
-diagnostic pool but excluded from the deployed consensus on cost grounds.)
+diagnostic pool but excluded from the deployed correction on cost grounds.)
 
 \paragraph{What suppresses the topic trap.} Given only the 6 broad definitions, all three
 verification models classified by subject matter rather than by communicative function: a blurb
@@ -257,7 +255,7 @@ The list comes from that prediction distribution, not from held-out gold. The dr
 chain-of-thought re-judging pass~\citep{wei2022cot} names a different sibling in the same family, the
 sibling replaces it (broad never changes). The surface rules are re-applied afterwards as a
 guard (Appendix~\ref{app:subs}). On the base alone it moves 554 instances
-(Appendix~\ref{app:drain}); in the final pipeline consensus runs first, so it fires on 383.
+(Appendix~\ref{app:drain}); in the final pipeline the correction runs first, so it fires on 383.
 
 \section{Experimental Setup}
 \label{sec:setup}
@@ -273,7 +271,7 @@ against under 1\% elsewhere (Appendix~\ref{app:subs}).
 \paragraph{Tools and metrics.} Qwen3-Embedding-8B under \texttt{sentence-transformers}, vLLM for
 the local judge, vendor SDKs for the verifiers; we report Macro F1, Weighted F1 and Accuracy at
 both tiers (Appendix~\ref{app:hparams}).
-\paragraph{Cost.} Consensus makes 36{,}013 calls at a $\approx$3.0K-token prompt each, about
+\paragraph{Cost.} The correction makes 36{,}013 calls at a $\approx$3.0K-token prompt each, about
 US\$50; rates and timings are in Appendix~\ref{app:hparams}. The base needs no paid API.
 
 \section{Results}
@@ -288,7 +286,7 @@ System & Split & Hier.\ F1 \\
 Official baseline (embedding sim.) & dev & 0.4658 \\
 Our judge (Gemma-4-31B) & dev & 0.8794 \\
 Our judge (GPT-5.6) & dev & 0.8943 \\
-\quad + agreement-gated correction & dev & 0.8557 \\
+\quad Gemma-4-31B + correction & dev & 0.8557 \\
 GPT-5.6 judge + attractor drain$^{\dagger}$ & dev & 0.9358 \\
 \midrule
 Genre-general judge, no retrieval & test & 0.6067 \\
@@ -315,15 +313,14 @@ secure. $^{\dagger}$applied to the GPT-5.6 judge, tuned on dev, so not held out.
 System & Hier & SpM & SpW & SpA & BrM & BrW & BrA \\
 \midrule
 Base (ours) & .714 & .549 & .584 & .591 & .879 & .900 & .900 \\
-\; + consensus & .722 & .553 & .592 & .598 & .892 & .910 & .910 \\
+\; + correction & .722 & .553 & .592 & .598 & .892 & .910 & .910 \\
 \textbf{Final (rank 1)} & \textbf{.735} & \textbf{.573} & \textbf{.613} & \textbf{.619} & \textbf{.898} & \textbf{.914} & \textbf{.914} \\
 \bottomrule
 \end{tabular}
 \caption{Official metrics for our three scored systems on the hidden test, rounded to three
-decimals (Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). Consensus on the
-verification pool lifts the broad tier by $+.013$ Broad Macro~F1; the final row folds in the safe
-broad expansion, consensus over the full set and the drain, together worth $+.020$ Specific
-Macro~F1.}
+decimals (Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). Correcting the verification subset lifts the broad tier by $+.013$ Broad Macro~F1;
+the final row folds in the cross-family moves, the within-family refinements and the drain,
+together worth $+.020$ Specific Macro~F1.}
 \label{tab:metrics}
 \end{table}
 
@@ -332,8 +329,7 @@ Macro~F1.}
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from what
 does not. The drain transfers: no class list is carried over, and the two dev classes it fires
 on are the two most-predicted there, so no gold is needed to find them. It moves five labels for
-$+0.042$ (paired bootstrap, 10k resamples: 95\% CI $[+0.010, +0.082]$). The consensus stage does
-not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero
+$+0.042$ (paired bootstrap, 10k resamples: 95\% CI $[+0.010, +0.082]$). The correction stage does not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero
 instances, and both corrections that fire are wrong. Residual dev disagreements stem from a
 convention clash between splits (Appendix~\ref{app:convention}).
 
@@ -350,7 +346,7 @@ lyrics carry no marker from that dialect's cue list (App.~\ref{app:errors}).
 
 \section{Conclusion}
 A definition-guided judge, an agreement-gated correction and an attractor drain placed 1st of
-18 at 0.7352, with no parameter updates at any stage.
+18 at 0.7352 without parameter updates.
 
 \section*{Limitations}
 
@@ -378,7 +374,7 @@ choice is validated on gold. \textbf{An untested comparison.} We ran GPT-5.6 ove
 never submitted its predictions as a system, so the claim that a cheap base judge with
 conservative correction beats direct full-taxonomy prediction is untested; the disagreement
 rate reported in \S\ref{sec:analysis} is our only evidence that one model is too noisy to act on.
-\textbf{Cost and ceilings.} Consensus cost scales with test size, and song-dialect distinctions
+\textbf{Cost and ceilings.} Correction cost scales with test size, and song-dialect distinctions
 remain near the noise floor because the distinguishing features are phonetic and largely absent
 from written lyrics.
 
