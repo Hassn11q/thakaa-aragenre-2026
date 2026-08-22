@@ -60,8 +60,9 @@ hierarchically constrained decoding scheme, reaching 0.7139. The scoreboard show
 already led on Specific Macro~F1 but trailed on Broad Macro~F1, so we add a correction stage: two
 instruction models re-predict the specific genre, each shown the \emph{entire} 74-definition
 taxonomy, and a label is edited only where both agree against the base. This agreement-gated
-stage lifts Broad Macro~F1 from 0.879 to 0.892, largely by suppressing a topic trap in which a
-book \emph{about} religion is taken for scripture; a post-evaluation ablation attributes the
+stage lifts Broad Macro~F1 from 0.879 to 0.892, largely by suppressing a \emph{topic trap}, in
+which the genre of the subject a text discusses displaces the genre the text itself
+instantiates; a post-evaluation ablation attributes the
 suppression to an explicit type-versus-topic instruction ($394\rightarrow233$ trapped calls) and
 to the taxonomy itself ($233\rightarrow119$). A final attractor drain then carries the system to
 0.7352.
@@ -99,9 +100,9 @@ generic classes; its only gold-verified estimate is on dev.
 teams, with the major system configurations scored as their own submissions.
 \end{enumerate}
 
-\noindent The main challenges were a specific-label inventory disjoint from training, a topic trap (writing
-\emph{about} a subject vs.\ the subject's genre), and classes with no written signal (song
-dialects, textbook levels).
+\noindent The main challenges were a specific-label inventory disjoint from training, the topic
+trap of \S\ref{sec:system}, and classes with no written signal (song dialects, textbook
+levels).
 
 \section{Related Work}
 \paragraph{Arabic and hierarchy-aware HTC.} Arabic pretrained models~\citep{antoun2020arabert,antoun2021aragpt2}
@@ -114,16 +115,16 @@ enforce the hierarchy structurally, forcing $\text{broad}=\text{parent}(\text{sp
 space through prompt ensembles~\citep{xia2025hieps}, LLM-built
 prototypes~\citep{zhang2024hierprompt} or rewritten taxonomies~\citep{golde2025refined}; we
 leave the definitions unrewritten and vary how much of the taxonomy is visible, though the base
-judge appends hand-written cues to each (\S\ref{sec:system}). Our
-two-stage design retrieves candidate definitions~\citep{chen2024retrieval} and compares them
-with an LLM~\citep{sun2023rankgpt,zheng2023judging}, with
+judge appends hand-written cues to each (\S\ref{sec:system}). Our two-stage design retrieves
+candidate definitions~\citep{chen2024retrieval} and compares them with an
+LLM~\citep{sun2023rankgpt,zheng2023judging}, with
 Qwen3-Embedding~\citep{qwen3embedding2025} bridging Arabic and English; the chain-of-thought
-pass follows reasoning-based HTC~\citep{jiang2025reasoning,consistencyreg2024}. Ensembling
-diverse predictors~\citep{dietterich2000ensemble} appears in LLM form as juries, blending,
+pass follows reasoning-based HTC~\citep{jiang2025reasoning,consistencyreg2024}. Ensembles of
+diverse predictors~\citep{dietterich2000ensemble} appear in LLM form as juries, blending,
 mixtures of agents, debate and
-self-consistency~\citep{verga2024poll,jiang2023llmblender,wang2024moa,du2023debate,wang2023selfconsistency};
-those aggregate free-form text or resample one model, whereas we require two models to emit the
-\emph{same} label, which helps only with the full taxonomy in context.
+self-consistency~\citep{verga2024poll,jiang2023llmblender,wang2024moa,du2023debate,wang2023selfconsistency},
+which aggregate free-form text or resample one model; we instead require two models to emit the
+\emph{same} label.
 
 \section{Background}
 Each instance is \texttt{\{id, text\}}; systems output one \texttt{broad\_genre} (of 6:
@@ -135,8 +136,7 @@ and test, so no supervised label set transfers. The \emph{hidden test} has 27{,}
 occurring instances over 74 specific genres in 6 families: Informative (42), Learning (12),
 Creative (7), Religious (6), Interactive (4) and Legal (3); Informative is dominated by 20 job
 domains and 13 book-description topics, and Creative holds 5 song dialects. Missing predictions
-are counted incorrect. Informative dominates our predictions ($\sim$50\%), and the specific
-tier's 74 classes make Macro~F1 highly sensitive to rare-class recall.
+are counted incorrect, and Informative dominates our predictions ($\sim$50\%).
 
 \section{System}
 \label{sec:system}
@@ -227,8 +227,9 @@ evidence of an ensemble effect. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on
 diagnostic pool but excluded from the deployed consensus on cost grounds.)
 
 \paragraph{What suppresses the topic trap.} Given only the 6 broad definitions, all three
-verification models fell into a \emph{topic trap} on the book descriptions: text \emph{about}
-Islam $\rightarrow$ Religious, even when it was an Informative \emph{book description}. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so we ran a
+verification models classified by subject matter rather than by communicative function: a blurb
+summarising an Islamic work \emph{performs} the function of a book description, so the taxonomy
+files it under Informative while every broad-only verifier answers Religious. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so we ran a
 post-evaluation three-arm ablation over the same 1{,}403 instances to estimate each factor's
 incremental effect (one model, GPT-5.6, identical pool): with broad definitions only and no such instruction, 394 are
 called Religious; adding the instruction alone removes 41\% of those (394$\rightarrow$233); supplying
@@ -247,15 +248,16 @@ are rejected, 718 moves in all. Within-family refinements are applied wherever b
 agree.
 
 \subsection{Attractor drain: redistributing to low-frequency siblings}
-This stage is partly transductive. Reading our own hidden-test predictions during the
-evaluation phase revealed five large ``attractor'' classes that absorb texts the judge cannot
-place, leaving siblings rarely predicted; they come from that prediction distribution, not from
-held-out gold. The drain is deterministic: when the base label is an attractor class and a separate
+Specific Macro~F1 averages F1 over all 74 classes, so a class the judge almost never predicts
+contributes near-zero recall. This stage is partly transductive: reading our own hidden-test
+predictions during the evaluation phase revealed five \emph{attractor} classes broad enough to
+absorb any text the judge cannot place, leaving their rarer siblings almost unused, so
+redistributing labels from an attractor to those siblings moves the mean far more than accuracy.
+The list comes from that prediction distribution, not from held-out gold. The drain is deterministic: when the base label is an attractor class and a separate
 chain-of-thought re-judging pass~\citep{wei2022cot} names a different sibling in the same family, the
-sibling replaces it (broad never changes). The surface rules are then re-applied over the
-changed labels, acting as a guard rather than a gain (Appendix~\ref{app:subs}). On the base alone it moves 554 instances
-(Appendix~\ref{app:drain}); in the final pipeline consensus runs first, so it fires on 383. Relative to the base, the final system changes 459 broad and
-2{,}890 specific labels (10.3\% of instances).
+sibling replaces it (broad never changes). The surface rules are re-applied afterwards as a
+guard (Appendix~\ref{app:subs}). On the base alone it moves 554 instances
+(Appendix~\ref{app:drain}); in the final pipeline consensus runs first, so it fires on 383.
 
 \section{Experimental Setup}
 \label{sec:setup}
@@ -337,10 +339,9 @@ convention clash between splits (Appendix~\ref{app:convention}).
 
 \section{Analysis}
 \label{sec:analysis}
-The two tiers fail differently, so gains on both compound through the mean. Broad-only
-prompting put 157 book descriptions under Religious unanimously across all three models, which
-the full taxonomy largely reversed; one model alone disagreed with the base on $\sim$29\% of
-specifics. Every alternative correction we tried fell below the base
+Broad-only prompting put 157 book descriptions under Religious unanimously across all three
+models, which the full taxonomy largely reversed; one model alone disagreed with the base on
+$\sim$29\% of specifics. Every alternative correction we tried fell below the base
 (Appendix~\ref{app:negative}).
 
 \paragraph{Qualitative prediction audit.} Three patterns dominate: cross-family topic leaks,
@@ -599,8 +600,9 @@ an accuracy gain. The dev contrast in \S\ref{sec:dev} is the gold-anchored count
 
 \section{Attractor Drain}
 \label{app:drain}
-The drain is deterministic: it fires when the base label is an attractor class and the
-chain-of-thought pass names a different sibling inside the same broad family
+Relative to the base, the final system changes 459 broad and 2{,}890 specific labels (10.3\% of
+instances). The drain is deterministic: it fires when the base label is an attractor class and
+the chain-of-thought pass names a different sibling inside the same broad family
 (Table~\ref{tab:drain}). No score threshold or entropy criterion is used, and
 broad is held fixed by construction.
 
