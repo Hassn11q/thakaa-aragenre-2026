@@ -9,7 +9,7 @@
 % omitted: they are pdfLaTeX-only and conflict with fontspec. Page geometry, margins and
 % font size are unchanged (A4, 595.28 x 841.89 pt, 11pt), as set by acl.sty.
 \documentclass[11pt]{article}
-\usepackage{acl}   % final (non-anonymous): system description papers are not anonymous
+\usepackage[final]{acl}   % non-anonymous: system description papers are not anonymous
 \usepackage{times}
 \usepackage{latexsym}
 \usepackage{booktabs}
@@ -41,8 +41,7 @@ Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification}
 
 \author{
   Hassan Alqaeri \quad Meshal Alamr \quad Abdullah Aldahlawi \\
-  Thakaa, Advanced Company for Information Technology \\
-  Riyadh, Saudi Arabia \\
+  Thakaa Advanced Company for Information Technology, Riyadh, Saudi Arabia \\
   \texttt{\{h.alqaeril, m.alamr, aldahlawi\}@thakaait.net}
 }
 
@@ -354,37 +353,27 @@ label to move an error \emph{to}. Deriving the move directions and the attractor
 prediction statistics rather than from reading outputs, and finding written correlates for spoken
 dialect---our clearest ceiling---are the next steps.
 
-\section*{Acknowledgements}
-We thank the AraGenre~2026 organisers for designing and running the shared task, for the
-released taxonomy and definitions, and for their prompt support throughout the evaluation
-phase. We thank the anonymous reviewers for their comments. We also thank the maintainers of
-the open models and libraries our pipeline builds on. Our code, cached model outputs and submission builder are available at
-\url{https://github.com/Hassn11q/thakaa-aragenre-2026}.
-
 \section*{Limitations}
-Every hidden-test \emph{score} we report is an official evaluation-phase submission
-(Appendix~\ref{app:subs}); we made no submission after the deadline. Two kinds of number are
-not: the instruction-only arm of the three-arm ablation (\S\ref{sec:system}) was run after the
-phase closed, so that comparison is post hoc, and the descriptive tables in
-Appendices~\ref{app:errors}, \ref{app:trap}, \ref{app:drain} and~\ref{app:subs} are local
-analyses of submitted outputs rather than scored runs.
 
-\paragraph{Validation.} The hidden test has no released gold and the development set is
-near-degenerate, so components were selected on the public leaderboard and by manual reading.
-Our reported progression therefore doubles as the selection signal, which risks fitting the
-test distribution, and no hidden-test gain carries an interval; those gains should be read as
+\textbf{What is and is not a score.} Every hidden-test \emph{score} we report is an official
+evaluation-phase submission (Appendix~\ref{app:subs}); we made no submission after the deadline.
+The instruction-only arm of the three-arm ablation (\S\ref{sec:system}) was run after the phase
+closed, so that comparison is post hoc, and the descriptive tables in
+Appendices~\ref{app:errors}, \ref{app:trap}, \ref{app:drain} and~\ref{app:subs} are local
+analyses of submitted outputs rather than scored runs. \textbf{Validation.} The hidden test has
+no released gold and the development set is near-degenerate, so components were selected on the
+public leaderboard and by manual reading; our reported progression therefore doubles as the
+selection signal, which risks fitting the test distribution. Because blind labels are
+unreleased, no hidden-test gain carries a confidence interval, and those gains should be read as
 leaderboard-measured rather than statistically certified. The one component testable against
 gold is the drain, where a paired bootstrap on dev puts its gain above zero (95\% CI
-$[+0.010, +0.082]$).
-
-\paragraph{An untested comparison.} We ran GPT-5.6 over the full test set but never submitted
-its predictions as a system, so the claim that a cheap base judge with conservative correction
-beats direct full-taxonomy prediction is untested; the $\sim$29\% disagreement rate is our
-only evidence that one model is too noisy to act on.
-
-\paragraph{Cost and ceilings.} Consensus cost scales with test size. Song-dialect distinctions
-remain near the noise floor because the distinguishing features are phonetic and largely
-absent from written lyrics.
+$[+0.010, +0.082]$). \textbf{An untested comparison.} We ran GPT-5.6 over the full test set but
+never submitted its predictions as a system, so the claim that a cheap base judge with
+conservative correction beats direct full-taxonomy prediction is untested; the $\sim$29\%
+disagreement rate is our only evidence that one model is too noisy to act on.
+\textbf{Cost and ceilings.} Consensus cost scales with test size, and song-dialect distinctions
+remain near the noise floor because the distinguishing features are phonetic and largely absent
+from written lyrics.
 
 \section*{Ethics Statement}
 This work uses only the publicly released AraGenre data and collects nothing new; any
@@ -413,6 +402,13 @@ already-public benchmark data, but the same pipeline should not be applied to pr
 sensitive text without review. Reliance on hosted models whose availability, cost and
 behaviour may change limits equitable reproducibility; the base retriever-plus-open-judge
 pipeline is provided as the self-hostable alternative.
+
+\section*{Acknowledgments}
+We thank the AraGenre~2026 organisers for designing and running the shared task, for the
+released taxonomy and definitions, and for their prompt support throughout the evaluation
+phase. We thank the anonymous reviewers for their comments. We also thank the maintainers of
+the open models and libraries our pipeline builds on. Our code, cached model outputs and submission builder are available at
+\url{https://github.com/Hassn11q/thakaa-aragenre-2026}.
 
 \bibliography{aragenre}
 

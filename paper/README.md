@@ -6,7 +6,8 @@ Source for the ArabicNLP 2026 system description paper of the 1st-place AraGenre
 ## Build
 
 ```bash
-./build.sh          # needs tectonic (or XeLaTeX) and pdftotext from poppler
+make                # or: ./build.sh   -- uses tectonic if available, else XeLaTeX
+make clean          # remove generated LaTeX files
 ```
 
 Produces `aragenre_thaka.pdf` and checks that the main body fits the 4-page limit.
@@ -16,7 +17,7 @@ Produces `aragenre_thaka.pdf` and checks that the main body fits the 4-page limi
 | File | Purpose |
 |---|---|
 | `aragenre_thaka.tex` | paper source (ACL format, XeLaTeX for Arabic examples) |
-| `aragenre.bib` | bibliography (33 references) |
+| `aragenre.bib` | bibliography (34 references) |
 | `acl.sty`, `acl_natbib.bst` | official ACL style, unmodified |
 | `aragenre_thaka.pdf` | compiled paper |
 
