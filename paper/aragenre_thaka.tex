@@ -169,7 +169,7 @@ tier's 74 classes make Macro~F1 highly sensitive to rare-class recall.
 \draw[ar] (basep)--(cons); \draw[ar] (cons)--(drain); \draw[ar] (drain)--(finalp);
 \begin{scope}[on background layer]
   \node[draw,dashed,rounded corners,fit=(text)(embed)(judge)(rules)(basep),
-        label={[anchor=south east]north east:{\scriptsize Base (no parameter updates)}}] {};
+        label={[anchor=south east]north east:{\scriptsize Base: Gemma-4-31B judge}}] {};
   \node[draw,dashed,rounded corners,fit=(cons)(drain)(finalp),
         label={[anchor=south east]north east:{\scriptsize Correction}}] {};
 \end{scope}
@@ -637,7 +637,7 @@ both scored below the base (Appendix~\ref{app:negative}).
 
 \section{Hyperparameters and Prompts}
 \label{app:hparams}
-Retriever: Qwen3-Embedding-8B loaded in 4-bit NF4 with fp16 compute (the configuration the
+Retriever: Qwen3-Embedding-8B loaded in 4-bit NF4 with double quantisation and fp16 compute (the configuration the
 submitted run used; only the cosine ranking is consumed and NF4 preserves embedding
 direction), 4096-dim, L2-normalised, \texttt{max\_seq\_length} 512, the top 20 specific genres
 cached per text; the judge scores every sibling in the four small families (Creative 7,
