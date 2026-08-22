@@ -64,8 +64,8 @@ stage lifts Broad Macro~F1 from 0.879 to 0.892, largely by suppressing a \emph{t
 which the genre of the subject a text discusses displaces the genre the text itself
 instantiates; a post-evaluation ablation attributes the
 suppression to an explicit type-versus-topic instruction ($394\rightarrow233$ trapped calls) and
-to the taxonomy itself ($233\rightarrow119$). A final attractor drain then carries the system to
-0.7352.
+to the taxonomy itself ($233\rightarrow119$). Within-family refinements and a final attractor
+drain carry the system to 0.7352.
 \end{abstract}
 
 \section{Introduction}
@@ -200,8 +200,7 @@ openings $\rightarrow$ \texttt{hadith}; hand-screened samples showed no false po
 impression rather than a precision estimate; emoji/hashtag short posts $\rightarrow$
 Interactive subtypes). Appended to each definition the judge also sees a contrastive
 discriminator, one per test genre: a single Arabic line naming the surface or content signal
-that separates that genre from its family siblings (dialect phonology, mushaf orthography,
-isn\=ad, book-blurb phrasing, job-domain keywords). All 74 were written from the released
+that separates that genre from its family siblings. All 74 were written from the released
 English definitions and Arabic linguistic knowledge, without reference to any labelled data,
 and ship in \texttt{src/discriminators.py}; hyperparameters are in
 Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores 0.7139.
@@ -365,7 +364,9 @@ gold is the drain, where a paired bootstrap on dev puts its gain above zero
 (\S\ref{sec:dev}). \textbf{Unmeasured components.} We never ran the judge with and without the 74 discriminators
 and per-family cue lists, so their contribution is unmeasured; they were written from the
 released definitions and Arabic linguistic knowledge, but we cannot separate their effect from
-the rest of the prompt. \textbf{Partly transductive.} Two design choices were derived by reading our own predictions
+the rest of the prompt. \textbf{Partly transductive.} The base judge's marginal correction subtracts a per-genre mean
+score computed over the whole test set (Appendix~\ref{app:calib}), so it cannot label a
+document in isolation. Two further design choices were derived by reading our own predictions
 over the blind inputs rather than from held-out gold: the five attractor classes
 (\S\ref{sec:system}) and the seven gated broad-move directions (Appendix~\ref{app:subs}). No
 hidden label was inspected, and no prediction was edited by hand---both choices enter the
@@ -629,7 +630,9 @@ $s'(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre 
 received over the whole test set and $\alpha{=}0.5$. It damps genres the judge rates generously
 everywhere, which is what leaves rare siblings seldom predicted. We started from $\alpha{=}0.75$, chosen on the
 released training labels; it over-flattened once the label space grew from 7 to 74 classes.
-The correction is applied before the argmax and never changes the broad family. Two
+The correction is applied before the argmax and never changes the broad family. Because
+$\bar{s}(y)$ is a batch statistic, this stage is transductive: a document's label depends on the
+set it is scored with. Two
 alternatives we tried instead of it, uniform-prior calibration and entropic optimal transport,
 both scored below the base (Appendix~\ref{app:negative}).
 
