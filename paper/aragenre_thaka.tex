@@ -50,22 +50,20 @@ Full-Taxonomy Agreement-Gated Correction for Hierarchical Arabic Genre Classific
 
 \begin{abstract}
 We report the first-place system in AraGenre~2026 (0.7352 Hierarchical Macro~F1, 18 teams). The
-task asks for one of 6 broad and one of 74 fine-grained specific genres for each of 27{,}972
-hidden-test Arabic segments, with every genre given only as an English prose definition and the
-specific-label inventory \emph{disjoint} from the released training data. Our pipeline is
-free of parameter updates but not of task-specific effort: the judge prompt carries 74
-hand-written per-genre cues, and components were selected on the public leaderboard.
-A family-restricted, definition-guided LLM judge scores candidate genres setwise under a
-hierarchically constrained decoding scheme, reaching 0.7139. The scoreboard showed this base
-already led on Specific Macro~F1 but trailed on Broad Macro~F1, so we add a correction stage: two
-instruction models re-predict the specific genre, each shown the \emph{entire} 74-definition
-taxonomy, and a label is edited only where both agree against the base. This agreement-gated
-stage lifts Broad Macro~F1 from 0.879 to 0.892, largely by suppressing a \emph{topic trap}, in
-which the genre of the subject a text discusses displaces the genre the text itself
-instantiates. In a post-evaluation audit of instances the base labelled book descriptions,
-Religious calls fall $394\rightarrow233$ once the prompt states the type-versus-topic
-convention, and to 119 once it also shows the full taxonomy. Within-family refinements and a final attractor
-drain carry the system to 0.7352.
+task assigns each of 27{,}972 hidden-test Arabic segments one of 6 broad and one of 74 specific
+genres, given only as English prose definitions, with the specific-label inventory
+\emph{disjoint} from training. Our pipeline updates no model parameters but is not free of
+task-specific effort: the judge prompt carries 74 hand-written cues, and components were
+selected on the public leaderboard. A family-restricted, definition-guided
+LLM judge scores candidate genres setwise under a hierarchically constrained decoding scheme,
+reaching 0.7139. That base led on Specific Macro~F1 but trailed on Broad Macro~F1, so we add a
+correction stage: two instruction models re-predict the specific genre, each shown the
+\emph{entire} 74-definition taxonomy, and a label is edited only where both agree against the
+base. This lifts Broad Macro~F1 to 0.892, largely by suppressing a \emph{topic trap} in which
+the subject a text discusses displaces the genre it instantiates. In a post-evaluation audit of
+instances the base labelled book descriptions, Religious calls fall $394\rightarrow233$ once the
+prompt states the type-versus-topic convention, and to 119 once it also shows the full taxonomy.
+Refinements and an attractor drain reach 0.7352.
 \end{abstract}
 
 \section{Introduction}
@@ -229,9 +227,10 @@ summarising an Islamic work \emph{performs} the function of a book description, 
 files it under Informative while every broad-only verifier answers Religious. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so a
 post-evaluation three-arm ablation over the same 1{,}403 instances separates the two (one model,
 GPT-5.6, identical pool): 394 are called Religious with neither, 233 with the instruction alone
-($-41\%$) and 119 with the full taxonomy ($-49\%$). The two are not interchangeable: the
-instruction lowers Religious calls only on the book descriptions and raises them elsewhere,
-whereas the taxonomy lowers them on every subset of the pool (Table~\ref{tab:arms}). Base-family agreement rises in five of the six families
+($-41\%$) and 119 with the full taxonomy ($-49\%$). The two are not interchangeable: the instruction
+lowers Religious calls on the book descriptions but raises them on the rest of the pool, whereas
+the full taxonomy lowers them on both while raising them on base-Religious instances, widening
+the separation from 21 to 41 percentage points (Table~\ref{tab:arms}). Base-family agreement rises in five of the six families
 (Appendix~\ref{app:trap}); Appendix~\ref{app:errors} gives a worked example.
 
 \paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
@@ -262,7 +261,8 @@ leaderboard feedback and from reading test inputs and our own outputs. An input 
 wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted system pairs it with
 \texttt{broad\_genre} = Informative and \texttt{specific\_genre} = \texttt{drivers\_and\_}
 \texttt{delivery\_jobs}.
-\paragraph{Preprocessing.} None. Normalisation erases the two orthographic signals that
+\paragraph{Preprocessing.} We apply no text normalisation; retriever inputs are capped at 512
+tokens and verifier inputs at 1{,}500 characters. Normalisation erases the two orthographic signals that
 separate whole families here: heavy diacritisation marks 77\% of the texts we label
 \texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
 against under 1\% elsewhere (Appendix~\ref{app:subs}).
@@ -402,7 +402,7 @@ the base retriever-plus-open-judge pipeline is the self-hostable alternative.
 \section*{Acknowledgments}
 We thank the AraGenre~2026 organisers for designing and running the shared task, for the
 released taxonomy and definitions, and for their prompt support throughout the evaluation
-phase. We thank the anonymous reviewers for their comments. We also thank the maintainers of
+phase. We also thank the maintainers of
 the open models and libraries our pipeline builds on.
 
 \bibliography{aragenre}
@@ -543,7 +543,9 @@ the instances the base already reads as Religious and less often on every other 
 separation between the two widens monotonically. Second, the instruction and the taxonomy are not
 interchangeable. The instruction pays off only on the book descriptions, where the competing label
 (\texttt{*\_book\_description}) is the trap's target; on the rest of the pool it over-fires,
-raising Religious calls by a quarter. Only the full taxonomy lowers them on every subset at once. We read
+raising Religious calls by a quarter. Only the full-taxonomy arm lowers them on the book
+descriptions and the rest of the pool while raising them on base-Religious instances, which is
+what widens the separation. We read
 this as the instruction supplying a convention the model cannot act on until the taxonomy shows it
 a label that satisfies the convention. The caveat of Table~\ref{tab:trap} applies here too: the
 row labels come from the base system, so these are agreement counts, not accuracy.
