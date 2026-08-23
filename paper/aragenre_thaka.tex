@@ -21,6 +21,12 @@
 \usepackage{xurl}   % allow long URLs to break; ACL style files are untouched
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc}
+\hypersetup{pdftitle={Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Taxonomy
+Agreement-Gated Correction for Hierarchical Arabic Genre Classification},
+pdfauthor={Hassan Alqaeri, Meshal Alamr, Abdullah Aldahlawi},
+pdfsubject={AraGenre 2026 Shared Task, ArabicNLP 2026},
+pdfkeywords={Arabic genre classification, hierarchical text classification, unseen label spaces,
+definition-guided prompting, LLM-as-a-judge, retrieval-augmented classification}}
 
 % ---- Arabic support (XeLaTeX/LuaLaTeX) ----
 \usepackage{fontspec}
@@ -93,7 +99,7 @@ consistent with uneven performance across broad classes, so correction must be t
 three-arm ablation splitting the topic trap between an explicit type-vs-topic instruction and a
 visible label to move the error onto.
 \item An attractor-drain step targeting the macro-F1 failure mode of heavily predicting a few
-generic classes; its only gold-verified estimate is on dev.
+generic classes; its only gold-scored estimate is on dev, where it was also tuned.
 \item Empirical validation on the hidden test: 0.7352 Hierarchical Macro~F1, ranked 1st of 18
 teams, with the major system configurations scored as their own submissions.
 \end{enumerate}
@@ -172,9 +178,9 @@ are counted incorrect, and Informative dominates our predictions ($\sim$50\%).
         label={[anchor=south east]north east:{\scriptsize Correction}}] {};
 \end{scope}
 \end{tikzpicture}}
-\caption{System overview. The base judge yields 0.7139; an agreement-gated correction in which
-each verifier sees the \emph{entire} 74-definition taxonomy, then a within-family attractor
-drain, reach 0.7352 (rank~1).}
+\caption{System overview. The base judge yields 0.7139. An agreement-gated correction, in which
+each verifier sees the \emph{entire} 74-definition taxonomy, is followed by a within-family
+attractor drain, reaching 0.7352 (rank~1).}
 \label{fig:arch}
 \end{figure}
 
@@ -257,8 +263,9 @@ guard (Appendix~\ref{app:subs}). On the base alone it moves 554 instances
 \paragraph{Data splits.} We update no model parameters, and each configuration predicts
 automatically once fixed, but the configurations were adapted between submissions from
 leaderboard feedback and from reading test inputs and our own outputs. An input is \texttt{\{"id","text"\}} with Arabic text such as
-\ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486, ``bus driver
-wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted system pairs it with
+\ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486,
+\emph{ma\d{t}l\=ub s\=a'iq b\=a\d{s} 24 r\=akib f\=i sharika f\=i Dubayy Jabal `Al\=i}, ``bus
+driver wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted system pairs it with
 \texttt{broad\_genre} = Informative and \texttt{specific\_genre} = \texttt{drivers\_and\_}
 \texttt{delivery\_jobs}.
 \paragraph{Preprocessing.} We apply no text normalisation; retriever inputs are capped at 512
@@ -325,11 +332,11 @@ together worth $+.020$ Specific Macro~F1.}
 \subsection{Development-set results and component transfer}
 \label{sec:dev}
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from what
-does not. The drain transfers: no class list is carried over, and the two dev classes it fires
-on are the two most-predicted there, the same two under both judges, so no gold and no
-particular base is needed to find them. It moves five labels for $+0.042$ (paired bootstrap, 10k resamples: 95\% CI $[+0.010, +0.082]$), but four of
-the five are a single confusion, so that interval spans two error types rather than five, and
-Table~\ref{tab:ablation} scores the drain only on the GPT-5.6 judge. The correction stage does not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero
+does not. No class list is carried over, and the two dev classes the drain fires on are the two
+most-predicted there, the same two under both judges, so no gold and no particular base is
+needed to find them. On dev it moves five labels for $+0.042$ (95\% CI $[+0.010, +0.082]$),
+but four are a single confusion and the component was tuned on these same items, so this is
+descriptive, not held-out, evidence. The correction stage does not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it repairs has zero
 instances, and both corrections that fire are wrong. Residual dev disagreements stem from a
 convention clash between splits (Appendix~\ref{app:convention}).
 
@@ -485,28 +492,31 @@ a single CUDA GPU (embeddings) plus a remote vLLM endpoint (judge).
 \section{Annotation-Convention Divergence Between Splits}
 \label{app:convention}
 Five of the seven residual dev errors are texts that analyse religion from the outside, e.g.
-\ar{تشير بعض الدراسات إلى أن أساليب الوعظ تختلف بين المجتمعات} (``some studies indicate that
-preaching styles differ between societies''). Our system labels these \texttt{Analytical
+\ar{تشير بعض الدراسات إلى أن أساليب الوعظ تختلف بين المجتمعات}
+(\emph{tush\=iru ba`\d{d}u al-dir\=as\=ati il\=a anna as\=al\=iba al-wa`\d{z}i takhtalifu bayna
+al-mujtama`\=at}, ``some studies indicate that preaching styles differ between societies''). Our system labels these \texttt{Analytical
 Reports} (Informative); the dev gold label is \texttt{Religious Commentary} (Religious).
 
-This is the \emph{inverse} of the convention in the hidden test, where
+The released test taxonomy points the other way:
 \texttt{islamic\_book\_description} (``texts summarising Islamic or religious books'') is
 Informative and our correction stage moves such predictions out of Religious, consistently with
 the released test definition. The examples suggest different boundary choices across the
 disjoint dev and test taxonomies, although the differing label inventories prevent a direct
-annotation-consistency comparison. A system following the test convention is therefore at a
-disadvantage on dev, which bounds how far dev accuracy can be pushed without split-specific
-rules. It also supports our central claim: the convention is carried by the
+annotation-consistency comparison. A system following the released test taxonomy is therefore at a disadvantage on these dev
+examples, an observed tradeoff rather than a formal bound. It also supports our central claim: the convention is carried by the
 definitions, which is why supplying the full taxonomy, rather than the broad labels alone,
 changes model behaviour so sharply.
 \section{Prediction Audit Examples}
 \label{app:errors}
 Three recurring prediction patterns appear in our audit. (i)~\emph{Cross-family topic leaks}: a description \emph{of} a
-religious book (\ar{يهدف هذا الكتاب إلى قراءة سيرة الرسول}, id 10041) is
+religious book (\ar{يهدف هذا الكتاب إلى قراءة سيرة الرسول}, \emph{yahdifu h\=adh\=a al-kit\=abu
+il\=a qir\=a'ati s\=irati al-ras\=ul}, ``this book aims at a reading of the Prophet's
+biography'', id 10041) is
 \texttt{islamic\_book\_description} (Informative), which both our base and final systems label
 that way, consistent with the released definition, but which all three verifiers call Religious
 under the broad-only prompt; scripture leaks the other way
-(\ar{هؤلاء امراء بني عيسو}, Genesis~36, id 10798), where the base says
+(\ar{هؤلاء امراء بني عيسو}, \emph{h\=a'ul\=a'i umar\=a'u ban\=i `\=Is\=u}, ``these are the
+chiefs of the sons of Esau'', Genesis~36, id 10798), where the base says
 \texttt{history\_encyclopedia} and consensus changes it to \texttt{bible}. (ii)~\emph{Heavy attractor prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
 (iii)~\emph{Low cue coverage}: for each of the five song-lyric classes, 87--99\% of the texts we
 assign to it carry no marker from our cue inventory
@@ -518,8 +528,8 @@ cues for these distinctions, not that no written signal exists.
 \label{app:negative}
 A \emph{direct} six-way broad classifier scored 0.6206; in our submitted configurations this
 fell below deriving broad from the specific prediction, though one prompt configuration cannot
-settle the comparison in general. scoring all 74 candidates without
-retrieval pruning fell to 0.6517. For correction, plain self-consistency (0.7134), entropic optimal transport
+settle the comparison in general. Scoring all 74 candidates without retrieval pruning fell to
+0.6517. For correction, plain self-consistency (0.7134), entropic optimal transport
 (0.7115), uniform-prior calibration (0.7124) and an unrestricted chain-of-thought pass (0.7131)
 all regressed below the 0.7139 base, whereas full-context consensus improved it. Cross-lingual rerankers failed~\citep{btzsc2026}, regex rules added nothing the judge lacked, and
 the off-the-shelf dialect classifiers we tried did not expose the Iraqi/Sudanese
@@ -654,8 +664,8 @@ both scored below the base (Appendix~\ref{app:negative}).
 \section{Hyperparameters and Prompts}
 \label{app:hparams}
 Retriever: Qwen3-Embedding-8B loaded in 4-bit NF4 with double quantisation and fp16 compute (the configuration the
-submitted run used; only the cosine ranking is consumed and NF4 preserves embedding
-direction), 4096-dim, L2-normalised, \texttt{max\_seq\_length} 512, the top 20 specific genres
+submitted run used); only the cosine ranking is consumed, and we did not measure the effect of
+NF4 quantisation on retrieval rankings, 4096-dim, L2-normalised, \texttt{max\_seq\_length} 512, the top 20 specific genres
 cached per text; the judge scores every sibling in the four small families (Creative 7,
 Religious 6, Interactive 4, Legal 3) and the top 6 retrieved in-family candidates in the two
 large ones.
@@ -738,7 +748,7 @@ significance tests.
 
 \paragraph{Two readings this record supports.} The 0.6881 row isolates the surface rules on top
 of the 0.6882 row: they rewrite 32 labels (23 \texttt{quran}, 9 \texttt{hadith}) and leave the
-score at 0.6881 against 0.6882. The rules are precise but score-neutral at that point, so the
+score at 0.6881 against 0.6882. The rules had an approximately score-neutral effect in this configuration, so the
 0.6882$\rightarrow$0.7139 gain belongs to the judge and calibration changes, not to them.
 They were kept for a different job: in the final pipeline they fire on 1{,}087 instances and
 agree with the base label on every one, so their whole net effect is to restore 75 labels that
@@ -754,7 +764,8 @@ would cross families, 460 fall in an author-screened direction and are applied:
 Informative$\rightarrow$Interactive 195, Legal$\rightarrow$Informative 80,
 Creative$\rightarrow$Religious 58, Informative$\rightarrow$Religious 58,
 Creative$\rightarrow$Informative 44, Interactive$\rightarrow$Religious 20,
-Legal$\rightarrow$Interactive 5. The remaining 718 are rejected, the largest groups being
+Legal$\rightarrow$Interactive 5; the final file differs from the base on 459 broad labels, one
+fewer, because the closing surface-rule pass restores one. The remaining 718 are rejected, the largest groups being
 Informative$\rightarrow$Learning (219), Creative$\rightarrow$Interactive (122) and
 Learning$\rightarrow$Informative (99).
 
