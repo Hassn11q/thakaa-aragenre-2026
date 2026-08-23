@@ -47,7 +47,7 @@ definition-guided prompting, LLM-as-a-judge, retrieval-augmented classification}
 \newcommand{\ar}[1]{\textarabic{#1}}
 % ------------------------------------------
 
-\title{Thakaa at AraGenre 2026: Definition-Guided LLM Judging with\\
+\title{Thakaa at AraGenre 2026: Definition-Guided LLM Judging with
 Agreement-Gated Correction for Hierarchical Arabic Genre Classification}
 
 \author{
@@ -116,9 +116,9 @@ trap of \S\ref{sec:system}, and classes for which we found no reliable written c
 dialects, textbook levels).
 
 \section{Related Work}
-\paragraph{Arabic and hierarchy-aware HTC.} Arabic pretrained models~\citep{antoun2020arabert,antoun2021aragpt2}
-underpin most classification work on the language, including hierarchical variants~\citep{aragpt2htc2025,arabichtc2026}, and a large
-literature models the label hierarchy explicitly~\citep{zhu2023hitin,cai2023hpt,zeng2025cpm,wang2025hierclassifier,combining2025,htcsurvey2024}.
+\paragraph{Arabic and hierarchy-aware HTC.} Prominent Arabic pretrained models~\citep{antoun2020arabert,antoun2021aragpt2}
+support much work on the language, including hierarchical variants~\citep{aragpt2htc2025,arabichtc2026}, and a large
+literature models the label hierarchy explicitly~\citep{zhu2023hitin,cai2023hpt,zeng2025cpm,wang2025hierclassifier,combining2025,consistencyreg2024,htcsurvey2024}.
 These closed-label supervised setups do not directly address AraGenre's unseen,
 definition-specified label inventory; we instead
 enforce the hierarchy structurally, forcing $\text{broad}=\text{parent}(\text{specific})$.
@@ -131,7 +131,7 @@ judge appends hand-written cues to each (\S\ref{sec:system}). Our two-stage desi
 candidate definitions~\citep{chen2024retrieval} and compares them with an
 LLM~\citep{sun2023rankgpt,zheng2023judging}, with
 Qwen3-Embedding~\citep{qwen3embedding2025} bridging Arabic and English; the chain-of-thought
-pass follows reasoning-based HTC~\citep{jiang2025reasoning,consistencyreg2024}. Ensembles of
+pass follows reasoning-based HTC~\citep{jiang2025reasoning}. Ensembles of
 diverse predictors~\citep{dietterich2000ensemble} appear in LLM form as juries, blending,
 mixtures of agents, debate and
 self-consistency~\citep{verga2024poll,jiang2023llmblender,wang2024moa,du2023debate,wang2023selfconsistency},
@@ -230,8 +230,8 @@ We re-predict the specific genre with two frontier instruction models
 (GPT-5.6~Luna~\citep{gpt56luna2026} and Gemini-3.6~Flash~\citep{gemini36flash2026}),
 \emph{feeding each the entire 74-definition taxonomy} ($\approx$2.9K tokens) grouped by
 broad genre, and asking for the single best specific label. The two-model design is motivated by
-the ensemble argument that combining diverse predictors beats any single
-one~\citep{dietterich2000ensemble}, in its LLM form~\citep{verga2024poll,wang2024moa}, but we
+the ensemble argument that combining diverse predictors can help when their errors are
+complementary~\citep{dietterich2000ensemble}, in its LLM form~\citep{verga2024poll,wang2024moa}, but we
 never submitted either verifier alone, so agreement here is a conservatism device and not
 evidence of an ensemble effect. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the
 diagnostic pool but excluded from the deployed correction on cost grounds.)
