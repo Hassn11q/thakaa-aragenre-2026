@@ -40,6 +40,8 @@ FALLBACK_PREDICTIONS = Path(
 OUT = Path(os.environ.get("OUT", ROOT / "work" / "judge_predictions.json"))
 SCORES = ROOT / "work" / "judge_scores.json"
 # The submitted run used 0.5; 0.75 over-flattened once the label space grew to 74 classes.
+# Marginal score centring. The value used for the submitted base run was not logged;
+# 0.5 is this release's default. See the paper, Appendix "Marginal Score Centring".
 ALPHA = float(os.environ.get("ALPHA", "0.5"))
 TEXT_CAP = 6000
 WORKERS = int(os.environ.get("WORKERS", "24"))

@@ -463,8 +463,7 @@ followed---no class frequencies or priors were to be injected---and contains onl
 and dialect-marker material, no quoted test instances. We did not log whether test texts were
 read while composing the cues, so we cannot rule it out. The five attractor classes, the seven accepted broad-move directions and the
 2{,}635-instance verification subset were chosen by reading our own predictions over the
-released test inputs. The calibration $\alpha{=}0.5$ replaced an initial 0.75 that over-flattened
-the 74-class space (Appendix~\ref{app:calib}), and the broad gate is an earlier scored submission
+released test inputs. The centring constant $\alpha$ was set by hand (Appendix~\ref{app:calib}), and the broad gate is an earlier scored submission
 of ours reused verbatim.
 
 \textbf{Models:} the base retriever is Qwen3-Embedding-8B (4-bit NF4
@@ -479,7 +478,7 @@ no temperature set. We record the parameters we sent; whether a hosted model hon
 and we do not treat \texttt{temperature=0} as guaranteeing deterministic output.
 The retriever caches the top 20 specific genres per text; the judge scores every sibling in the
 four small families and the top 6 retrieved elsewhere, in a single setwise pass, with marginal
-correction $\alpha{=}0.5$.
+correction (Appendix~\ref{app:calib}).
 
 \textbf{Pipeline and code:} the code and cached model outputs described in this appendix will
 be released publicly; paths below are relative to the repository root and name what that release
@@ -688,9 +687,14 @@ applied first and the drain fires on 383 of these instances.}
 This is score centring, not probabilistic calibration: we subtract a scaled per-genre mean from
 each candidate's score,
 $s'(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre $y$
-received over the whole test set and $\alpha{=}0.5$. It damps genres the judge rates generously
-everywhere, which is what leaves rare siblings seldom predicted. We started from $\alpha{=}0.75$, chosen on the
-released training labels; it over-flattened once the label space grew from 7 to 74 classes.
+received over the whole test set. It damps genres the judge rates generously
+everywhere, which is what leaves rare siblings seldom predicted. The released code defaults to
+$\alpha{=}0.5$; every exploratory run whose log survives used $\alpha{=}0.75$, chosen on the released
+training labels. We did not log the value passed to the submitted base run and did not keep its
+score cache, so we cannot recover it: the two prediction files whose caches do survive are both
+reproduced exactly at $\alpha{=}0.75$, and the judge-reproduction figures in
+Appendix~\ref{app:repro} are insensitive to the choice (93.5\%/97.1\% at 0.25, 0.5 and 0.75
+alike). Readers should treat $\alpha$ as unrecorded for the submitted run.
 The correction is applied before the argmax and never changes the broad family. Because
 $\bar{s}(y)$ is a batch statistic, this stage is transductive: a document's label depends on the
 set it is scored with. Two
@@ -708,7 +712,7 @@ large ones.
 
 \paragraph{Judge.} \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
 temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction
-$\alpha{=}0.5$. We did not record the serving precision of the judge endpoint. The retriever precision is given above.
+(Appendix~\ref{app:calib}). We did not record the serving precision of the judge endpoint. The retriever precision is given above.
 
 \paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
 Gemini-3.6~Flash (called with \texttt{temperature=0}, $\leq$400 output tokens), each given the full 74-definition taxonomy

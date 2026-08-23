@@ -15,7 +15,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-ALPHA = 0.5  # the value the submitted run used; see src/judge.py
+ALPHA = 0.5  # src/judge.py's default; the value the submitted run used was not logged.
+# The figures below are insensitive to it: 93.5%/97.1% at 0.25, 0.5 and 0.75 alike.
+# Pass --alpha to check.
 
 
 def main():
