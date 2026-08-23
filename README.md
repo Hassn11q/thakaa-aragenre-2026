@@ -186,7 +186,7 @@ fine-grained output as triage rather than a verdict.
 ## Citing
 
 ```bibtex
-@inproceedings{alqaeri2026aragenre,
+@inproceedings{alqaeri-etal-2026-thakaa,
   title     = {Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Taxonomy
                Agreement-Gated Correction for Hierarchical Arabic Genre Classification},
   author    = {Alqaeri, Hassan and Alamr, Meshal and Aldahlawi, Abdullah},
