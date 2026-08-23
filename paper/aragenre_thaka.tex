@@ -256,11 +256,13 @@ guard (Appendix~\ref{app:subs}). On the base alone it moves 554 instances
 
 \section{Experimental Setup}
 \label{sec:setup}
-\paragraph{Data splits.} We update no parameters; every system is applied unchanged to the hidden test. An input is \texttt{\{"id","text"\}} with Arabic text such as
+\paragraph{Data splits.} We update no model parameters, and each configuration predicts
+automatically once fixed, but the configurations were adapted between submissions from
+leaderboard feedback and from reading test inputs and our own outputs. An input is \texttt{\{"id","text"\}} with Arabic text such as
 \ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486, ``bus driver
-wanted, 24-seater, for a company in Dubai, Jebel Ali''); the required output pairs it with
-\texttt{broad\_genre} = Informative and \texttt{specific\_genre} =
-\texttt{drivers\_and\_} \texttt{delivery\_jobs}.
+wanted, 24-seater, for a company in Dubai, Jebel Ali''); the output pairs it with
+\texttt{broad\_genre} = Informative and \texttt{specific\_genre} = \texttt{drivers\_and\_}
+\texttt{delivery\_jobs}.
 \paragraph{Preprocessing.} None. Normalisation erases the two orthographic signals that
 separate whole families here: heavy diacritisation marks 77\% of the texts we label
 \texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
@@ -268,8 +270,8 @@ against under 1\% elsewhere (Appendix~\ref{app:subs}).
 \paragraph{Tools and metrics.} Qwen3-Embedding-8B under \texttt{sentence-transformers}, vLLM for
 the local judge, vendor SDKs for the verifiers; we report Macro F1, Weighted F1 and Accuracy at
 both tiers (Appendix~\ref{app:hparams}).
-\paragraph{Cost.} The correction makes 36{,}013 calls at a $\approx$3.0K-token prompt each, about
-US\$50; rates and timings are in Appendix~\ref{app:hparams}. The base needs no paid API.
+\paragraph{Cost.} The correction makes 36{,}013 calls at a $\approx$3.0K-token prompt each,
+about US\$50; the base needs no paid API (Appendix~\ref{app:hparams}).
 
 \section{Results}
 
@@ -578,7 +580,10 @@ verifiers to agree, joint Religious assignments fall from 134 under broad-only p
 under the full taxonomy, a 72\% reduction. That comparison is restricted to the 548 book
 descriptions for which the second verifier has a call under both prompts, since the deployed
 full-taxonomy run queries it only on the instances where the first verifier disagrees with the
-base; on all 1{,}403, the first verifier alone falls from 394 to 126.
+base; on all 1{,}403, the first verifier alone falls from 394 to 126. That 126 is the deployed
+all-instance run scored on this subset, not arm~C: arm~C is a separate pool-matched run of the
+same prompt, which is why Table~\ref{tab:arms} reports 119 rather than 126 for the same model,
+prompt and instances.
 All three broad-only runs are included, and \texttt{src/broad\_only\_check.py} reproduces these counts
 and the 157 above without API access.
 
@@ -600,7 +605,9 @@ Religious   &   63 & 41\% & \textbf{48\%} \\
 prompt context. This measures \emph{agreement with the base system}, not accuracy: the hidden
 test has no released gold, so we can show that full context changes verifier behaviour and
 that the change is consistent with the taxonomy's own conventions, but we cannot certify it as
-an accuracy gain. The dev contrast in \S\ref{sec:dev} is the gold-anchored counterpart.}
+an accuracy gain. Dev cannot serve as the gold-anchored counterpart here: it contains no
+book descriptions and no scripture, so the trap this table measures has no instances there
+(\S\ref{sec:dev}).}
 \label{tab:trap}
 \end{table}
 
