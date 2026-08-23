@@ -210,16 +210,15 @@ candidate 0--100 against its definition in one call, and we take the argmax afte
 targeted surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; emoji/hashtag short posts $\rightarrow$ Interactive
-subtypes). Hand-screened samples showed nothing violating the rule semantics, and a spot check
-of the Interactive rule agreed with our reading on roughly 85\%; neither is a precision estimate
-(Appendix~\ref{app:hparams}). Appended to each definition the judge also sees a contrastive
+subtypes). Hand screening found nothing violating the rule semantics and a spot check of the
+Interactive rule agreed on roughly 85\%; neither is a precision estimate. Appended to each definition the judge also sees a contrastive
 discriminator, one per test genre: a single Arabic line naming the signal that separates it from
 its family siblings, written without access to instance-level gold labels
 (Appendix~\ref{app:repro}). On the hidden test this base pipeline scores 0.7139.
 
 \paragraph{Diagnosis from the scoreboard.}
-The leaderboard exposed the structure, visible already two submissions
-earlier: against the system then ahead of us, our base led on Specific Macro~F1
+The leaderboard exposed the structure: against the system then ahead of us, our base led on
+Specific Macro~F1
 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the deficit was
 concentrated in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
 per-class performance; reading our own predictions showed cross-family leakage, with Bible
