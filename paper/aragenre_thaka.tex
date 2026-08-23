@@ -88,8 +88,9 @@ Our contributions are:
 \item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139
 Hierarchical Macro~F1 with no parameter updates.
 \item An account of why one predictor fails the two tiers differently: broad accuracy is the
-family-accuracy of the specific prediction, whereas Broad Macro~F1 is sensitive to
-minority-class false positives, so correction must be tier-specific (\S\ref{sec:system}).
+family-accuracy of the specific prediction, whereas the gap between it and Broad Macro~F1 is
+consistent with uneven performance across broad classes, so correction must be tier-specific
+(\S\ref{sec:system}).
 \item An agreement-gated correction stage in which each verifier sees the full taxonomy, with a
 three-arm ablation splitting the topic trap between an explicit type-vs-topic instruction and a
 visible label to move the error onto.
@@ -196,13 +197,13 @@ call~\citep{sun2023rankgpt}, and we take the argmax after a light marginal corre
 (Appendix~\ref{app:calib}). (iv) A few
 high-precision surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
-openings $\rightarrow$ \texttt{hadith}; hand-screened samples showed no false positives, an
-impression rather than a precision estimate; emoji/hashtag short posts $\rightarrow$
+openings $\rightarrow$ \texttt{hadith}; hand-screened samples showed nothing visibly violating the
+intended rule semantics, which is not a precision estimate; emoji/hashtag short posts $\rightarrow$
 Interactive subtypes). Appended to each definition the judge also sees a contrastive
-discriminator, one per test genre: a single Arabic line naming the surface or content signal
-that separates that genre from its family siblings. All 74 were written from the released
-English definitions and Arabic linguistic knowledge, without reference to any labelled data;
-hyperparameters are in Appendix~\ref{app:hparams}. On the hidden test this base pipeline scores 0.7139.
+discriminator, one per test genre: a single Arabic line naming the signal that separates it from
+its family siblings, written from the released English definitions and Arabic linguistic
+knowledge without reference to labelled data (Appendix~\ref{app:hparams}). On the hidden test
+this base pipeline scores 0.7139.
 
 \paragraph{Diagnosis from the scoreboard.}
 The leaderboard exposed the structure: against the system then ahead of us, our base led on
@@ -225,26 +226,24 @@ diagnostic pool but excluded from the deployed correction on cost grounds.)
 \paragraph{What suppresses the topic trap.} Given only the 6 broad definitions, all three
 verification models classified by subject matter rather than by communicative function: a blurb
 summarising an Islamic work \emph{performs} the function of a book description, so the taxonomy
-files it under Informative while every broad-only verifier answers Religious. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so we ran a
-post-evaluation three-arm ablation over the same 1{,}403 instances to estimate each factor's
-incremental effect (one model, GPT-5.6, identical pool): with broad definitions only and no such instruction, 394 are
-called Religious; adding the instruction alone removes 41\% of those (394$\rightarrow$233); supplying
-the full taxonomy removes a further 49\% (233$\rightarrow$119). The two are not interchangeable: the
+files it under Informative while every broad-only verifier answers Religious. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so a
+post-evaluation three-arm ablation over the same 1{,}403 instances separates the two (one model,
+GPT-5.6, identical pool): 394 are called Religious with neither, 233 with the instruction alone
+($-41\%$) and 119 with the full taxonomy ($-49\%$). The two are not interchangeable: the
 instruction lowers Religious calls only on the book descriptions and raises them elsewhere,
-whereas the taxonomy lowers them on every subset of the pool (Table~\ref{tab:arms}). Scripture filed as an encyclopedia entry (\ar{هؤلاء امراء بني عيسو}, Genesis~36) is relabelled
-\texttt{bible}, and base-family agreement rises in five of the six families (Appendix~\ref{app:trap}).
+whereas the taxonomy lowers them on every subset of the pool (Table~\ref{tab:arms}). Base-family agreement rises in five of the six families
+(Appendix~\ref{app:trap}); Appendix~\ref{app:errors} gives a worked example.
 
 \paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
 second only over the 8{,}041 where the first disagrees with the base, and a correction is
-applied only where both name the same label. Broad-changing moves are gated to seven
-read-verified directions; unreliable ones, such as
-Informative$\rightarrow$Learning, are rejected, 718 moves in all
-(Appendix~\ref{app:subs}). Within-family refinements are applied wherever both models
+applied only where both name the same label. Of the 1{,}178 proposed cross-family moves, 460
+fall in seven author-screened directions and are applied; the other 718, such as
+Informative$\rightarrow$Learning, are rejected (Appendix~\ref{app:subs}). Within-family refinements are applied wherever both models
 agree.
 
 \subsection{Attractor drain: redistributing to low-frequency siblings}
-Specific Macro~F1 averages F1 over all 74 classes, so a class the judge almost never predicts
-contributes near-zero recall. This stage is partly transductive: reading our own hidden-test
+Specific Macro~F1 averages F1 over all 74 classes, so a class that is systematically
+under-predicted has low recall and low class-level F1. This stage is partly transductive: reading our own hidden-test
 predictions during the evaluation phase revealed five \emph{attractor} classes broad enough to
 absorb any text the judge cannot place, leaving their rarer siblings almost unused, so
 redistributing labels from an attractor to those siblings moves the mean far more than accuracy.
@@ -260,7 +259,7 @@ guard (Appendix~\ref{app:subs}). On the base alone it moves 554 instances
 automatically once fixed, but the configurations were adapted between submissions from
 leaderboard feedback and from reading test inputs and our own outputs. An input is \texttt{\{"id","text"\}} with Arabic text such as
 \ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486, ``bus driver
-wanted, 24-seater, for a company in Dubai, Jebel Ali''); the output pairs it with
+wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted system pairs it with
 \texttt{broad\_genre} = Informative and \texttt{specific\_genre} = \texttt{drivers\_and\_}
 \texttt{delivery\_jobs}.
 \paragraph{Preprocessing.} None. Normalisation erases the two orthographic signals that
@@ -342,8 +341,8 @@ $\sim$29\% of specifics. Every alternative correction we tried fell below the ba
 (Appendix~\ref{app:negative}).
 
 \paragraph{Qualitative prediction audit.} Three patterns dominate: cross-family topic leaks,
-heavy attractor prediction, and ceiling classes where 87--99\% of texts we label as song
-lyrics carry no marker from that dialect's cue list (App.~\ref{app:errors}).
+heavy attractor prediction, and song-dialect classes where 87--99\% of the texts we assign to
+them carry no marker from our cue inventory (App.~\ref{app:errors}).
 
 \section{Conclusion}
 A definition-guided judge, an agreement-gated correction and an attractor drain placed 1st of
@@ -378,9 +377,8 @@ choice is validated on gold. \textbf{An untested comparison.} We ran GPT-5.6 ove
 never submitted its predictions as a system, so the claim that a cheap base judge with
 conservative correction beats direct full-taxonomy prediction is untested; the disagreement
 rate reported in \S\ref{sec:analysis} is our only evidence that one model is too noisy to act on.
-\textbf{Cost and ceilings.} Correction cost scales with test size, and song-dialect distinctions
-remain near the noise floor because the distinguishing features are phonetic and largely absent
-from written lyrics.
+\textbf{Cost and ceilings.} Correction cost scales with test size, and our cue inventory has low coverage among texts
+we predict as song dialects, so we lack reliable surface cues for these distinctions.
 
 \section*{Ethics Statement}
 This work uses only the publicly released AraGenre data and collects nothing new; any
@@ -426,8 +424,9 @@ the open models and libraries our pipeline builds on.
 evaluated 1~August 2026, which scored 0.7352 Hierarchical Macro~F1 (Specific Macro 0.5725,
 Weighted 0.6125, Accuracy 0.6189; Broad Macro 0.8979, Weighted 0.9142, Accuracy 0.9138) over
 27{,}972 of 27{,}972 gold instances with no missing prediction, ranking 1st of the 18 teams in
-the organisers' final standings. Every hidden-test number in Table~\ref{tab:ablation} and Appendix~\ref{app:negative} is
-likewise an official scored submission rather than a local estimate; the full record is in
+the organisers' final standings. Every hidden-test \emph{metric score} we report for a system
+configuration comes from an official submitted file rather than a local estimate; the counts and
+agreement tables elsewhere are local analyses of those files; the full record is in
 Appendix~\ref{app:subs}.
 No parameters are updated at any stage; task-specific information enters only through the
 hand-written discriminators, dev-tuned prompts and leaderboard-guided component selection.
@@ -501,11 +500,12 @@ Reports} (Informative); the dev gold label is \texttt{Religious Commentary} (Rel
 
 This is the \emph{inverse} of the convention in the hidden test, where
 \texttt{islamic\_book\_description} (``texts summarising Islamic or religious books'') is
-Informative and our consensus stage is rewarded for moving such texts out of Religious. Both
-conventions are stated in their own definition files, and the two files disagree about where
-writing \emph{about} religion belongs. A system that follows the test convention is therefore
-necessarily penalised on dev, which bounds how far dev accuracy can be pushed without
-split-specific rules. It also supports our central claim: the convention is carried by the
+Informative and our correction stage moves such predictions out of Religious, consistently with
+the released test definition. The examples suggest different boundary choices across the
+disjoint dev and test taxonomies, although the differing label inventories prevent a direct
+annotation-consistency comparison. A system following the test convention is therefore at a
+disadvantage on dev, which bounds how far dev accuracy can be pushed without split-specific
+rules. It also supports our central claim: the convention is carried by the
 definitions, which is why supplying the full taxonomy, rather than the broad labels alone,
 changes model behaviour so sharply.
 \section{Prediction Audit Examples}
@@ -517,15 +517,17 @@ that way, consistent with the released definition, but which all three verifiers
 under the broad-only prompt; scripture leaks the other way
 (\ar{هؤلاء امراء بني عيسو}, Genesis~36, id 10798), where the base says
 \texttt{history\_encyclopedia} and consensus changes it to \texttt{bible}. (ii)~\emph{Heavy attractor prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
-(iii)~\emph{Ceiling classes}: for each of the five song-lyric classes, 87--99\% of the texts we
-assign to it contain no marker from that dialect's cue list
-(\texttt{src/dialect\_markers.py} holds the lists and rebuilds the table;
-the rate is a property of the text, so it is measurable without gold).
+(iii)~\emph{Low cue coverage}: for each of the five song-lyric classes, 87--99\% of the texts we
+assign to it carry no marker from our cue inventory
+(\texttt{src/dialect\_markers.py} holds the lists and rebuilds the table). This measures the
+coverage of our inventory, not an intrinsic ceiling: it shows our system lacks reliable surface
+cues for these distinctions, not that no written signal exists.
 
 \section{Negative Results}
 \label{app:negative}
-A \emph{direct} six-way broad classifier regressed to 0.6206, confirming
-that deriving broad from the specific prediction beats classifying it directly; scoring all 74 candidates without
+A \emph{direct} six-way broad classifier scored 0.6206; in our submitted configurations this
+fell below deriving broad from the specific prediction, though one prompt configuration cannot
+settle the comparison in general. scoring all 74 candidates without
 retrieval pruning fell to 0.6517. For correction, plain self-consistency (0.7134), entropic optimal transport
 (0.7115), uniform-prior calibration (0.7124) and an unrestricted chain-of-thought pass (0.7131)
 all regressed below the 0.7139 base, whereas full-context consensus improved it. Cross-lingual rerankers failed~\citep{btzsc2026}, regex rules added nothing the judge lacked, and
@@ -534,8 +536,10 @@ distinction that NADI-style country-level tasks define~\citep{nadi2021}.
 
 \section{Full-Context vs.\ Broad-Only Prompting}
 \label{app:trap}
-Both consensus models were run over the same verification pool ($n=2{,}635$) once with only the
-6 broad definitions and once with all 74 specific definitions. Because the full-taxonomy prompt
+Both verifiers were run over the same verification pool ($n=2{,}635$) once with only the
+6 broad definitions and once with all 74 specific definitions. That pool was selected during
+the evaluation phase as the instances whose broad label we judged least secure, so it is an
+enriched diagnostic sample: rates measured on it are not representative of all 27{,}972. Because the full-taxonomy prompt
 also carries an explicit type-vs-topic instruction, we added a third arm, broad definitions only
 \emph{plus} that instruction, to separate the two factors. On the 1{,}403 book-description
 instances GPT-5.6 calls 394 of them Religious with neither, 233 with the instruction alone and
@@ -690,9 +694,10 @@ pass over 27{,}972 instances was run at higher concurrency.
 
 \section{Official Submission Record}
 \label{app:subs}
-Every hidden-test number we report is an official evaluation of a submitted file
-(Table~\ref{tab:subs}), so the progression is traceable to scored submissions rather than to
-local approximations.
+Every hidden-test metric score we report for a system configuration comes from an official
+submitted file (Table~\ref{tab:subs}), so the progression is traceable to scored submissions
+rather than to local approximations. Counts such as the arm totals and the agreement tables are
+local analyses of those files, not scored quantities.
 
 \begin{table}[h]
 \centering\footnotesize
@@ -729,11 +734,14 @@ of scored configurations rather than a single controlled sweep.}
 \label{tab:subs}
 \end{table}
 
-\paragraph{The scale of a stage gain.} Nineteen of the 74 specific classes receive fewer than
-200 predictions in the final submission, the smallest 33. Moving a single class's F1 from 0 to 1
-would shift Specific Macro~F1 by 0.0135 and Hierarchical Macro~F1 by 0.0068, so the stage gains
-in Table~\ref{tab:ablation} are on the order of two to three class-level effects, and the margin
-over the second-placed system is about 2.7.
+\paragraph{The scale of a stage gain.} Every specific class carries the same $1/74$ weight in
+Specific Macro~F1 regardless of how often it is predicted, so moving one class's F1 from 0 to 1
+shifts Specific Macro~F1 by 0.0135 and Hierarchical Macro~F1 by 0.0068. Measured against that
+unit the individual stages in Table~\ref{tab:ablation} are small: the correction on the subset
+is worth about 1.25 class-level effects, extending the cross-family moves about 0.47, and the
+within-family refinements with the drain about 1.41. The full base-to-final gain is about 3.1
+and the margin over the second-placed system about 2.7. These are coarse yardsticks, not
+significance tests.
 
 \paragraph{Two readings this record supports.} The 0.6881 row isolates the surface rules on top
 of the 0.6882 row: they rewrite 32 labels (23 \texttt{quran}, 9 \texttt{hadith}) and leave the
@@ -749,7 +757,7 @@ Chain-of-thought helps here only where it is aimed.
 
 \paragraph{Gated broad moves.} Of the 3{,}300 instances where both verifiers agree against the
 base, 2{,}122 stay inside the base family and are applied as refinements. Of the 1{,}178 that
-would cross families, 460 fall in a read-verified direction and are applied:
+would cross families, 460 fall in an author-screened direction and are applied:
 Informative$\rightarrow$Interactive 195, Legal$\rightarrow$Informative 80,
 Creative$\rightarrow$Religious 58, Informative$\rightarrow$Religious 58,
 Creative$\rightarrow$Informative 44, Interactive$\rightarrow$Religious 20,
