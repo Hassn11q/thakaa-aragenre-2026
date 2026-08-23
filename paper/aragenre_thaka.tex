@@ -93,7 +93,7 @@ pushes systems toward
 generalising over communicative function. We placed 1st of 18 teams (Table~\ref{tab:metrics}) on the official ranking metric,
 Hierarchical Macro~F1: the mean of Broad and Specific Macro~F1.
 
-The components are established individually; we combine and analyse them:
+Our contributions are:
 \begin{enumerate}
 \itemsep0em
 \item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139
@@ -454,7 +454,7 @@ figures for our own predictions, not accuracy.
 
 \textbf{Provenance of the hand-built parts.} Nothing below was tuned on held-out gold. The 74
 discriminators and per-family cue lists were written by one author from the released
-definitions and Arabic linguistic knowledge, without reference to labelled data. Their file was created in a
+definitions and Arabic linguistic knowledge, without access to instance-level gold labels. Their file was created in a
 single write on 28~July~2026 and never modified afterwards, so they were composed after the
 hidden-test inputs were released and after our first two scored submissions, but were fixed two
 days before the configuration that uses them was scored and could not have been revised in
@@ -720,9 +720,10 @@ minimum versions rather than exact pins.
 \paragraph{Cost.} The \$50 in \S\ref{sec:setup} is the amount billed for the 36{,}013 calls at
 July~2026 prices; we did not log per-request token usage, so we cannot restate it as a rate.
 
-\paragraph{Truncation and malformed outputs.} The 1{,}500-character verifier cap binds on
-2{,}987 of 27{,}972 instances (10.7\%); no text reaches the retriever's 8{,}000-character
-pre-truncation cap. The first verifier returned an unparsable label on 2 of its 27{,}972 calls
+\paragraph{Truncation and malformed outputs.} The retriever's 512-token cap binds on 3{,}365 of
+27{,}972 instances (12.0\%; median length 127 tokens, 90th percentile 587, maximum 3{,}346,
+measured post hoc with the Qwen3 tokenizer), and the 1{,}500-character verifier cap binds on
+2{,}987 (10.7\%); no text reaches the 8{,}000-character pre-truncation cap. The first verifier returned an unparsable label on 2 of its 27{,}972 calls
 and the second on 33 of its 8{,}041; those instances keep the base label.
 
 \paragraph{Throughput.} A consensus call takes 2.0--2.8\,s. At the released default of 20
