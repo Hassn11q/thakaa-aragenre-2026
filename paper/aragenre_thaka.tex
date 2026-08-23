@@ -717,8 +717,9 @@ both scored below the base (Appendix~\ref{app:negative}).
 \section{Hyperparameters and Prompts}
 \label{app:hparams}
 Retriever: \texttt{Qwen/\allowbreak Qwen3-\allowbreak Embedding-\allowbreak 8B} loaded in 4-bit
-NF4 with double quantisation and fp16 compute, the configuration in the script that wrote the
-cached candidate lists the submitted run consumed; only the cosine ranking is consumed, and we did not measure the effect of
+NF4 with double quantisation and fp16 compute. These are not reconstructed: the script that wrote
+the cached candidate lists the submitted run consumed will ship unedited as
+\texttt{src/retrieve\_\allowbreak submitted.py}, and sets them unconditionally; only the cosine ranking is consumed, and we did not measure the effect of
 NF4 quantisation on retrieval rankings, 4096-dim, L2-normalised, \texttt{max\_seq\_length} 512, the
 top 20 specific genres cached per text. Only the 74 \emph{specific} definitions are embedded, with
 no prefix; the broad definitions are not. The Arabic texts alone carry the Qwen3 query
