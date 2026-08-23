@@ -713,25 +713,27 @@ cached per text; the judge scores every sibling in the four small families (Crea
 Religious 6, Interactive 4, Legal 3) and the top 6 retrieved in-family candidates in the two
 large ones.
 
-\paragraph{Judge.} \texttt{google/gemma-4-31B-it} via vLLM, served from a local copy that the
-endpoint reports as \texttt{/gemma-4-31b} with \texttt{max\_model\_len} 32{,}768; setwise
+\paragraph{Judge.} A local copy of \texttt{google/\allowbreak gemma-\allowbreak 4-\allowbreak
+31B-\allowbreak it}, served via vLLM and reported by the endpoint as
+\texttt{/gemma-\allowbreak 4-\allowbreak 31b}, with a context window of 32{,}768 tokens; setwise
 0--100 scoring in a single pass,
 temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction
 $\alpha{=}0.75$. We did not record the serving precision of the judge endpoint. The retriever precision is given above.
 
-\paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{gpt-5.6-luna};
-\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and Gemini-3.6~Flash
-(\texttt{gemini-3.6-flash}; \texttt{temperature=0}, $\leq$400 output tokens), each given the full 74-definition taxonomy
+\paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{gpt-\allowbreak 5.6-\allowbreak luna};
+\texttt{reasoning\_\allowbreak effort=\allowbreak low}, $\leq$500 completion tokens) and
+Gemini-3.6~Flash (\texttt{gemini-\allowbreak 3.6-\allowbreak flash};
+\texttt{temperature=\allowbreak 0}, $\leq$400 output tokens), each given the full 74-definition taxonomy
 (2{,}884 tokens under \texttt{o200k\_base}, giving a mean prompt of 3{,}034 tokens and a maximum
 of 5{,}185) in the system prompt, and the text truncated to 1500 characters. The judge prompt asks for a
 JSON array of integer scores over the candidate definitions; the consensus prompt asks for a single exact
 \texttt{specific\_genre} identifier and states that a factual description \emph{of} a book is a
 \texttt{*\_book\_description}, not the book's subject genre.
 
-\paragraph{Software.} \texttt{torch}, \texttt{transformers},
-\texttt{sentence-transformers} and \texttt{bitsandbytes} for the retriever, vLLM for the local
-judge, and the \texttt{openai} and \texttt{google-genai} SDKs for the verifiers; the code lists
-minimum versions rather than exact pins.
+\paragraph{Software.} The retriever uses \texttt{torch}, \texttt{trans\-\allowbreak formers},
+\texttt{sentence-\allowbreak transformers} and \texttt{bitsand\-\allowbreak bytes}; the local
+judge runs under vLLM; the verifiers use the \texttt{openai} and \texttt{google-\allowbreak
+genai} SDKs. The code lists minimum versions rather than exact pins.
 
 \paragraph{Cost.} The \$50 in \S\ref{sec:setup} is the amount billed for the 36{,}013 calls at
 July~2026 prices; we did not log per-request token usage, so we cannot restate it as a rate.
