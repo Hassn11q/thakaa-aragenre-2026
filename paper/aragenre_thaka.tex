@@ -377,32 +377,27 @@ test size, and our cue inventory has low coverage among texts we predict as song
 lack reliable surface cues for those distinctions.
 
 \section*{Ethics Statement}
-This work uses only the publicly released AraGenre data and collects nothing new; any
-user-generated text originates from the official benchmark. In line with the shared-task
-rules, all predictions are produced automatically: no submitted label was hand-edited and we
-did not reverse-engineer the hidden evaluation labels. We did read system outputs and the
-corresponding texts to design the automatic rules, and the rule-precision estimates in
-\S\ref{sec:system} come from that inspection; this is author inspection of system outputs, not
-annotation of the evaluation set, and no such judgement enters a submission except through a
-deterministic rule.
+This work uses only the publicly released AraGenre data and collects nothing new. In line with
+the shared-task rules all predictions are produced automatically: no submitted label was
+hand-edited and we did not reverse-engineer the hidden evaluation labels. We did read system
+outputs and their texts to design the automatic rules, but that is inspection of our own
+outputs, not annotation of the evaluation set, and no such judgement enters a submission except
+through a deterministic rule.
 
-The taxonomy spans religiously and culturally sensitive categories (Islamic and Christian
-scripture, dialectal varieties, regional song lyrics), which we treat descriptively as
-text-type labels: a misclassification carries no endorsement and no judgement on the
-authenticity, orthodoxy or quality of a text, and models trained on skewed corpora may
-under-serve lower-resourced dialects. Two misuses would concern us. Dialect is not provenance
--- pointed at ordinary prose, the classifier reads as a guess at where a writer is from, and
-our own measurements show that the written signal is mostly absent. And because the labels
-separate religious from informative text, genre output could be used to route or suppress
-material by register rather than by content. The system assigns text types, it does not assess
-them, and a 0.57 Specific Macro~F1 is not a basis for an automated decision about a document or
-its author without a person in the loop.
+The taxonomy spans religiously and culturally sensitive categories, which we treat descriptively
+as text-type labels: a misclassification carries no judgement on the authenticity, orthodoxy or
+quality of a text, and models trained on skewed corpora may under-serve lower-resourced
+dialects. Two misuses would concern us. Dialect is not provenance: pointed at ordinary prose,
+the classifier reads as a guess at where a writer is from, and we have no evidence it supports
+that use. And because the labels separate religious from informative text, genre output could be
+used to route or suppress material by register rather than by content. The system assigns text
+types, it does not assess them, and a 0.57 Specific Macro~F1 is not a basis for an automated
+decision about a document or its author without a person in the loop.
 
-Our correction stage sends Arabic text to third-party hosted LLM APIs; the inputs are
-already-public benchmark data, but the same pipeline should not be applied to private or
-sensitive text without review. Reliance on hosted models whose availability, cost and
-behaviour may change limits equitable reproducibility; the base retriever-plus-open-judge
-pipeline is provided as the self-hostable alternative.
+Our correction stage sends Arabic text to third-party hosted APIs; the inputs are already-public
+benchmark data, but the same pipeline should not be applied to private text without review.
+Reliance on hosted models whose cost and behaviour may change limits equitable reproducibility;
+the base retriever-plus-open-judge pipeline is the self-hostable alternative.
 
 \section*{Acknowledgments}
 We thank the AraGenre~2026 organisers for designing and running the shared task, for the
