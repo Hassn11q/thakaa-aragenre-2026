@@ -186,9 +186,9 @@ fine-grained output as triage rather than a verdict.
 ## Citing
 
 ```bibtex
-@inproceedings{thakaa-aragenre-2026,
-  title     = {Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Context
-               Multi-Model Consensus for Hierarchical Arabic Genre Classification},
+@inproceedings{alqaeri2026aragenre,
+  title     = {Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Taxonomy
+               Agreement-Gated Correction for Hierarchical Arabic Genre Classification},
   author    = {Alqaeri, Hassan and Alamr, Meshal and Aldahlawi, Abdullah},
   booktitle = {Proceedings of the 4th Arabic Natural Language Processing Conference (ArabicNLP 2026)},
   address   = {Budapest, Hungary},
