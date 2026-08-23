@@ -68,7 +68,7 @@ genres, given only as English prose definitions, with the specific-label invento
 task-specific effort: the judge prompt carries 74 hand-written cues, and components were
 selected on the public leaderboard. A family-restricted, definition-guided
 LLM judge scores candidate genres setwise under a hierarchically constrained decoding scheme,
-reaching 0.7139. That base led on Specific Macro~F1 but trailed on Broad Macro~F1, so we add a
+whose five-step pipeline reaches 0.7139. That base led on Specific Macro~F1 but trailed on Broad Macro~F1, so we add a
 correction stage: two instruction models re-predict the specific genre, each shown the
 \emph{entire} 74-definition taxonomy, and a label is edited only where both agree against the
 base. That system scores 0.892 Broad Macro~F1, alongside fewer \emph{topic-trap} calls, where
@@ -97,7 +97,7 @@ Hierarchical Macro~F1: the mean of Broad and Specific Macro~F1.
 Our contributions are:
 \begin{enumerate}
 \itemsep0em
-\item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139
+\item A hierarchically constrained, definition-guided LLM judge whose five-step base pipeline reaches 0.7139
 Hierarchical Macro~F1 with no parameter updates.
 \item An account of why one predictor fails the two tiers differently: broad accuracy is the
 family-accuracy of the specific prediction, whereas its gap with Broad Macro~F1 is consistent
@@ -106,22 +106,22 @@ with uneven per-class performance, so correction must be tier-specific (\S\ref{s
 three-arm prompt diagnostic separating an explicit type-vs-topic instruction from a visible
 label to move the error onto.
 \item An attractor-drain step targeting the Macro~F1 failure mode of heavily predicting a few
-generic classes; its only gold-scored estimate is on dev, where it was also tuned.
+generic classes; its only approximately isolated gold-scored estimate is on dev, where it was
+also tuned.
 \item Official shared-task evaluation: 0.7352 Hierarchical Macro~F1, ranked 1st of 18 teams,
 with the major system configurations scored as their own submissions.
 \end{enumerate}
 
-\noindent The main challenges were a specific-label inventory disjoint from training, the topic
-trap of \S\ref{sec:system}, and classes for which we found no reliable written cue (song
-dialects, textbook levels).
+\noindent The main challenges were a label inventory disjoint from training, the topic trap of
+\S\ref{sec:system}, and classes with no reliable written cue (song dialects, textbook levels).
 
 \section{Related Work}
 \paragraph{Arabic and hierarchy-aware HTC.} Prominent Arabic pretrained models~\citep{antoun2020arabert,antoun2021aragpt2}
 support much work on the language, including hierarchical variants~\citep{aragpt2htc2025,arabichtc2026}, and a large
 literature models the label hierarchy explicitly~\citep{zhu2023hitin,cai2023hpt,zeng2025cpm,wang2025hierclassifier,combining2025,consistencyreg2025,htcsurvey2024}.
-These closed-label supervised setups do not directly address AraGenre's unseen,
-definition-specified label inventory; we instead
-enforce the hierarchy structurally, forcing $\text{broad}=\text{parent}(\text{specific})$.
+These closed-label supervised setups do not address AraGenre's unseen, definition-specified
+inventory; we enforce the hierarchy structurally, forcing
+$\text{broad}=\text{parent}(\text{specific})$.
 
 \paragraph{Zero-shot HTC, LLM judging, and consensus.} Prior systems reach an unseen label
 space through prompt ensembles~\citep{xia2025hieps}, LLM-built
@@ -131,12 +131,12 @@ judge appends hand-written cues to each (\S\ref{sec:system}). Our two-stage desi
 candidate definitions~\citep{chen2024retrieval} and compares them with an
 LLM~\citep{sun2023rankgpt,zheng2023judging}, with Qwen3-Embedding~\citep{qwen3embedding2025}
 placing Arabic inputs and English definitions in one multilingual space; the chain-of-thought
-pass follows reasoning-based HTC~\citep{jiang2026reasoning}. Ensembles of
-diverse predictors~\citep{dietterich2000ensemble} appear in LLM form as juries, blending,
-mixtures of agents, debate and
+pass follows reasoning-based HTC~\citep{jiang2026reasoning}. Ensembles of diverse
+predictors~\citep{dietterich2000ensemble} appear in LLM form as juries, blending, mixtures of
+agents, debate and
 self-consistency~\citep{verga2024poll,jiang2023llmblender,wang2024moa,du2023debate,wang2023selfconsistency},
-which aggregate free-form text or resample one model; we instead require two models to emit the
-\emph{same} label.
+which aggregate text or resample one model; we require two models to emit the \emph{same}
+label.
 
 \section{Background}
 Each instance is \texttt{\{id, text\}}; systems output one \texttt{broad\_genre} (of 6:
@@ -170,25 +170,26 @@ are counted incorrect, and Informative dominates our predictions ($\sim$50\%).
 \node[io] (text) {Arabic text $\langle$id, text$\rangle$};
 \node[base,below=of text] (embed) {Qwen3-Embedding-8B retriever};
 \node[base,below=of embed] (judge) {Family-restricted \texttt{gemma-4-31b} judge};
-\node[base,below=of judge] (rules) {Marginal correction + surface rules};
-\node[res,below=of rules] (basep) {Base \;\textbf{0.7139}};
+\node[base,below=of judge] (rules) {Score centring + surface rules};
+\node[base,below=of rules] (intr) {Interactive-recall pass};
+\node[res,below=of intr] (basep) {Base pipeline \;\textbf{0.7139}};
 \draw[ar] (text)--(embed); \draw[ar] (embed)--(judge);
-\draw[ar] (judge)--(rules); \draw[ar] (rules)--(basep);
+\draw[ar] (judge)--(rules); \draw[ar] (rules)--(intr); \draw[ar] (intr)--(basep);
 % correction stages
 \node[corr,below=7mm of basep] (cons) {Agreement-gated correction, full taxonomy};
 \node[corr,below=of cons] (drain) {Attractor drain, then surface rules};
 \node[res,below=of drain] (finalp) {Final \;\textbf{0.7352} \;(rank 1)};
 \draw[ar] (basep)--(cons); \draw[ar] (cons)--(drain); \draw[ar] (drain)--(finalp);
 \begin{scope}[on background layer]
-  \node[draw,dashed,rounded corners,fit=(text)(embed)(judge)(rules)(basep),
+  \node[draw,dashed,rounded corners,fit=(text)(embed)(judge)(rules)(intr)(basep),
         label={[anchor=south east]north east:{\footnotesize Base}}] {};
   \node[draw,dashed,rounded corners,fit=(cons)(drain)(finalp),
         label={[anchor=south east]north east:{\footnotesize Correction}}] {};
 \end{scope}
 \end{tikzpicture}}
 \caption{System overview. A Qwen3 retriever gates a broad family and a \texttt{gemma-4-31b}
-judge scores its siblings setwise; rules and an Interactive-recall pass complete the base
-(0.7139). GPT-5.6 and Gemini-3.6, shown all 74 definitions, then change a label only where they
+judge scores its siblings setwise; score centring, surface rules and a binary Interactive-recall
+pass complete the five-step base pipeline (0.7139). GPT-5.6 and Gemini-3.6, shown all 74 definitions, then change a label only where they
 agree, and an attractor drain follows (0.7352, rank~1).}
 \label{fig:arch}
 \end{figure}
@@ -211,36 +212,35 @@ targeted surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; emoji/hashtag short posts $\rightarrow$ Interactive
 subtypes). These rules were assessed by convenience inspection rather than a
-recorded random audit, so we report no precision estimate for them. (v) Interactive stays under-predicted
-after (iv), so a binary pass by the same judge over 9{,}978 short marker-bearing texts reassigns
-1{,}441 to an Interactive subtype (Appendix~\ref{app:repro}); it is in the scored base. Appended to each definition the judge also sees a contrastive
-discriminator, one per test genre: a single Arabic line naming the signal that separates it from
-its family siblings, written without access to instance-level gold labels
-(Appendix~\ref{app:repro}). On the hidden test this base pipeline scores 0.7139.
+recorded random audit, so we report no precision estimate for them. (v) Interactive remained sparsely
+predicted after (iv), which the prediction distribution and leaderboard feedback suggested was an
+imbalance, so a binary pass by the same judge over 9{,}978 short marker-bearing texts reassigns
+1{,}441 of them (Appendix~\ref{app:repro}); it is in the scored base. Each definition also carries a contrastive
+discriminator: one Arabic line naming the signal that separates that genre from its siblings,
+written without instance-level gold (Appendix~\ref{app:repro}). This base pipeline scores 0.7139.
 
 \paragraph{Diagnosis from the scoreboard.}
-The leaderboard exposed the structure: against the system then ahead of us, our base led on
-Specific Macro~F1
-(0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the deficit was
-concentrated in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
-per-class performance; reading our own predictions showed cross-family leakage, with Bible
-passages labelled poetry or encyclopedia entries and news labelled legal.
+Against the system then ahead of us, our base led on Specific Macro~F1 (0.5487 vs.\ 0.5339) but
+trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), concentrating the deficit in the broad tier. Broad
+accuracy (0.9003) exceeded broad macro, indicating uneven per-class performance; our own
+predictions showed cross-family leakage, with Bible passages labelled poetry or encyclopedia
+entries and news labelled legal.
 
 \subsection{Correction: full-taxonomy agreement-gated re-prediction}
 We re-predict the specific genre with two frontier instruction models
 (GPT-5.6~Luna~\citep{gpt56luna2026} and Gemini-3.6~Flash~\citep{gemini36flash2026}),
 \emph{feeding each the entire 74-definition taxonomy} ($\approx$2.9K tokens) grouped by
-broad genre, and asking for the single best specific label. The two-model design is motivated by
-the ensemble argument that combining diverse predictors can help when their errors are
-complementary~\citep{dietterich2000ensemble}, in its LLM form~\citep{verga2024poll,wang2024moa}, but we
-never submitted either verifier alone, so agreement here is a conservatism device and not
-evidence of an ensemble effect. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the
-diagnostic pool but excluded from the deployed correction on cost grounds.)
+broad genre, and asking for the single best specific label. The two-model design follows the
+ensemble argument that diverse predictors help when their errors are
+complementary~\citep{dietterich2000ensemble,verga2024poll,wang2024moa}, but we never submitted
+either verifier alone, so agreement here is a conservatism device, not evidence of an ensemble
+effect. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the diagnostic
+pool only, on cost grounds.)
 
 \paragraph{What moves the topic-trap calls.} Given only the 6 broad definitions, all three
-verification models produced calls consistent with classifying by subject rather than function: a blurb
-summarising an Islamic work \emph{performs} the function of a book description, so the taxonomy
-files it under Informative while every broad-only verifier answers Religious. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so a
+verification models classified by subject rather than function: a blurb summarising an Islamic
+work \emph{performs} the function of a book description, so the taxonomy files it under
+Informative while every broad-only verifier answers Religious. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so a
 post-evaluation three-arm ablation over the same 1{,}403 instances separates the two (one model,
 GPT-5.6, identical pool): 394 are called Religious with neither, 233 with the instruction alone
 ($-41\%$) and 119 with the full taxonomy ($-49\%$). The two are not interchangeable: the instruction
@@ -261,8 +261,9 @@ Specific Macro~F1 averages F1 over all 74 classes, so a class that is systematic
 under-predicted has low recall and low class-level F1. This stage is partly transductive: reading our own hidden-test
 predictions during the evaluation phase revealed five heavily predicted \emph{attractor}
 classes whose rarer siblings were almost unused, so
-redistribution to those siblings is metric-directed: it changes the per-class average far more
-than accuracy, and we cannot show the reassignments are semantically correct. The list comes from
+redistribution to those siblings is metric-directed toward Macro~F1 and is intended to affect the
+per-class average more directly than accuracy; we cannot show the reassignments are semantically
+correct. The list comes from
 that distribution, not from gold. The drain is deterministic: when the base label is an attractor class and a separate
 chain-of-thought re-judging pass (following~\citealp{wei2022cot}) names a different sibling in the same family, the
 sibling replaces it (broad never changes). The surface rules are re-applied afterwards as a guard. It moves 554
@@ -280,7 +281,8 @@ it with \texttt{broad\_genre} = Informative and \texttt{specific\_genre} =
 \texttt{drivers\_and\_}\texttt{delivery\_jobs}.
 \paragraph{Preprocessing.} We apply no text normalisation; retriever inputs are capped at 512
 tokens and verifier inputs at 1{,}500 characters, preserving two orthographic signals: heavy
-diacritisation in 77\% of texts we label \texttt{quran} and 43\% of poetry against 1\% elsewhere,
+diacritisation in 77\% of texts we label \texttt{quran} and 43\% of poetry
+(\texttt{classical\_poetry} and \texttt{msa\_poetry}) against 1\% elsewhere,
 and emoji in 28\% of Interactive texts against under 1\% (Appendix~\ref{app:ortho}).
 \paragraph{Tools and metrics.} Qwen3-Embedding-8B, vLLM for the local judge, vendor SDKs for the
 verifiers; Macro F1, Weighted F1 and Accuracy at both tiers (Appendix~\ref{app:hparams}).
@@ -305,7 +307,7 @@ GPT-5.6 judge + attractor drain$^{\dagger}$ & dev & 0.9358 \\
 Genre-general judge, no retrieval & test & 0.6067 \\
 \quad + embedding retrieval gate & test & 0.6812 \\
 \quad + family-restricted judging & test & 0.6882 \\
-\textbf{\; + judge prompt, score centring, rules} & test & \textbf{0.7139} \\
+\textbf{\; + prompt, centring, rules, Interactive} & test & \textbf{0.7139} \\
 \quad + agreement-gated correction (subset) & test & 0.7224 \\
 \quad + cross-family moves, all instances & test & 0.7256 \\
 \textbf{\; + within-family refinements, drain} & test & \textbf{0.7352} \\
@@ -341,25 +343,27 @@ cross-family moves, within-family refinements and the drain.}
 
 \subsection{Development-set results and component transfer}
 \label{sec:dev}
-Re-running the pipeline on dev (110 examples, official gold) separates what transfers from what
-does not; five of its seven residual errors stem from a convention clash between splits
+Analogous dev configurations (110 examples, official gold) separate what transfers from what does
+not. Dev's six labels are disjoint from the test taxonomy, so the discriminators, cues, rules and
+Interactive subtypes cannot carry over; the judge is re-run against the dev definitions and only
+the drain's mechanism is reused.
+ five of its seven residual errors stem from a convention clash between splits
 (Appendix~\ref{app:convention}). No class list is carried over: the two dev classes the drain
 fires on are the two most-predicted there under either judge, and it moves five labels for
-$+0.042$, four of them a single confusion. It was tuned on these same items, so this is
-descriptive, not held-out, evidence. The correction stage does not transfer: dev has no
+$+0.042$, four of them one confusion; tuned on these same items, this is descriptive, not
+held-out, evidence. The correction stage does not transfer: dev has no
 \texttt{*\_book\_description} and no scripture, so its trap has zero instances and both
 corrections that fire are wrong.
 
 \section{Analysis}
 \label{sec:analysis}
 Broad-only prompting put 157 book descriptions under Religious unanimously across all three
-models, a pattern the full taxonomy largely reverses; one model alone disagreed with the base on
-$\sim$29\% of specifics. Every alternative correction scored below the base
-(Appendix~\ref{app:negative}); Appendix~\ref{app:errors} characterises our prediction audit.
+models, a pattern the full taxonomy reverses; every alternative correction scored below the base
+(Appendix~\ref{app:negative}).
 
 \section{Conclusion}
-A definition-guided judge, agreement-gated correction and attractor drain placed 1st of 18 under
-leaderboard-guided selection.
+A definition-guided judge, agreement-gated correction and attractor drain placed 1st of 18, under
+leaderboard selection.
 
 \section*{Limitations}
 
@@ -379,10 +383,12 @@ components.} We never ran the judge with and without the 74 discriminators and p
 lists, so we cannot separate their contribution from the rest of the prompt.
 \textbf{Partly transductive.} The marginal correction subtracts a per-genre mean computed over
 the whole test set (Appendix~\ref{app:calib}), so the base cannot label a document in isolation,
-and two further choices were derived by reading our own predictions over the blind inputs: the
-five attractor classes (\S\ref{sec:system}) and the seven gated broad-move directions
-(Appendix~\ref{app:subs}). No hidden label was inspected and no prediction was edited by hand,
-but the method is not fully inductive and neither choice is validated on gold.
+and four further choices were derived by reading our own predictions over the blind inputs: the
+five attractor classes (\S\ref{sec:system}), the seven gated broad-move directions, the
+2{,}635-instance verification subset (Appendix~\ref{app:subs}) and the Interactive pass's pool,
+length thresholds, marker list and subtype defaults. No hidden label was inspected and no
+prediction was edited by hand, but the method is not fully inductive and none of these choices is
+validated on gold.
 \textbf{An untested comparison.} We ran GPT-5.6 over the full test set but never submitted it as
 a system, so the claim that a cheap base judge with conservative correction beats direct
 full-taxonomy prediction is untested. \textbf{Cost and ceilings.} Correction cost scales with
@@ -432,7 +438,7 @@ the organisers' final standings. Every hidden-test \emph{metric score} we report
 configuration comes from an official submitted file rather than a local estimate; the counts and
 agreement tables elsewhere are local analyses of those files; the full record is in
 Appendix~\ref{app:subs}.
-No parameters are updated at any stage; task-specific information enters through the
+No model weights are updated at any stage; task-specific information enters through the
 hand-written discriminators, cue and dialect-marker lists, surface rules, dev-tuned prompts, the
 attractor set, the accepted broad-move directions, the verification subset, the centring
 constant, the cached broad gate, the Interactive-recall pass and leaderboard-guided component
@@ -452,7 +458,8 @@ true labels. We can report how often retrieval surfaced the label the system its
 choosing: the base label lies in the retrieved top-20 for 98.4\% of instances, and within the
 top-6 actually scored in the two large families for 93.1\% of the instances the base assigns to
 them. The final label lies in the top-20 for 97.2\%; the remaining 2.8\% are labels the
-correction stage or the rules introduced from outside the retrieved set. These are coverage
+correction stage, the rules, the Interactive pass or the drain introduced from outside the
+retrieved set. These are coverage
 figures for our own predictions, not accuracy.
 
 \textbf{Provenance of the hand-built parts.} Nothing below was tuned on held-out gold. The 74
@@ -631,7 +638,7 @@ same prompt. The two were issued 26 minutes apart on 31~July~2026 with the same 
 the same instances. We did not record the model build returned by either call, so the
 seven-prediction gap cannot be attributed to a specific cause: run-to-run variation and a
 service-side model change are both consistent with it.
-All three broad-only runs will be included, and \texttt{src/broad\_only\_check.py} reproduces these counts
+All three broad-only runs will be included, and \texttt{src/broad\_only\_check.py} will reproduce these counts
 and the 157 above without API access.
 
 \begin{table}[h]
@@ -695,13 +702,12 @@ over the instances in which $y$ appears in the scored candidate set, recomputed 
 each split, and $\alpha{=}0.75$, chosen on the released training labels. It
 damps genres the judge rates generously everywhere, which is what leaves rare siblings seldom
 predicted. The submitted base run's invocation was not itself logged, but every run log that
-survives records $\alpha{=}0.75$, but surviving artifacts across our wider workspace are mixed:
-sibling experiments that select $\alpha$ on the released training labels, over the grid
-$\{0, 0.25, 0.5, 0.75, 1\}$, chose 0.5 and 1.0. Two cached prediction files whose score files we
-still hold, the chain-of-thought pass (\texttt{cot\_predictions.json}) and an earlier base rebuild
-(\texttt{early\_base.json}), are reproduced at $\alpha{=}0.75$ and at no other value on that grid
-by \texttt{src/judge\_rerun\_check.py}. We therefore report 0.75 as a reconstruction rather than a
-directly verified invocation setting.
+of our own judge passes report $\alpha{=}0.75$, while sibling experiment artifacts that select
+$\alpha$ on the released training labels, over the grid $\{0, 0.25, 0.5, 0.75, 1\}$, record other
+values including 0.5 and 1.0. Two cached prediction files whose score files we still hold, the
+chain-of-thought pass (\texttt{cot\_predictions.json}) and an earlier base rebuild
+(\texttt{early\_base.json}), reproduce at $\alpha{=}0.75$ and at no other value on that grid. We
+therefore report 0.75 as a reconstruction rather than a directly verified invocation setting.
 The correction is applied before the argmax and never changes the broad family. Because
 $\bar{s}(y)$ is a batch statistic, this stage is transductive: a document's label depends on the
 set it is scored with. Two
@@ -710,13 +716,14 @@ both scored below the base (Appendix~\ref{app:negative}).
 
 \section{Hyperparameters and Prompts}
 \label{app:hparams}
-Retriever: Qwen3-Embedding-8B loaded in 4-bit NF4 with double quantisation and fp16 compute (the configuration the
-submitted run used); only the cosine ranking is consumed, and we did not measure the effect of
+Retriever: \texttt{Qwen/\allowbreak Qwen3-\allowbreak Embedding-\allowbreak 8B} loaded in 4-bit
+NF4 with double quantisation and fp16 compute, the configuration in the script that wrote the
+cached candidate lists the submitted run consumed; only the cosine ranking is consumed, and we did not measure the effect of
 NF4 quantisation on retrieval rankings, 4096-dim, L2-normalised, \texttt{max\_seq\_length} 512, the
 top 20 specific genres cached per text. Only the 74 \emph{specific} definitions are embedded, with
 no prefix; the broad definitions are not. The Arabic texts alone carry the Qwen3 query
 instruction \texttt{Instruct: Given an Arabic text, retrieve the genre definition that best
-describes it.} followed by \texttt{Query:}, and we did not record the checkpoint revision hash.
+describes it.} followed by \texttt{Query:}, and we recorded no checkpoint revision hash for either the retriever or the judge.
 The judge scores every sibling in the four small families (Creative 7,
 Religious 6, Interactive 4, Legal 3) and the top 6 retrieved in-family candidates in the two
 large ones.
@@ -725,21 +732,25 @@ large ones.
 31B-\allowbreak it}, served via vLLM and reported by the endpoint as
 \texttt{/gemma-\allowbreak 4-\allowbreak 31b}, with a context window of 32{,}768 tokens; setwise
 0--100 scoring in a single pass,
-temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction
+temperature 0, seed 42, up to 3 attempts with JSON-regex fallback, marginal correction
 $\alpha{=}0.75$. We did not record the serving precision of the judge endpoint. The retriever precision is given above.
 
 \paragraph{Interactive-recall and drain passes.} Both reuse the judge endpoint and its
-settings (temperature 0, seed 42). The Interactive pass is binary: it fires on the 9{,}978 texts
-under 400 characters that carry an emoji, a hashtag or one of a fixed dialectal-pronoun list,
-asks for a single \texttt{YES}/\texttt{NO} token ($\leq$40 tokens), and on \texttt{YES} assigns
-the Interactive subtype the surface rules indicate; it moved 1{,}441 predictions
-(\texttt{src/interactive\_judge.py}). The drain reads the chain-of-thought pass, which scores the
+settings (temperature 0, seed 42). The Interactive pass is binary. Its pool is every text at most 400 characters long whose base
+label is neither Interactive nor \texttt{quran}/\texttt{hadith}, and which is either under 220
+characters or carries an emoji, a hashtag or one of a fixed dialectal-pronoun list; both
+thresholds and the marker list were set by reading our own predictions during the evaluation
+phase, not from gold. It asks for one \texttt{YES}/\texttt{NO} token ($\leq$40 tokens); on
+\texttt{YES} it takes the subtype the markers indicate, defaulting to
+\texttt{youtube\_\allowbreak comments} when none applies or the reply is malformed. It moved
+1{,}441 predictions (\texttt{src/interactive\_judge.py}); its effect in isolation was never
+scored. The drain reads the chain-of-thought pass, which scores the
 same candidate sets as the base judge but emits a short rationale before the scores; unparsable
 replies keep the base label. Neither pass is wired into \texttt{reproduce.sh}, which consumes
 their cached outputs.
 
-\paragraph{Diagnostic-only verifier.} Claude Sonnet~5 (\texttt{claude-sonnet-5}, $\leq$16
-completion tokens, same broad-only prompt as the other two) was run for the broad-only
+\paragraph{Diagnostic-only verifier.} Claude Sonnet~5 (\texttt{claude-\allowbreak sonnet-\allowbreak 5}, $\leq$16
+completion tokens, temperature not set, same broad-only prompt as the other two) was run for the broad-only
 diagnostic in \S\ref{sec:analysis} and appears in no submitted configuration.
 
 \paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{gpt-\allowbreak 5.6-\allowbreak luna};
@@ -824,8 +835,8 @@ significance tests.
 \paragraph{Two readings this record supports.} The 0.6881 row isolates the surface rules on top
 of the 0.6882 row: they rewrite 32 labels (23 \texttt{quran}, 9 \texttt{hadith}) and leave the
 score at 0.6881 against 0.6882. In the 0.6882 configuration, adding the rules alone changed the score to 0.6881. Because the
-later 0.7139 submission jointly changed the prompt, cues, score centring and rules, that gain
-cannot be decomposed from the available submissions.
+later 0.7139 submission jointly changed the prompt, cues, score centring, rules and the
+Interactive-recall pass, that gain cannot be decomposed from the available submissions.
 They were kept for a different job: in the final pipeline they fire on 1{,}087 instances and
 agree with the base label on every one, so their whole net effect is to restore 75 labels that
 consensus or the drain had moved away (56 \texttt{youtube\_comments}, 19 \texttt{quran}). Their
