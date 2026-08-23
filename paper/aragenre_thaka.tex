@@ -57,6 +57,7 @@ Agreement-Gated Correction for Hierarchical Arabic Genre Classification}
   \texttt{\{h.alqaeril, m.alamr, aldahlawi\}@thakaait.net}
 }
 
+\usepackage{balance}
 \begin{document}
 \maketitle
 
@@ -214,7 +215,7 @@ openings $\rightarrow$ \texttt{hadith}; emoji/hashtag short posts $\rightarrow$ 
 subtypes). These rules were assessed by convenience inspection rather than a
 recorded random audit, so we report no precision estimate for them. (v) Interactive remained sparsely
 predicted after (iv), which the prediction distribution and leaderboard feedback suggested was an
-imbalance, so a binary pass by the same judge over 9{,}978 short marker-bearing texts reassigns
+imbalance, so a binary pass by the same judge over 9{,}978 short or marker-bearing texts reassigns
 1{,}441 of them (Appendix~\ref{app:repro}); it is in the scored base. Each definition also carries a contrastive
 discriminator: one Arabic line naming the signal that separates that genre from its siblings,
 written without instance-level gold (Appendix~\ref{app:repro}). This base pipeline scores 0.7139.
@@ -238,16 +239,16 @@ effect. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the diagnostic
 pool only, on cost grounds.)
 
 \paragraph{What moves the topic-trap calls.} Given only the 6 broad definitions, all three
-verification models classified by subject rather than function: a blurb summarising an Islamic
+verification models produced calls consistent with classifying by subject rather than function: a blurb summarising an Islamic
 work \emph{performs} the function of a book description, so the taxonomy files it under
 Informative while every broad-only verifier answers Religious. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so a
 post-evaluation three-arm ablation over the same 1{,}403 instances separates the two (one model,
 GPT-5.6, identical pool): 394 are called Religious with neither, 233 with the instruction alone
-($-41\%$) and 119 with the full taxonomy ($-49\%$). The two are not interchangeable: the instruction
-lowers Religious calls on the book descriptions but raises them on the rest of the pool, whereas
-the full taxonomy lowers them on both while raising them on base-Religious instances, widening
-the separation from 21 to 41 percentage points (Table~\ref{tab:arms}), and base-family
-agreement rises in five of the six families (Appendix~\ref{app:trap}).
+($-41\%$) and 119 with the full taxonomy ($-49\%$). The two are not interchangeable: the
+instruction lowers Religious calls on the book descriptions but raises them on the rest of the
+pool, whereas the full taxonomy lowers them on both while raising them on base-Religious
+instances, widening the separation from 21 to 41 points (Table~\ref{tab:arms}); base-family
+agreement rises in five of six families (Appendix~\ref{app:trap}).
 
 \paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
 second only over the 8{,}041 where the first disagrees with the base, and a correction is
@@ -269,27 +270,6 @@ chain-of-thought re-judging pass (following~\citealp{wei2022cot}) names a differ
 sibling replaces it (broad never changes). The surface rules are re-applied afterwards as a guard. It moves 554
 instances on the base alone and 383 in the final pipeline, where the correction runs first
 (Appendices~\ref{app:subs} and~\ref{app:drain}).
-
-\section{Experimental Setup}
-\label{sec:setup}
-\paragraph{Data splits.} We update no model parameters, and each configuration predicts
-automatically once fixed, but the configurations were adapted between submissions from
-leaderboard feedback and from reading test inputs and our own outputs. An input is \texttt{\{"id","text"\}} with Arabic text such as
-\ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486,
-``bus driver wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted system pairs
-it with \texttt{broad\_genre} = Informative and \texttt{specific\_genre} =
-\texttt{drivers\_and\_}\texttt{delivery\_jobs}.
-\paragraph{Preprocessing.} We apply no text normalisation; retriever inputs are capped at 512
-tokens and verifier inputs at 1{,}500 characters, preserving two orthographic signals: heavy
-diacritisation in 77\% of texts we label \texttt{quran} and 43\% of poetry
-(\texttt{classical\_poetry} and \texttt{msa\_poetry}) against 1\% elsewhere,
-and emoji in 28\% of Interactive texts against under 1\% (Appendix~\ref{app:ortho}).
-\paragraph{Tools and metrics.} Qwen3-Embedding-8B, vLLM for the local judge, vendor SDKs for the
-verifiers; Macro F1, Weighted F1 and Accuracy at both tiers (Appendix~\ref{app:hparams}).
-\paragraph{Cost.} The correction makes 36{,}013 calls, about US\$50; the base needs no paid API
-(Appendix~\ref{app:hparams}).
-
-\section{Results}
 
 \begin{table}[t]
 \centering\small
@@ -320,6 +300,27 @@ secure. Test rows are successive submissions, not single-component ablations; de
 local evaluations. $^{\dagger}$~applied to the GPT-5.6 judge, tuned on dev, so not held out.}
 \label{tab:ablation}
 \end{table}
+\section{Experimental Setup}
+\label{sec:setup}
+\paragraph{Data splits.} We update no model parameters, and each configuration predicts
+automatically once fixed, but the configurations were adapted between submissions from
+leaderboard feedback and from reading test inputs and our own outputs. An input is \texttt{\{"id","text"\}} with Arabic text such as
+\ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486,
+``bus driver wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted system pairs
+it with \texttt{broad\_genre} = Informative and \texttt{specific\_genre} =
+\texttt{drivers\_and\_}\texttt{delivery\_jobs}.
+\paragraph{Preprocessing.} We apply no text normalisation; retriever inputs are capped at 512
+tokens and verifier inputs at 1{,}500 characters, preserving two orthographic signals: heavy
+diacritisation in 77\% of texts we label \texttt{quran} and 43\% of poetry
+(\texttt{classical\_poetry} and \texttt{msa\_poetry}) against 1\% elsewhere,
+and emoji in 28\% of Interactive texts against under 1\% (Appendix~\ref{app:ortho}).
+\paragraph{Tools and metrics.} Qwen3-Embedding-8B, vLLM for the local judge, vendor SDKs for the
+verifiers; Macro F1, Weighted F1 and Accuracy at both tiers (Appendix~\ref{app:hparams}).
+\paragraph{Cost.} The correction makes 36{,}013 calls, about US\$50; the base needs no paid API
+(Appendix~\ref{app:hparams}).
+
+\section{Results}
+
 
 \begin{table}[t]
 \centering\footnotesize
@@ -333,11 +334,11 @@ Base (ours) & .714 & .549 & .584 & .591 & .879 & .900 & .900 \\
 \textbf{Final (rank 1)} & \textbf{.735} & \textbf{.573} & \textbf{.613} & \textbf{.619} & \textbf{.898} & \textbf{.914} & \textbf{.914} \\
 \bottomrule
 \end{tabular}
-\caption{Official metrics for our three scored systems on the hidden test, rounded to three
-decimals (Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). These are three sequentially submitted configurations, so each difference is associated with a
-configuration change rather than attributable to one component: $+.013$ Broad Macro~F1
-accompanies the subset correction, and $+.020$ Specific Macro~F1 the final row, which combines
-cross-family moves, within-family refinements and the drain.}
+\caption{Official metrics for our three scored systems on the hidden test, to three decimals
+(Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). These are sequential
+submissions, so each difference accompanies a configuration change rather than one component:
+$+.013$ Broad Macro~F1 with the subset correction, $+.020$ Specific Macro~F1 with the final row,
+which combines cross-family moves, within-family refinements and the drain.}
 \label{tab:metrics}
 \end{table}
 
@@ -345,25 +346,24 @@ cross-family moves, within-family refinements and the drain.}
 \label{sec:dev}
 Analogous dev configurations (110 examples, official gold) separate what transfers from what does
 not. Dev's six labels are disjoint from the test taxonomy, so the discriminators, cues, rules and
-Interactive subtypes cannot carry over; the judge is re-run against the dev definitions and only
-the drain's mechanism is reused.
- five of its seven residual errors stem from a convention clash between splits
-(Appendix~\ref{app:convention}). No class list is carried over: the two dev classes the drain
-fires on are the two most-predicted there under either judge, and it moves five labels for
-$+0.042$, four of them one confusion; tuned on these same items, this is descriptive, not
-held-out, evidence. The correction stage does not transfer: dev has no
-\texttt{*\_book\_description} and no scripture, so its trap has zero instances and both
-corrections that fire are wrong.
+Interactive subtypes cannot carry over; the judge and the agreement-gated correction are re-run
+against the dev definitions, and among the test-specific postprocessors only the drain mechanism
+transfers without a test-label list. Five of the seven residual errors stem from a convention
+clash between splits (Appendix~\ref{app:convention}). No class list is carried over: the two dev
+classes the drain fires on are the two most-predicted there under either judge, and it moves five
+labels for $+0.042$, four of them one confusion; tuned on these items, this is descriptive, not
+held-out, evidence. Correction does not transfer: dev contains neither
+\texttt{*\_book\_description} nor scripture, and both fired corrections are wrong.
 
-\section{Analysis}
+\subsection{Analysis}
 \label{sec:analysis}
 Broad-only prompting put 157 book descriptions under Religious unanimously across all three
-models, a pattern the full taxonomy reverses; every alternative correction scored below the base
+models, a pattern the full taxonomy largely reverses; every alternative correction scored below the base
 (Appendix~\ref{app:negative}).
 
 \section{Conclusion}
-A definition-guided judge, agreement-gated correction and attractor drain placed 1st of 18, under
-leaderboard selection.
+A definition-guided judge, agreement-gated correction and attractor drain placed 1st of 18
+under leaderboard selection.
 
 \section*{Limitations}
 
@@ -388,7 +388,8 @@ five attractor classes (\S\ref{sec:system}), the seven gated broad-move directio
 2{,}635-instance verification subset (Appendix~\ref{app:subs}) and the Interactive pass's pool,
 length thresholds, marker list and subtype defaults. No hidden label was inspected and no
 prediction was edited by hand, but the method is not fully inductive and none of these choices is
-validated on gold.
+validated against instance-level gold labels, although leaderboard scores provided an indirect
+gold-based selection signal.
 \textbf{An untested comparison.} We ran GPT-5.6 over the full test set but never submitted it as
 a system, so the claim that a cheap base judge with conservative correction beats direct
 full-taxonomy prediction is untested. \textbf{Cost and ceilings.} Correction cost scales with
@@ -438,7 +439,7 @@ the organisers' final standings. Every hidden-test \emph{metric score} we report
 configuration comes from an official submitted file rather than a local estimate; the counts and
 agreement tables elsewhere are local analyses of those files; the full record is in
 Appendix~\ref{app:subs}.
-No model weights are updated at any stage; task-specific information enters through the
+There are no model-weight updates at any stage; task-specific information enters through the
 hand-written discriminators, cue and dialect-marker lists, surface rules, dev-tuned prompts, the
 attractor set, the accepted broad-move directions, the verification subset, the centring
 constant, the cached broad gate, the Interactive-recall pass and leaderboard-guided component
@@ -516,7 +517,7 @@ predictions additionally carry an Interactive-recall reassignment applied during
 evaluation phase by a separate automatic judge pass (\texttt{src/interactive\_judge.py}), which
 will be included but is not wired into \texttt{reproduce.sh}; re-running the judge over the
 same candidate sets reproduces 93.5\% of the base specific labels and 97.1\% of the broad
-labels. Both cached files will be included, so the submitted predictions rebuild exactly
+labels. Both cached files will be included, so the submitted predictions will rebuild exactly
 (27{,}972/27{,}972) from cached outputs, but the base stage is a cached input rather than
 something the repository regenerates end to end.
 
@@ -701,11 +702,10 @@ $s'(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre 
 over the instances in which $y$ appears in the scored candidate set, recomputed independently for
 each split, and $\alpha{=}0.75$, chosen on the released training labels. It
 damps genres the judge rates generously everywhere, which is what leaves rare siblings seldom
-predicted. The submitted base run's invocation was not itself logged, but every run log that
-of our own judge passes report $\alpha{=}0.75$, while sibling experiment artifacts that select
-$\alpha$ on the released training labels, over the grid $\{0, 0.25, 0.5, 0.75, 1\}$, record other
-values including 0.5 and 1.0. Two cached prediction files whose score files we still hold, the
-chain-of-thought pass (\texttt{cot\_predictions.json}) and an earlier base rebuild
+predicted. The submitted base invocation was not logged. Our own judge run logs report
+$\alpha{=}0.75$, while sibling experiment artifacts that select $\alpha$ over the grid
+$\{0, 0.25, 0.5, 0.75, 1\}$ record other values, including 0.5 and 1.0. Two cached prediction
+files, the chain-of-thought pass (\texttt{cot\_predictions.json}) and an earlier base rebuild
 (\texttt{early\_base.json}), reproduce at $\alpha{=}0.75$ and at no other value on that grid. We
 therefore report 0.75 as a reconstruction rather than a directly verified invocation setting.
 The correction is applied before the argmax and never changes the broad family. Because
@@ -740,11 +740,14 @@ settings (temperature 0, seed 42). The Interactive pass is binary. Its pool is e
 label is neither Interactive nor \texttt{quran}/\texttt{hadith}, and which is either under 220
 characters or carries an emoji, a hashtag or one of a fixed dialectal-pronoun list; both
 thresholds and the marker list were set by reading our own predictions during the evaluation
-phase, not from gold. It asks for one \texttt{YES}/\texttt{NO} token ($\leq$40 tokens); on
-\texttt{YES} it takes the subtype the markers indicate, defaulting to
-\texttt{youtube\_\allowbreak comments} when none applies or the reply is malformed. It moved
-1{,}441 predictions (\texttt{src/interactive\_judge.py}); its effect in isolation was never
-scored. The drain reads the chain-of-thought pass, which scores the
+phase, not from gold. It asks for a JSON object carrying an interactive flag and a subtype
+($\leq$40 tokens). A negative verdict keeps the base label; a positive one takes the returned
+subtype, falling back to \texttt{youtube\_\allowbreak comments} when the subtype is not one of
+the four Interactive classes. Replies that yield no parsable object are retried up to three
+times, and the run recorded no instance that exhausted them. It moved 1{,}441 predictions
+(\texttt{src/interactive\_judge.py}). An earlier Interactive-subtype configuration was scored
+(0.6942, Table~\ref{tab:subs}), but the pass as incorporated into the 0.7139 base was never
+scored as a matched isolated addition. The drain reads the chain-of-thought pass, which scores the
 same candidate sets as the base judge but emits a short rationale before the scores; unparsable
 replies keep the base label. Neither pass is wired into \texttt{reproduce.sh}, which consumes
 their cached outputs.
@@ -887,4 +890,5 @@ over 10\% of its Arabic characters) or at least one emoji, over the final predic
 Both are properties of the text, so no gold is needed;
 \texttt{src/orthographic\_signals.py} reproduces the table.
 
+\balance
 \end{document}
