@@ -269,8 +269,7 @@ driver wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted sy
 \texttt{broad\_genre} = Informative and \texttt{specific\_genre} = \texttt{drivers\_and\_}
 \texttt{delivery\_jobs}.
 \paragraph{Preprocessing.} We apply no text normalisation; retriever inputs are capped at 512
-tokens and verifier inputs at 1{,}500 characters. Normalisation erases the two orthographic signals that
-separate whole families here: heavy diacritisation marks 77\% of the texts we label
+tokens and verifier inputs at 1{,}500 characters. Normalisation erases two orthographic signals: heavy diacritisation marks 77\% of the texts we label
 \texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
 against under 1\% elsewhere (Appendix~\ref{app:subs}).
 \paragraph{Tools and metrics.} Qwen3-Embedding-8B under \texttt{sentence-transformers}, vLLM for
@@ -297,7 +296,7 @@ GPT-5.6 judge + attractor drain$^{\dagger}$ & dev & 0.9358 \\
 Genre-general judge, no retrieval & test & 0.6067 \\
 \quad + embedding retrieval gate & test & 0.6812 \\
 \quad + family-restricted judging & test & 0.6882 \\
-\textbf{\; + marginal correction, rules (base)} & test & \textbf{0.7139} \\
+\textbf{\; + judge prompt, correction, rules} & test & \textbf{0.7139} \\
 \quad + agreement-gated correction (subset) & test & 0.7224 \\
 \quad + cross-family moves, all instances & test & 0.7256 \\
 \textbf{\; + within-family refinements, drain} & test & \textbf{0.7352} \\
@@ -306,7 +305,7 @@ Genre-general judge, no retrieval & test & 0.6067 \\
 \caption{Main progression on both splits. Dev is near-degenerate (its 6 specific genres map
 one-to-one onto 6 broad, so all three F1 metrics coincide), so the hidden test is our primary
 evaluation. \emph{Subset} corrects only instances whose broad label the base judged least
-secure. $^{\dagger}$applied to the GPT-5.6 judge, tuned on dev, so not held out.}
+secure. Rows are successive submissions, not single-component ablations. $^{\dagger}$applied to the GPT-5.6 judge, tuned on dev, so not held out.}
 \label{tab:ablation}
 \end{table}
 
@@ -348,12 +347,11 @@ $\sim$29\% of specifics. Every alternative correction we tried fell below the ba
 (Appendix~\ref{app:negative}).
 
 \paragraph{Qualitative prediction audit.} Three patterns dominate: cross-family topic leaks,
-heavy attractor prediction, and song-dialect classes where 87--99\% of the texts we assign to
-them carry no marker from our cue inventory (App.~\ref{app:errors}).
+heavy attractor prediction, and song-dialect classes where 87--99\% of texts we assign to them
+carry no marker from our cue inventory (App.~\ref{app:errors}).
 
 \section{Conclusion}
-A definition-guided judge, an agreement-gated correction and an attractor drain placed 1st of
-18 at 0.7352 without parameter updates.
+A definition-guided judge, an agreement-gated correction and an attractor drain placed 1st of 18.
 
 \section*{Limitations}
 
@@ -438,6 +436,23 @@ genres explicitly (\texttt{src/discriminators.py}, \texttt{src/judge.py}). The s
 name a further seven labels. No test label or annotation informs any of it, but the pipeline is
 not label-agnostic and we do not claim it is.
 
+\textbf{Provenance of the hand-written material.} The 74 discriminators and the per-family cue
+lists were written by the authors from the released English definitions and Arabic linguistic
+knowledge, without consulting any labelled data. They were composed during the evaluation phase,
+after the first scored submission and before the base configuration was scored, and were not
+revised afterwards; each was therefore fixed before the configuration that used it was
+submitted. We did not keep per-cue authorship records.
+
+\textbf{Provenance of the selected constants.} None of the following was tuned on held-out gold.
+The five attractor classes and the seven accepted broad-move directions were chosen by reading
+our own predictions over the released test inputs (\S\ref{sec:system}). The calibration
+$\alpha{=}0.5$ replaced an initial 0.75 chosen on the released training labels, after the
+larger value over-flattened the 74-class space (Appendix~\ref{app:calib}). The 2{,}635-instance
+verification subset was selected during the evaluation phase as the instances whose broad label
+we judged least secure. The broad gate is an earlier scored submission of ours reused verbatim.
+On dev the drain fires on the two most-predicted classes, re-derived there rather than carried
+over.
+
 \textbf{Models:} the base retriever is Qwen3-Embedding-8B (4-bit NF4
 weights with fp16 compute, 4096-dim, cosine over L2-normalised vectors, sequence length
 capped at 512 tokens); the judge is a Gemma-family model
@@ -446,8 +461,8 @@ are GPT-5.6~Luna and Gemini-3.6~Flash, each queried with the full-taxonomy promp
 
 \textbf{Settings:} the judge decodes at temperature 0 with seed 42; the Gemini verifier is
 called with \texttt{temperature=0} and the GPT verifier with \texttt{reasoning\_effort=low} and
-no temperature set. We record the parameters we sent; whether a hosted model honours them is
-outside our control.
+no temperature set. We record the parameters we sent; whether a hosted model honours them is outside our control,
+and we do not treat \texttt{temperature=0} as guaranteeing deterministic output.
 The retriever caches the top 20 specific genres per text; the judge scores every sibling in the
 four small families and the top 6 retrieved elsewhere, in a single setwise pass, with marginal
 correction $\alpha{=}0.5$.
@@ -590,9 +605,11 @@ under the full taxonomy, a 72\% reduction. That comparison is restricted to the 
 descriptions for which the second verifier has a call under both prompts, since the deployed
 full-taxonomy run queries it only on the instances where the first verifier disagrees with the
 base; on all 1{,}403, the first verifier alone falls from 394 to 126. That 126 is the deployed
-all-instance run scored on this subset, not arm~C: arm~C is a separate pool-matched run of the
-same prompt, which is why Table~\ref{tab:arms} reports 119 rather than 126 for the same model,
-prompt and instances.
+all-instance run scored on this subset, not arm~C, which is a separate pool-matched run of the
+same prompt. The two were issued 26 minutes apart on 31~July~2026 with the same model string and
+the same instances, so the seven-prediction gap is run-to-run variation in the hosted model
+rather than a difference in configuration; we did not record the exact model build returned by
+either call.
 All three broad-only runs are included, and \texttt{src/broad\_only\_check.py} reproduces these counts
 and the 157 above without API access.
 
@@ -688,8 +705,10 @@ JSON array of integer scores over the candidate definitions; the consensus promp
 judge, and the \texttt{openai} and \texttt{google-genai} SDKs for the verifiers; pinned
 versions accompany the code.
 
-\paragraph{Cost.} At list prices the consensus stage runs about US\$1.05--1.48 per 1{,}000
-calls, giving the \$50 total quoted in \S\ref{sec:setup} over its 36{,}013 calls.
+\paragraph{Cost.} The \$50 total quoted in \S\ref{sec:setup} is the amount actually billed for
+the 36{,}013 correction calls at the vendor prices in force in July~2026. We did not log
+per-request token usage, so we cannot decompose it into input and output totals or restate it as
+a rate.
 
 \paragraph{Throughput.} A consensus call takes 2.0--2.8\,s. At the released default of 20
 concurrent workers the 8{,}041-instance Gemini pass took 19\,min of wall clock; the full GPT
@@ -702,7 +721,7 @@ submitted file (Table~\ref{tab:subs}), so the progression is traceable to scored
 rather than to local approximations. Counts such as the arm totals and the agreement tables are
 local analyses of those files, not scored quantities.
 
-\begin{table}[h]
+\begin{table}[!ht]
 \centering\footnotesize
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{lr}
