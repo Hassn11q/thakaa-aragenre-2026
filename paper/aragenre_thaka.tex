@@ -196,9 +196,9 @@ all 74 definitions, then change a label only where they agree, and an attractor 
 \subsection{Base: family-restricted definition-guided judge}
 The base system turns the 74-way choice into a within-family one (Figure~\ref{fig:arch}):
 retrieval proposes candidates and a judge scores only siblings of a gated broad genre. The
-setwise judge is \texttt{google/gemma-4-31B-it}~\citep{gemma4_2026}, served through vLLM under
-the local alias \texttt{gemma-4-31b}; API model strings are pinned in
-Appendix~\ref{app:hparams}. Each text passes through four steps.
+setwise judge is \texttt{google/gemma-4-31B-it}~\citep{gemma4_2026}, served through vLLM from a
+local copy of that checkpoint, which the endpoint reports as \texttt{/gemma-4-31b}. All three
+model strings are given in Appendix~\ref{app:hparams}. Each text passes through four steps.
 (i) \texttt{Qwen3-Embedding-8B}~\citep{qwen3embedding2025} encodes the Arabic text and the
 English definitions, and proposes candidate specific genres by cosine similarity.
 (ii) Decoding is hierarchically constrained, all siblings for small families and top-$k$
@@ -211,8 +211,8 @@ candidate 0--100 against its definition in one call, and we take the argmax afte
 targeted surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; emoji/hashtag short posts $\rightarrow$ Interactive
-subtypes). Hand screening found nothing violating the rule semantics and a spot check of the
-Interactive rule agreed on roughly 85\%; neither is a precision estimate. Appended to each definition the judge also sees a contrastive
+subtypes). These rules were assessed by convenience inspection rather than a
+recorded random audit, so we report no precision estimate for them. Appended to each definition the judge also sees a contrastive
 discriminator, one per test genre: a single Arabic line naming the signal that separates it from
 its family siblings, written without access to instance-level gold labels
 (Appendix~\ref{app:repro}). On the hidden test this base pipeline scores 0.7139.
@@ -305,7 +305,7 @@ GPT-5.6 judge + attractor drain$^{\dagger}$ & dev & 0.9358 \\
 Genre-general judge, no retrieval & test & 0.6067 \\
 \quad + embedding retrieval gate & test & 0.6812 \\
 \quad + family-restricted judging & test & 0.6882 \\
-\textbf{\; + judge prompt, correction, rules} & test & \textbf{0.7139} \\
+\textbf{\; + judge prompt, score centring, rules} & test & \textbf{0.7139} \\
 \quad + agreement-gated correction (subset) & test & 0.7224 \\
 \quad + cross-family moves, all instances & test & 0.7256 \\
 \textbf{\; + within-family refinements, drain} & test & \textbf{0.7352} \\
@@ -342,12 +342,13 @@ cross-family moves, within-family refinements and the drain.}
 \subsection{Development-set results and component transfer}
 \label{sec:dev}
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from what
-does not. No class list is carried over: the two dev classes the drain fires on are the two
-most-predicted there under either judge. On dev it moves five labels for $+0.042$ (95\% CI $[+0.010, +0.082]$),
-but four are a single confusion and the component was tuned on these same items, so this is
-descriptive, not held-out, evidence. The correction stage does not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it targets has zero
-instances, and both corrections that fire are wrong. Residual dev disagreements stem from a
-convention clash between splits (Appendix~\ref{app:convention}).
+does not; its residual disagreements stem from a convention clash between splits
+(Appendix~\ref{app:convention}). No class list is carried over: the two dev classes the drain
+fires on are the two most-predicted there under either judge, and it moves five labels for
+$+0.042$, four of them a single confusion. It was tuned on these same items, so this is
+descriptive, not held-out, evidence. The correction stage does not transfer: dev has no
+\texttt{*\_book\_description} and no scripture, so its trap has zero instances and both
+corrections that fire are wrong.
 
 \section{Analysis}
 \label{sec:analysis}
@@ -459,7 +460,7 @@ definitions and Arabic linguistic knowledge, without access to instance-level go
 single write on 28~July~2026 and never modified afterwards, so they were composed after the
 hidden-test inputs were released and after our first four scored submissions, but were fixed two
 days before the configuration that uses them was scored and could not have been revised in
-response to any later leaderboard result. A design note saved in the same second records the rule
+response to any later leaderboard result. A contemporaneous design note records the rule
 followed---no class frequencies or priors were to be injected---and contains only definitional
 and dialect-marker material, no quoted test instances. We did not log whether test texts were
 read while composing the cues, so we cannot rule it out. The five attractor classes, the seven accepted broad-move directions and the
@@ -555,10 +556,11 @@ cues for these distinctions, not that no written signal exists.
 
 \section{Negative Results}
 \label{app:negative}
-Two paths were built but never reached a submitted configuration: LLM-enriched definitions
-(a sibling contrast and two synthetic exemplars per genre) and a transductive label-propagation
-pass over the test embeddings; the released judge keeps the definitions verbatim and adds only
-the hand-written cues. A \emph{direct} six-way broad classifier scored 0.6206; in our submitted configurations this
+Two further paths were built but never scored, so we report no outcome for them:
+LLM-enriched definitions (a sibling contrast and two synthetic exemplars per genre) and a
+transductive label-propagation pass over the test embeddings. We record them because the release
+ships their scripts; the deployed judge keeps the definitions verbatim and adds only the
+hand-written cues. A \emph{direct} six-way broad classifier scored 0.6206; in our submitted configurations this
 fell below deriving broad from the specific prediction, though one prompt configuration cannot
 settle the comparison in general. Scoring all 74 candidates without retrieval pruning fell to
 0.6517. For correction, plain self-consistency (0.7134), entropic optimal transport
@@ -691,8 +693,11 @@ $s'(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre 
 received over the whole test set and $\alpha{=}0.75$, chosen on the released training labels. It
 damps genres the judge rates generously everywhere, which is what leaves rare siblings seldom
 predicted. The submitted base run's invocation was not itself logged, but every run log that
-survives records $\alpha{=}0.75$, every script defaults to it, and the two prediction files whose
-score caches survive are reproduced exactly at that value.
+survives records $\alpha{=}0.75$ and the judge scripts default to it. Both cached prediction
+files whose score files we still hold, the chain-of-thought pass
+(\texttt{cot\_predictions.json}) and an earlier base rebuild (\texttt{early\_base.json}), are
+reproduced from those scores at exactly that value, and at no other value we tried, by
+\texttt{src/judge\_rerun\_check.py}.
 The correction is applied before the argmax and never changes the broad family. Because
 $\bar{s}(y)$ is a batch statistic, this stage is transductive: a document's label depends on the
 set it is scored with. Two
@@ -708,12 +713,15 @@ cached per text; the judge scores every sibling in the four small families (Crea
 Religious 6, Interactive 4, Legal 3) and the top 6 retrieved in-family candidates in the two
 large ones.
 
-\paragraph{Judge.} \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
+\paragraph{Judge.} \texttt{google/gemma-4-31B-it} via vLLM, served from a local copy that the
+endpoint reports as \texttt{/gemma-4-31b} with \texttt{max\_model\_len} 32{,}768; setwise
+0--100 scoring in a single pass,
 temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction
 $\alpha{=}0.75$. We did not record the serving precision of the judge endpoint. The retriever precision is given above.
 
-\paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
-Gemini-3.6~Flash (called with \texttt{temperature=0}, $\leq$400 output tokens), each given the full 74-definition taxonomy
+\paragraph{Consensus verifiers.} GPT-5.6~Luna, requested as \texttt{gpt-5.6-luna}
+(\texttt{reasoning\_effort=low}, $\leq$500 completion tokens), and Gemini-3.6~Flash, requested as
+\texttt{gemini-3.6-flash} (called with \texttt{temperature=0}, $\leq$400 output tokens), each given the full 74-definition taxonomy
 (2{,}884 tokens under \texttt{o200k\_base}, giving a mean prompt of 3{,}034 tokens and a maximum
 of 5{,}185) in the system prompt, and the text truncated to 1500 characters. The judge prompt asks for a
 JSON array of integer scores over the candidate definitions; the consensus prompt asks for a single exact
@@ -792,7 +800,7 @@ significance tests.
 \paragraph{Two readings this record supports.} The 0.6881 row isolates the surface rules on top
 of the 0.6882 row: they rewrite 32 labels (23 \texttt{quran}, 9 \texttt{hadith}) and leave the
 score at 0.6881 against 0.6882. The rules had an approximately score-neutral effect in this configuration, so the
-0.6882$\rightarrow$0.7139 gain belongs to the judge and calibration changes, not to them.
+0.6882$\rightarrow$0.7139 gain belongs to the judge and score-centring changes, not to them.
 They were kept for a different job: in the final pipeline they fire on 1{,}087 instances and
 agree with the base label on every one, so their whole net effect is to restore 75 labels that
 consensus or the drain had moved away (56 \texttt{youtube\_comments}, 19 \texttt{quran}). They

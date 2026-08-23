@@ -15,4 +15,20 @@ These files let `reproduce.sh` rebuild the submitted predictions without a GPU o
 | `trap_arm_b.json` | `src/ablate_trap.py` | arm B: broad definitions plus the explicit type-versus-topic instruction. Arm C is `trap_arm_c.json`, the same-pool full-taxonomy run; `src/trap_table.py` rebuilds the 394/233/119 table from these files without any API access. `verify_gpt.json` is the separate all-instance run the deployed pipeline uses, and gives 126 on this subset. Arm B was run after the evaluation phase closed, so that comparison is post hoc. |
 | `gpt_broad.json`, `gemini_broad.json`, `sonnet_broad.json` | the broad-only verifier prompt, one file per model | Each model's broad-genre verdict over the 2,635-instance pool under the 6-definition prompt, released so the broad-only claims can be checked: all three call 157 of the 1,403 book descriptions Religious unanimously, and GPT and Gemini jointly call 134 of the 548 book descriptions that Gemini also covers under the full taxonomy. `gpt_broad.json` is the same run as `trap_arm_a.json`. **No producer ships here** — `src/verify.py` always sends the full taxonomy. |
 | `judge_rerun_scores.json` | `src/judge.py` | a full 27,972-row re-run of the judge over the same candidate sets, released so the 93.5% specific / 97.1% broad figure above can be checked without a GPU |
+| `cot_scores.json` | `COT=1 src/judge.py` | the per-candidate scores behind `cot_predictions.json` |
+| `early_base.json` | `src/judge.py` | an earlier base rebuild, kept because its score file survives |
+| `early_base_scores.json` | `src/judge.py` | the per-candidate scores behind `early_base.json` |
 | `final_leaderboard.tsv` | the organisers' final standings | all 18 teams with their seven official metrics; the source for the paper's rank and for the rank-2 comparison in Table 2 |
+
+## Checking the centring constant
+
+The submitted base run's invocation was not logged. These two pairs are the cached predictions
+whose score files survive, and both are reproduced exactly at `ALPHA=0.75` and at no other value
+we tried:
+
+```sh
+python3 src/judge_rerun_check.py --scores artifacts/cot_scores.json \
+    --base artifacts/cot_predictions.json --alpha 0.75      # 27972/27972
+python3 src/judge_rerun_check.py --scores artifacts/early_base_scores.json \
+    --base artifacts/early_base.json --alpha 0.75           # 27972/27972
+```
