@@ -148,11 +148,11 @@ are counted incorrect, and Informative dominates our predictions ($\sim$50\%).
 
 \begin{figure}[t]
 \centering
-\resizebox{0.836\columnwidth}{!}{%
+\resizebox{0.83\columnwidth}{!}{%
 \begin{tikzpicture}[
   font=\small,
-  node distance=1.9mm,
-  box/.style={draw,rounded corners,align=center,inner sep=2.5pt,minimum height=5.6mm,fill=blue!5},
+  node distance=2.2mm,
+  box/.style={draw,rounded corners,align=center,inner sep=3pt,minimum height=5.4mm,fill=blue!5},
   base/.style={box,fill=blue!8},
   corr/.style={box,fill=orange!12},
   io/.style={align=center,font=\small\itshape},
@@ -161,27 +161,28 @@ are counted incorrect, and Informative dominates our predictions ($\sim$50\%).
 ]
 % base pipeline
 \node[io] (text) {Arabic text $\langle$id, text$\rangle$};
-\node[base,below=of text] (embed) {Qwen3-Embedding-8B retriever\\ \scriptsize (Arabic $\leftrightarrow$ English defs) $\rightarrow$ candidates};
-\node[base,below=of embed] (judge) {Family-restricted \texttt{gemma-4-31b} judge\\ \scriptsize broad gate $\rightarrow$ setwise scoring within family};
-\node[base,below=of judge] (rules) {Marginal correction + high-precision surface rules};
-\node[res,below=of rules] (basep) {Base prediction \;\textbf{0.7139}};
+\node[base,below=of text] (embed) {Qwen3-Embedding-8B retriever};
+\node[base,below=of embed] (judge) {Family-restricted \texttt{gemma-4-31b} judge};
+\node[base,below=of judge] (rules) {Marginal correction + surface rules};
+\node[res,below=of rules] (basep) {Base \;\textbf{0.7139}};
 \draw[ar] (text)--(embed); \draw[ar] (embed)--(judge);
 \draw[ar] (judge)--(rules); \draw[ar] (rules)--(basep);
 % correction stages
-\node[corr,below=8mm of basep] (cons) {Full-taxonomy agreement-gated correction\\ \scriptsize GPT-5.6 + Gemini-3.6, \emph{all 74 defs}; edit only if both agree};
-\node[corr,below=of cons] (drain) {Attractor drain, then surface rules\\ \scriptsize CoT within-family, broad-locked; rules re-applied last};
+\node[corr,below=7mm of basep] (cons) {Agreement-gated correction, full taxonomy};
+\node[corr,below=of cons] (drain) {Attractor drain, then surface rules};
 \node[res,below=of drain] (finalp) {Final \;\textbf{0.7352} \;(rank 1)};
 \draw[ar] (basep)--(cons); \draw[ar] (cons)--(drain); \draw[ar] (drain)--(finalp);
 \begin{scope}[on background layer]
   \node[draw,dashed,rounded corners,fit=(text)(embed)(judge)(rules)(basep),
-        label={[anchor=south east]north east:{\scriptsize Base: Gemma-4-31B judge}}] {};
+        label={[anchor=south east]north east:{\footnotesize Base}}] {};
   \node[draw,dashed,rounded corners,fit=(cons)(drain)(finalp),
-        label={[anchor=south east]north east:{\scriptsize Correction}}] {};
+        label={[anchor=south east]north east:{\footnotesize Correction}}] {};
 \end{scope}
 \end{tikzpicture}}
-\caption{System overview. The base judge yields 0.7139. An agreement-gated correction, in which
-each verifier sees the \emph{entire} 74-definition taxonomy, is followed by a within-family
-attractor drain, reaching 0.7352 (rank~1).}
+\caption{System overview. A Qwen3 retriever gates a broad family and a \texttt{gemma-4-31b}
+judge scores its siblings setwise, giving the base (0.7139); GPT-5.6 and Gemini-3.6, each shown
+all 74 definitions, then change a label only where they agree, and an attractor drain follows
+(0.7352, rank~1).}
 \label{fig:arch}
 \end{figure}
 
@@ -277,8 +278,8 @@ against under 1\% elsewhere (Appendix~\ref{app:subs}).
 \paragraph{Tools and metrics.} Qwen3-Embedding-8B under \texttt{sentence-transformers}, vLLM for
 the local judge, vendor SDKs for the verifiers; we report Macro F1, Weighted F1 and Accuracy at
 both tiers (Appendix~\ref{app:hparams}).
-\paragraph{Cost.} The correction makes 36{,}013 calls at a $\approx$3.0K-token prompt each,
-about US\$50; the base needs no paid API (Appendix~\ref{app:hparams}).
+\paragraph{Cost.} The correction makes 36{,}013 calls, about US\$50; the base needs no paid API
+(Appendix~\ref{app:hparams}).
 
 \section{Results}
 
