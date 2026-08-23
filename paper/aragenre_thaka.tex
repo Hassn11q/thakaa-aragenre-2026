@@ -65,10 +65,11 @@ LLM judge scores candidate genres setwise under a hierarchically constrained dec
 reaching 0.7139. That base led on Specific Macro~F1 but trailed on Broad Macro~F1, so we add a
 correction stage: two instruction models re-predict the specific genre, each shown the
 \emph{entire} 74-definition taxonomy, and a label is edited only where both agree against the
-base. This lifts Broad Macro~F1 to 0.892, largely by reducing \emph{topic-trap} calls, where the subject a text discusses displaces the
-genre it instantiates. In a post-evaluation audit of
-instances the base labelled book descriptions, Religious calls fall $394\rightarrow233$ once the
-prompt states the type-versus-topic convention, and to 119 once it also shows the full taxonomy.
+base. That system scores 0.892 Broad Macro~F1, alongside fewer \emph{topic-trap} calls, where
+the subject a text discusses displaces the genre it instantiates. In a post-evaluation audit of
+instances that the base labelled as book descriptions, Religious calls fall
+$394\rightarrow233\rightarrow119$ as the prompt adds the type-versus-topic convention and then
+the full taxonomy.
 Refinements and an attractor drain reach 0.7352.
 \end{abstract}
 
@@ -82,7 +83,8 @@ systems receive English genre definitions and limited synthetic training data, b
 hidden benchmark contains noisier naturally occurring Arabic spanning Modern Standard
 Arabic, Classical Arabic, and multiple dialects, with \emph{previously unseen
 genre--definition combinations}. Because the 74 specific test genres are disjoint from
-training, no specific label can be memorised from it, and the setup pushes systems toward
+training, no specific test label can be learned from the released labelled data, and the setup
+pushes systems toward
 generalising over communicative function. We placed 1st of 18 teams (Table~\ref{tab:metrics}) on the official ranking metric,
 Hierarchical Macro~F1: the mean of Broad and Specific Macro~F1.
 
@@ -96,12 +98,12 @@ family-accuracy of the specific prediction, whereas the gap between it and Broad
 consistent with uneven performance across broad classes, so correction must be tier-specific
 (\S\ref{sec:system}).
 \item An agreement-gated correction stage in which each verifier sees the full taxonomy, with a
-three-arm ablation splitting the topic trap between an explicit type-vs-topic instruction and a
-visible label to move the error onto.
+three-arm prompt diagnostic separating an explicit type-vs-topic instruction from a visible
+label to move the error onto.
 \item An attractor-drain step targeting the macro-F1 failure mode of heavily predicting a few
 generic classes; its only gold-scored estimate is on dev, where it was also tuned.
-\item Empirical validation on the hidden test: 0.7352 Hierarchical Macro~F1, ranked 1st of 18
-teams, with the major system configurations scored as their own submissions.
+\item Official shared-task evaluation: 0.7352 Hierarchical Macro~F1, ranked 1st of 18 teams,
+with the major system configurations scored as their own submissions.
 \end{enumerate}
 
 \noindent The main challenges were a specific-label inventory disjoint from training, the topic
@@ -214,7 +216,7 @@ this base pipeline scores 0.7139.
 \paragraph{Diagnosis from the scoreboard.}
 The leaderboard exposed the structure: against the system then ahead of us, our base led on
 Specific Macro~F1 (0.5487 vs.\ 0.5339) but trailed on Broad Macro~F1 (0.8792 vs.\ 0.90), so the
-whole deficit sat in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
+deficit was concentrated in the broad tier. Broad accuracy (0.9003) exceeded broad macro, indicating uneven
 per-class performance; reading our own predictions showed cross-family leakage, with Bible
 passages labelled poetry or encyclopedia entries and news labelled legal.
 
@@ -229,8 +231,8 @@ never submitted either verifier alone, so agreement here is a conservatism devic
 evidence of an ensemble effect. (Claude~Sonnet~5~\citep{sonnet5_2026} was run on the
 diagnostic pool but excluded from the deployed correction on cost grounds.)
 
-\paragraph{What suppresses the topic trap.} Given only the 6 broad definitions, all three
-verification models classified by subject matter rather than by communicative function: a blurb
+\paragraph{What moves the topic-trap calls.} Given only the 6 broad definitions, all three
+verification models produced calls consistent with classifying by subject rather than function: a blurb
 summarising an Islamic work \emph{performs} the function of a book description, so the taxonomy
 files it under Informative while every broad-only verifier answers Religious. The full-taxonomy prompt also carries an explicit type-vs-topic instruction, so a
 post-evaluation three-arm ablation over the same 1{,}403 instances separates the two (one model,
@@ -238,8 +240,8 @@ GPT-5.6, identical pool): 394 are called Religious with neither, 233 with the in
 ($-41\%$) and 119 with the full taxonomy ($-49\%$). The two are not interchangeable: the instruction
 lowers Religious calls on the book descriptions but raises them on the rest of the pool, whereas
 the full taxonomy lowers them on both while raising them on base-Religious instances, widening
-the separation from 21 to 41 percentage points (Table~\ref{tab:arms}). Base-family agreement rises in five of the six families
-(Appendix~\ref{app:trap}); Appendix~\ref{app:errors} gives a worked example.
+the separation from 21 to 41 percentage points (Table~\ref{tab:arms}), and base-family
+agreement rises in five of the six families (Appendix~\ref{app:trap}).
 
 \paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
 second only over the 8{,}041 where the first disagrees with the base, and a correction is
@@ -254,12 +256,13 @@ under-predicted has low recall and low class-level F1. This stage is partly tran
 predictions during the evaluation phase revealed five \emph{attractor} classes worded broadly
 enough to absorb much of what the judge cannot place confidently, leaving their rarer siblings
 almost unused, so
-redistributing labels from an attractor to those siblings moves the mean far more than accuracy.
-The list comes from that prediction distribution, not from held-out gold. The drain is deterministic: when the base label is an attractor class and a separate
+redistribution to those siblings is metric-directed: it changes the per-class average far more
+than accuracy, and we cannot show the reassignments are semantically correct. The list comes from
+that prediction distribution, not from gold. The drain is deterministic: when the base label is an attractor class and a separate
 chain-of-thought re-judging pass~\citep{wei2022cot} names a different sibling in the same family, the
 sibling replaces it (broad never changes). The surface rules are re-applied afterwards as a
-guard (Appendix~\ref{app:subs}). On the base alone it moves 554 instances
-(Appendix~\ref{app:drain}); in the final pipeline the correction runs first, so it fires on 383.
+guard (Appendix~\ref{app:subs}). It moves 554 instances on the base alone and 383 in the final pipeline, where the correction
+runs first (Appendix~\ref{app:drain}).
 
 \section{Experimental Setup}
 \label{sec:setup}
@@ -275,9 +278,8 @@ driver wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted sy
 tokens and verifier inputs at 1{,}500 characters. Normalisation erases two orthographic signals: heavy diacritisation marks 77\% of the texts we label
 \texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
 against under 1\% elsewhere (Appendix~\ref{app:subs}).
-\paragraph{Tools and metrics.} Qwen3-Embedding-8B under \texttt{sentence-transformers}, vLLM for
-the local judge, vendor SDKs for the verifiers; we report Macro F1, Weighted F1 and Accuracy at
-both tiers (Appendix~\ref{app:hparams}).
+\paragraph{Tools and metrics.} Qwen3-Embedding-8B, vLLM for the local judge, vendor SDKs for the
+verifiers; we report Macro F1, Weighted F1 and Accuracy at both tiers (Appendix~\ref{app:hparams}).
 \paragraph{Cost.} The correction makes 36{,}013 calls, about US\$50; the base needs no paid API
 (Appendix~\ref{app:hparams}).
 
@@ -305,7 +307,7 @@ Genre-general judge, no retrieval & test & 0.6067 \\
 \textbf{\; + within-family refinements, drain} & test & \textbf{0.7352} \\
 \bottomrule
 \end{tabular}
-\caption{Main progression on both splits. Dev is near-degenerate (its 6 specific genres map
+\caption{Submission record on both splits. Dev is near-degenerate (its 6 specific genres map
 one-to-one onto 6 broad, so all three F1 metrics coincide), so the hidden test is our primary
 evaluation. \emph{Subset} corrects only instances whose broad label the base judged least
 secure. Rows are successive submissions, not single-component ablations. $^{\dagger}$applied to the GPT-5.6 judge, tuned on dev, so not held out.}
@@ -325,18 +327,19 @@ Base (ours) & .714 & .549 & .584 & .591 & .879 & .900 & .900 \\
 \bottomrule
 \end{tabular}
 \caption{Official metrics for our three scored systems on the hidden test, rounded to three
-decimals (Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). Correcting the verification subset lifts the broad tier by $+.013$ Broad Macro~F1;
-the final row folds in the cross-family moves, the within-family refinements and the drain,
-together worth $+.020$ Specific Macro~F1.}
+decimals (Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). These are three sequentially submitted configurations, so each difference is associated with a
+configuration change rather than attributable to one component: $+.013$ Broad Macro~F1
+accompanies the subset correction, and $+.020$ Specific Macro~F1 the final row, which combines
+cross-family moves, within-family refinements and the drain.}
 \label{tab:metrics}
 \end{table}
 
 \subsection{Development-set results and component transfer}
 \label{sec:dev}
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from what
-does not. No class list is carried over, and the two dev classes the drain fires on are the two
-most-predicted there, the same two under both judges, so no gold and no particular base is
-needed to find them. On dev it moves five labels for $+0.042$ (95\% CI $[+0.010, +0.082]$),
+does not. No class list is carried over: the two dev classes the drain fires on are the two
+most-predicted there under either judge, so neither gold nor a particular base is needed to find
+them. On dev it moves five labels for $+0.042$ (95\% CI $[+0.010, +0.082]$),
 but four are a single confusion and the component was tuned on these same items, so this is
 descriptive, not held-out, evidence. The correction stage does not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it targets has zero
 instances, and both corrections that fire are wrong. Residual dev disagreements stem from a
@@ -345,13 +348,11 @@ convention clash between splits (Appendix~\ref{app:convention}).
 \section{Analysis}
 \label{sec:analysis}
 Broad-only prompting put 157 book descriptions under Religious unanimously across all three
-models, which the full taxonomy largely reversed; one model alone disagreed with the base on
-$\sim$29\% of specifics. Every alternative correction we tried fell below the base
+models, a pattern the full taxonomy largely reverses; one model alone disagreed with the base on
+$\sim$29\% of specifics. Every alternative correction we tried scored below the base
 (Appendix~\ref{app:negative}).
 
-\paragraph{Qualitative prediction audit.} Three patterns dominate: cross-family topic leaks,
-heavy attractor prediction, and song-dialect classes with low cue coverage
-(App.~\ref{app:errors}).
+Appendix~\ref{app:errors} characterises the three prediction patterns that dominate our audit.
 
 \section{Conclusion}
 A definition-guided judge, an agreement-gated correction and an attractor drain placed 1st of
@@ -369,8 +370,8 @@ components were selected on the public leaderboard and by manual reading; the re
 progression therefore doubles as the selection signal, which risks fitting the test
 distribution. No hidden-test gain carries a confidence interval, so those gains are
 leaderboard-measured rather than statistically certified; Appendix~\ref{app:subs} gives the
-scale of a class-level effect. The one component testable against gold is the drain, where a
-paired bootstrap on dev puts its gain above zero (\S\ref{sec:dev}). \textbf{Unmeasured
+scale of a class-level effect. Only the drain is evaluable on dev for its intended failure mode; a paired bootstrap there puts
+its gain above zero (\S\ref{sec:dev}), on a set it was also tuned on. \textbf{Unmeasured
 components.} We never ran the judge with and without the 74 discriminators and per-family cue
 lists, so we cannot separate their contribution from the rest of the prompt.
 \textbf{Partly transductive.} The marginal correction subtracts a per-genre mean computed over
@@ -550,7 +551,7 @@ fell below deriving broad from the specific prediction, though one prompt config
 settle the comparison in general. Scoring all 74 candidates without retrieval pruning fell to
 0.6517. For correction, plain self-consistency (0.7134), entropic optimal transport
 (0.7115), uniform-prior calibration (0.7124) and an unrestricted chain-of-thought pass (0.7131)
-all regressed below the 0.7139 base, whereas full-context consensus improved it. Cross-lingual rerankers failed~\citep{btzsc2026}, regex rules added nothing the judge lacked, and
+all regressed below the 0.7139 base, whereas full-context consensus improved it. Cross-lingual rerankers, tried after~\citet{btzsc2026}, did not help here; regex rules added nothing the judge lacked, and
 the off-the-shelf dialect classifiers we tried did not expose the Iraqi/Sudanese
 distinction that NADI-style country-level tasks define~\citep{nadi2021}.
 
@@ -612,9 +613,9 @@ full-taxonomy run queries it only on the instances where the first verifier disa
 base; on all 1{,}403, the first verifier alone falls from 394 to 126. That 126 is the deployed
 all-instance run scored on this subset, not arm~C, which is a separate pool-matched run of the
 same prompt. The two were issued 26 minutes apart on 31~July~2026 with the same model string and
-the same instances, so the seven-prediction gap is run-to-run variation in the hosted model
-rather than a difference in configuration; we did not record the exact model build returned by
-either call.
+the same instances. We did not record the model build returned by either call, so the
+seven-prediction gap cannot be attributed to a specific cause: run-to-run variation and a
+service-side model change are both consistent with it.
 All three broad-only runs are included, and \texttt{src/broad\_only\_check.py} reproduces these counts
 and the 157 above without API access.
 
@@ -778,7 +779,7 @@ consensus or the drain had moved away (56 \texttt{youtube\_comments}, 19 \texttt
 guard the correction stages rather than adding score.
 The chain-of-thought row applies that pass to every instance and scores 0.7131,
 below the 0.7139 base; the same pass restricted to attractor classes is what the drain uses.
-Chain-of-thought helps here only where it is aimed.
+In this configuration the chain-of-thought pass helped only where it was aimed.
 
 \paragraph{Gated broad moves.} Of the 3{,}300 instances where both verifiers agree against the
 base, 2{,}122 stay inside the base family and are applied as refinements. Of the 1{,}178 that
