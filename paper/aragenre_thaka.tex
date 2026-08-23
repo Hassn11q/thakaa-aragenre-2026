@@ -82,7 +82,7 @@ Refinements and an attractor drain reach 0.7352.
 Genre is what a text \emph{does} rather than what it is about: the same subject appears in a
 contract, a news report and a textbook, and only the first is useful to someone assembling a
 legal corpus. Sorting documents this way is what makes an archive filterable and a corpus
-assemblable by register, and the Arabic resources for it remain comparatively thin.
+assemblable by register, and Arabic lacks a comparable body of genre-labelled resources.
 AraGenre~2026~\citep{elhaj-etal-2026-aragenre} frames the problem as one of generalisation:
 systems receive English genre definitions and limited synthetic training data, but the
 hidden benchmark contains noisier naturally occurring Arabic spanning Modern Standard
@@ -264,7 +264,7 @@ almost unused, so
 redistribution to those siblings is metric-directed: it changes the per-class average far more
 than accuracy, and we cannot show the reassignments are semantically correct. The list comes from
 that prediction distribution, not from gold. The drain is deterministic: when the base label is an attractor class and a separate
-chain-of-thought re-judging pass~\citep{wei2022cot} names a different sibling in the same family, the
+chain-of-thought re-judging pass (following~\citealp{wei2022cot}) names a different sibling in the same family, the
 sibling replaces it (broad never changes). The surface rules are re-applied afterwards as a
 guard (Appendix~\ref{app:subs}). It moves 554 instances on the base alone and 383 in the final pipeline, where the correction
 runs first (Appendix~\ref{app:drain}).
@@ -700,8 +700,7 @@ large ones.
 
 \paragraph{Judge.} \texttt{gemma-4-31b} via vLLM, setwise 0--100 scoring in a single pass,
 temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction
-$\alpha{=}0.5$. We did not record the serving precision of the judge endpoint; vLLM's default
-for this checkpoint is bfloat16. The retriever precision is given above.
+$\alpha{=}0.5$. We did not record the serving precision of the judge endpoint. The retriever precision is given above.
 
 \paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
 Gemini-3.6~Flash (called with \texttt{temperature=0}, $\leq$400 output tokens), each given the full 74-definition taxonomy
