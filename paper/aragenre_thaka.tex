@@ -556,7 +556,8 @@ fell below deriving broad from the specific prediction, though one prompt config
 settle the comparison in general. Scoring all 74 candidates without retrieval pruning fell to
 0.6517. For correction, plain self-consistency (0.7134), entropic optimal transport
 (0.7115), uniform-prior calibration (0.7124) and an unrestricted chain-of-thought pass (0.7131)
-all regressed below the 0.7139 base, whereas full-context consensus improved it. Cross-lingual rerankers, tried after~\citet{btzsc2026}, did not help here; regex rules added nothing the judge lacked, and
+all regressed below the 0.7139 base, whereas full-context consensus improved it. \citet{btzsc2026} reports rerankers as the strongest zero-shot classifiers on their benchmark,
+but the cross-lingual rerankers we tried did not help on this task; regex rules added nothing the judge lacked, and
 the off-the-shelf dialect classifiers we tried did not expose the Iraqi/Sudanese
 distinction that NADI-style country-level tasks define~\citep{nadi2021}.
 
