@@ -447,8 +447,10 @@ capped at 512 tokens); the judge is a Gemma-family model
 (\texttt{gemma-4-31b}) served via vLLM with setwise 0--100 scoring; the consensus verifiers
 are GPT-5.6~Luna and Gemini-3.6~Flash, each queried with the full-taxonomy prompt.
 
-\textbf{Settings:} the judge decodes at temperature 0 with seed 42; the Gemini verifier runs at
-temperature 0 and the GPT verifier at \texttt{reasoning\_effort=low} with no temperature set.
+\textbf{Settings:} the judge decodes at temperature 0 with seed 42; the Gemini verifier is
+called with \texttt{temperature=0} and the GPT verifier with \texttt{reasoning\_effort=low} and
+no temperature set. We record the parameters we sent; whether a hosted model honours them is
+outside our control.
 The retriever caches the top 20 specific genres per text; the judge scores every sibling in the
 four small families and the top 6 retrieved elsewhere, in a single setwise pass, with marginal
 correction $\alpha{=}0.5$.
@@ -667,7 +669,7 @@ $\alpha{=}0.5$. We did not record the serving precision of the judge endpoint; v
 for this checkpoint is bfloat16. The retriever precision is given above.
 
 \paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and
-Gemini-3.6~Flash (temperature 0, $\leq$400 output tokens), each given the full 74-definition taxonomy
+Gemini-3.6~Flash (called with \texttt{temperature=0}, $\leq$400 output tokens), each given the full 74-definition taxonomy
 (2{,}884 tokens under \texttt{o200k\_base}, giving a mean prompt of 3{,}034 tokens and a maximum
 of 5{,}185) in the system prompt, and the text truncated to 1500 characters. The judge prompt asks for a
 JSON array of integer scores over the candidate definitions; the consensus prompt asks for a single exact
