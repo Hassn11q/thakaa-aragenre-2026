@@ -93,15 +93,14 @@ pushes systems toward
 generalising over communicative function. We placed 1st of 18 teams (Table~\ref{tab:metrics}) on the official ranking metric,
 Hierarchical Macro~F1: the mean of Broad and Specific Macro~F1.
 
-Our contributions are:
+The components are established individually; we combine and analyse them:
 \begin{enumerate}
 \itemsep0em
 \item A hierarchically constrained, definition-guided LLM judge that reaches 0.7139
 Hierarchical Macro~F1 with no parameter updates.
 \item An account of why one predictor fails the two tiers differently: broad accuracy is the
-family-accuracy of the specific prediction, whereas the gap between it and Broad Macro~F1 is
-consistent with uneven performance across broad classes, so correction must be tier-specific
-(\S\ref{sec:system}).
+family-accuracy of the specific prediction, whereas its gap with Broad Macro~F1 is consistent
+with uneven per-class performance, so correction must be tier-specific (\S\ref{sec:system}).
 \item An agreement-gated correction stage in which each verifier sees the full taxonomy, with a
 three-arm prompt diagnostic separating an explicit type-vs-topic instruction from a visible
 label to move the error onto.
@@ -718,6 +717,11 @@ minimum versions rather than exact pins.
 \paragraph{Cost.} The \$50 in \S\ref{sec:setup} is the amount billed for the 36{,}013 calls at
 July~2026 prices; we did not log per-request token usage, so we cannot restate it as a rate.
 
+\paragraph{Truncation and malformed outputs.} The 1{,}500-character verifier cap binds on
+2{,}987 of 27{,}972 instances (10.7\%); no text reaches the retriever's 8{,}000-character
+pre-truncation cap. The first verifier returned an unparsable label on 2 of its 27{,}972 calls
+and the second on 33 of its 8{,}041; those instances keep the base label.
+
 \paragraph{Throughput.} A consensus call takes 2.0--2.8\,s. At the released default of 20
 concurrent workers the 8{,}041-instance Gemini pass took 19\,min of wall clock; the full GPT
 pass over 27{,}972 instances was run at higher concurrency.
@@ -784,6 +788,15 @@ guard the correction stages rather than adding score.
 The chain-of-thought row applies that pass to every instance and scores 0.7131,
 below the 0.7139 base; the same pass restricted to attractor classes is what the drain uses.
 In this configuration the chain-of-thought pass helped only where it was aimed.
+
+\paragraph{How the directions were screened.} For each candidate direction we read a sample of
+the moves the two verifiers agreed on and asked whether they showed a recurring misfiling that
+the released definitions themselves resolve---dialectal comments filed as book descriptions,
+wire news filed as resolutions or contracts, long prose filed as song lyrics, scripture filed as
+fiction or encyclopedia entries. Directions where the agreed moves instead looked like a shared
+topic bias were rejected, the clearest being Informative$\rightarrow$Learning, which over-fires
+student-writing on academic prose. The criterion is a reading judgement, not a measurement; the
+accepted set is fixed in \texttt{src/assemble.py} with a one-line rationale per direction.
 
 \paragraph{Gated broad moves.} Of the 3{,}300 instances where both verifiers agree against the
 base, 2{,}122 stay inside the base family and are applied as refinements. Of the 1{,}178 that
