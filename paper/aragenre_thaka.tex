@@ -82,8 +82,8 @@ systems receive English genre definitions and limited synthetic training data, b
 hidden benchmark contains noisier naturally occurring Arabic spanning Modern Standard
 Arabic, Classical Arabic, and multiple dialects, with \emph{previously unseen
 genre--definition combinations}. Because the 74 specific test genres are disjoint from
-training, memorisation is useless and semantic understanding of communicative function
-is required. We placed 1st of 18 teams (Table~\ref{tab:metrics}) on the official ranking metric,
+training, no specific label can be memorised from it, and the setup pushes systems toward
+generalising over communicative function. We placed 1st of 18 teams (Table~\ref{tab:metrics}) on the official ranking metric,
 Hierarchical Macro~F1: the mean of Broad and Specific Macro~F1.
 
 Our contributions are:
@@ -105,14 +105,15 @@ teams, with the major system configurations scored as their own submissions.
 \end{enumerate}
 
 \noindent The main challenges were a specific-label inventory disjoint from training, the topic
-trap of \S\ref{sec:system}, and classes with no written signal (song dialects, textbook
-levels).
+trap of \S\ref{sec:system}, and classes for which we found no reliable written cue (song
+dialects, textbook levels).
 
 \section{Related Work}
 \paragraph{Arabic and hierarchy-aware HTC.} Arabic pretrained models~\citep{antoun2020arabert,antoun2021aragpt2}
 underpin most classification work on the language, including hierarchical variants~\citep{aragpt2htc2025,arabichtc2026}, and a large
 literature models the label hierarchy explicitly~\citep{zhu2023hitin,cai2023hpt,zeng2025cpm,wang2025hierclassifier,combining2025,htcsurvey2024}.
-These closed-label supervised setups do not transfer to AraGenre's unseen, definition-specified labels; we instead
+These closed-label supervised setups do not directly address AraGenre's unseen,
+definition-specified label inventory; we instead
 enforce the hierarchy structurally, forcing $\text{broad}=\text{parent}(\text{specific})$.
 
 \paragraph{Zero-shot HTC, LLM judging, and consensus.} Prior systems reach an unseen label
@@ -249,8 +250,9 @@ agree.
 \subsection{Attractor drain: redistributing to low-frequency siblings}
 Specific Macro~F1 averages F1 over all 74 classes, so a class that is systematically
 under-predicted has low recall and low class-level F1. This stage is partly transductive: reading our own hidden-test
-predictions during the evaluation phase revealed five \emph{attractor} classes broad enough to
-absorb any text the judge cannot place, leaving their rarer siblings almost unused, so
+predictions during the evaluation phase revealed five \emph{attractor} classes worded broadly
+enough to absorb much of what the judge cannot place confidently, leaving their rarer siblings
+almost unused, so
 redistributing labels from an attractor to those siblings moves the mean far more than accuracy.
 The list comes from that prediction distribution, not from held-out gold. The drain is deterministic: when the base label is an attractor class and a separate
 chain-of-thought re-judging pass~\citep{wei2022cot} names a different sibling in the same family, the
