@@ -99,7 +99,7 @@ Our contributions are:
 \begin{enumerate}
 \itemsep0em
 \item A hierarchically constrained, definition-guided LLM judge whose five-step base pipeline reaches 0.7139
-Hierarchical Macro~F1 with no parameter updates.
+Hierarchical Macro~F1 with no model-weight updates.
 \item An account of why one predictor fails the two tiers differently: broad accuracy is the
 family-accuracy of the specific prediction, whereas its gap with Broad Macro~F1 is consistent
 with uneven per-class performance, so correction must be tier-specific (\S\ref{sec:system}).
@@ -258,16 +258,15 @@ Informative$\rightarrow$Learning, are rejected (Appendix~\ref{app:subs}). Within
 agree.
 
 \subsection{Attractor drain: redistributing to low-frequency siblings}
-Specific Macro~F1 averages F1 over all 74 classes, so a class that is systematically
-under-predicted has low recall and low class-level F1. This stage is partly transductive: reading our own hidden-test
+Specific Macro~F1 averages over all 74 classes, so a systematically under-predicted class has low
+recall and low class-level F1. This stage is partly transductive: reading our own hidden-test
 predictions during the evaluation phase revealed five heavily predicted \emph{attractor}
 classes whose rarer siblings were almost unused, so
-redistribution to those siblings is metric-directed toward Macro~F1 and is intended to affect the
-per-class average more directly than accuracy; we cannot show the reassignments are semantically
-correct. The list comes from
-that distribution, not from gold. The drain is deterministic: when the base label is an attractor class and a separate
-chain-of-thought re-judging pass (following~\citealp{wei2022cot}) names a different sibling in the same family, the
-sibling replaces it (broad never changes). The surface rules are re-applied afterwards as a guard. It moves 554
+redistribution is metric-directed toward Macro~F1 and is intended to affect the per-class average
+more directly than accuracy; we cannot show the reassignments are semantically correct. The list comes from
+that distribution, not from gold. The drain is deterministic. When the base label is an attractor class and a separate
+chain-of-thought pass (following~\citealp{wei2022cot}) names a different sibling in the same
+family, that sibling replaces it; the broad label never changes. The surface rules are re-applied afterwards as a guard. It moves 554
 instances on the base alone and 383 in the final pipeline, where the correction runs first
 (Appendices~\ref{app:subs} and~\ref{app:drain}).
 
@@ -314,8 +313,9 @@ tokens and verifier inputs at 1{,}500 characters, preserving two orthographic si
 diacritisation in 77\% of texts we label \texttt{quran} and 43\% of poetry
 (\texttt{classical\_poetry} and \texttt{msa\_poetry}) against 1\% elsewhere,
 and emoji in 28\% of Interactive texts against under 1\% (Appendix~\ref{app:ortho}).
-\paragraph{Tools and metrics.} Qwen3-Embedding-8B, vLLM for the local judge, vendor SDKs for the
-verifiers; Macro F1, Weighted F1 and Accuracy at both tiers (Appendix~\ref{app:hparams}).
+\paragraph{Tools and metrics.} Qwen3-Embedding-8B, vLLM for the judge, vendor SDKs for the
+verifiers. We report Macro F1, Weighted F1 and Accuracy at both tiers
+(Appendix~\ref{app:hparams}).
 \paragraph{Cost.} The correction makes 36{,}013 calls, about US\$50; the base needs no paid API
 (Appendix~\ref{app:hparams}).
 
@@ -506,8 +506,8 @@ present with exact labels.
 cached artifacts, but the base pipeline cannot be regenerated end to end. Two inputs to the trap
 experiment illustrate the gap: the 2{,}635-instance verification pool, selected during the
 evaluation phase as the instances whose broad label we judged least secure, and the broad-only
-prompt behind arm~A. Both the pool file and arm~A's cached outputs ship, so
-\texttt{src/trap\_table.py} rebuilds the table offline, but neither selection can be re-derived
+prompt behind arm~A. Both the pool file and arm~A's cached outputs will ship, so
+\texttt{src/trap\_table.py} will rebuild the table offline, but neither selection can be re-derived
 from the code.
 
 \textbf{Two cached inputs.} The broad gate the judge restricts to is the scored 0.6812
@@ -560,7 +560,7 @@ chiefs of the sons of Esau'', Genesis~36, id 10798), where the base says
 \texttt{history\_encyclopedia} and consensus changes it to \texttt{bible}. (ii)~\emph{Heavy attractor prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
 (iii)~\emph{Low cue coverage}: for each of the five song-lyric classes, 87--99\% of the texts we
 assign to it carry no marker from our cue inventory
-(\texttt{src/dialect\_markers.py} holds the lists and rebuilds the table). This measures the
+(\texttt{src/dialect\_markers.py} will hold the lists and rebuild the table). This measures the
 coverage of our inventory, not an intrinsic ceiling: it shows our system lacks reliable surface
 cues for these distinctions, not that no written signal exists.
 
@@ -575,7 +575,7 @@ from the specific prediction, scored 0.6206; the submitted configuration that sc
 candidates without retrieval pruning scored 0.6517. Neither isolates a single component. For correction, plain self-consistency (0.7134), entropic optimal transport
 (0.7115), uniform-prior calibration (0.7124) and an unrestricted chain-of-thought pass (0.7131)
 all regressed below the 0.7139 base, whereas full-context consensus improved it. \citet{btzsc2026} reports rerankers as the strongest zero-shot classifiers on their benchmark,
-but the cross-lingual rerankers we tried did not help on this task; regex rules added nothing the judge lacked, and
+but the cross-lingual rerankers we tried did not help on this task; regex rules did not improve the 0.6882 configuration, and
 the off-the-shelf dialect classifiers we tried did not expose the Iraqi/Sudanese
 distinction that NADI-style country-level tasks define~\citep{nadi2021}.
 
@@ -588,7 +588,7 @@ enriched diagnostic sample: rates measured on it are not representative of all 2
 also carries an explicit type-vs-topic instruction, we added a third arm, broad definitions only
 \emph{plus} that instruction, to separate the two factors. On the 1{,}403 book-description
 instances GPT-5.6 calls 394 of them Religious with neither, 233 with the instruction alone and
-119 with the full taxonomy; \texttt{src/trap\_table.py} rebuilds these counts from cached
+119 with the full taxonomy; \texttt{src/trap\_table.py} will rebuild these counts from cached
 verifier outputs with no API access.
 
 Table~\ref{tab:arms} splits the same three arms over the whole pool. Two things follow. First,
@@ -702,8 +702,8 @@ $s'(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre 
 over the instances in which $y$ appears in the scored candidate set, recomputed independently for
 each split, and $\alpha{=}0.75$, chosen on the released training labels. It
 damps genres the judge rates generously everywhere, which is what leaves rare siblings seldom
-predicted. The submitted base invocation was not logged. Our own judge run logs report
-$\alpha{=}0.75$, while sibling experiment artifacts that select $\alpha$ over the grid
+predicted. The submitted base invocation was not logged. A contemporaneous report records
+$\alpha{=}0.75$, while sibling experiment artifacts selecting $\alpha$ over the grid
 $\{0, 0.25, 0.5, 0.75, 1\}$ record other values, including 0.5 and 1.0. Two cached prediction
 files, the chain-of-thought pass (\texttt{cot\_predictions.json}) and an earlier base rebuild
 (\texttt{early\_base.json}), reproduce at $\alpha{=}0.75$ and at no other value on that grid. We
@@ -780,7 +780,7 @@ measured post hoc with the Qwen3 tokenizer), and the 1{,}500-character verifier 
 2{,}987 (10.7\%); no text reaches the 8{,}000-character pre-truncation cap. The first verifier returned an unparsable label on 2 of its 27{,}972 calls
 and the second on 33 of its 8{,}041; those instances keep the base label.
 
-\paragraph{Throughput.} A consensus call takes 2.0--2.8\,s. At the released default of 20
+\paragraph{Throughput.} A consensus call takes 2.0--2.8\,s. At the planned release default of 20
 concurrent workers the 8{,}041-instance Gemini pass took 19\,min of wall clock; the full GPT
 pass over 27{,}972 instances was run at higher concurrency.
 
