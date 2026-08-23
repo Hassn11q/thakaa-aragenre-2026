@@ -351,34 +351,30 @@ A definition-guided judge, an agreement-gated correction and an attractor drain 
 \section*{Limitations}
 
 \textbf{What is and is not a score.} Every hidden-test \emph{score} we report is an official
-evaluation-phase submission (Appendix~\ref{app:subs}); we made no submission after the deadline.
-The instruction-only arm of the three-arm ablation (\S\ref{sec:system}) was run after the phase
-closed, so that comparison is post hoc, and the descriptive tables in
-Appendices~\ref{app:errors}, \ref{app:trap}, \ref{app:drain} and~\ref{app:subs} are local
-analyses of submitted outputs rather than scored runs. \textbf{Validation.} The hidden test has
-no released gold and the development set is near-degenerate, so components were selected on the
-public leaderboard and by manual reading; our reported progression therefore doubles as the
-selection signal, which risks fitting the test distribution. Because blind labels are
-unreleased, no hidden-test gain carries a confidence interval, and those gains should be read as
+evaluation-phase submission (Appendix~\ref{app:subs}); we made none after the deadline. The
+instruction-only ablation arm (\S\ref{sec:system}) was run after the phase closed, and the
+descriptive tables in Appendices~\ref{app:errors}, \ref{app:trap}, \ref{app:drain}
+and~\ref{app:subs} are local analyses of submitted outputs, not scored runs.
+\textbf{Validation.} The hidden test has no released gold and dev is near-degenerate, so
+components were selected on the public leaderboard and by manual reading; the reported
+progression therefore doubles as the selection signal, which risks fitting the test
+distribution. No hidden-test gain carries a confidence interval, so those gains are
 leaderboard-measured rather than statistically certified; Appendix~\ref{app:subs} gives the
-scale of a class-level effect for comparison. The one component testable against
-gold is the drain, where a paired bootstrap on dev puts its gain above zero
-(\S\ref{sec:dev}). \textbf{Unmeasured components.} We never ran the judge with and without the 74 discriminators
-and per-family cue lists, so their contribution is unmeasured; they were written from the
-released definitions and Arabic linguistic knowledge, but we cannot separate their effect from
-the rest of the prompt. \textbf{Partly transductive.} The base judge's marginal correction subtracts a per-genre mean
-score computed over the whole test set (Appendix~\ref{app:calib}), so it cannot label a
-document in isolation. Two further design choices were derived by reading our own predictions
-over the blind inputs rather than from held-out gold: the five attractor classes
-(\S\ref{sec:system}) and the seven gated broad-move directions (Appendix~\ref{app:subs}). No
-hidden label was inspected, and no prediction was edited by hand---both choices enter the
-pipeline only through deterministic rules---but the method is not fully inductive, and neither
-choice is validated on gold. \textbf{An untested comparison.} We ran GPT-5.6 over the full test set but
-never submitted its predictions as a system, so the claim that a cheap base judge with
-conservative correction beats direct full-taxonomy prediction is untested; the disagreement
-rate reported in \S\ref{sec:analysis} is our only evidence that one model is too noisy to act on.
-\textbf{Cost and ceilings.} Correction cost scales with test size, and our cue inventory has low coverage among texts
-we predict as song dialects, so we lack reliable surface cues for these distinctions.
+scale of a class-level effect. The one component testable against gold is the drain, where a
+paired bootstrap on dev puts its gain above zero (\S\ref{sec:dev}). \textbf{Unmeasured
+components.} We never ran the judge with and without the 74 discriminators and per-family cue
+lists, so we cannot separate their contribution from the rest of the prompt.
+\textbf{Partly transductive.} The marginal correction subtracts a per-genre mean computed over
+the whole test set (Appendix~\ref{app:calib}), so the base cannot label a document in isolation,
+and two further choices were derived by reading our own predictions over the blind inputs: the
+five attractor classes (\S\ref{sec:system}) and the seven gated broad-move directions
+(Appendix~\ref{app:subs}). No hidden label was inspected and no prediction was edited by hand,
+but the method is not fully inductive and neither choice is validated on gold.
+\textbf{An untested comparison.} We ran GPT-5.6 over the full test set but never submitted it as
+a system, so the claim that a cheap base judge with conservative correction beats direct
+full-taxonomy prediction is untested. \textbf{Cost and ceilings.} Correction cost scales with
+test size, and our cue inventory has low coverage among texts we predict as song dialects, so we
+lack reliable surface cues for those distinctions.
 
 \section*{Ethics Statement}
 This work uses only the publicly released AraGenre data and collects nothing new; any
