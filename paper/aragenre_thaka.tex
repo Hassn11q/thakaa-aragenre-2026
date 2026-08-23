@@ -62,9 +62,9 @@ instruction models re-predict the specific genre, each shown the \emph{entire} 7
 taxonomy, and a label is edited only where both agree against the base. This agreement-gated
 stage lifts Broad Macro~F1 from 0.879 to 0.892, largely by suppressing a \emph{topic trap}, in
 which the genre of the subject a text discusses displaces the genre the text itself
-instantiates; a post-evaluation ablation attributes the
-suppression to an explicit type-versus-topic instruction ($394\rightarrow233$ trapped calls) and
-to the taxonomy itself ($233\rightarrow119$). Within-family refinements and a final attractor
+instantiates. In a post-evaluation audit of instances the base labelled book descriptions,
+Religious calls fall $394\rightarrow233$ once the prompt states the type-versus-topic
+convention, and to 119 once it also shows the full taxonomy. Within-family refinements and a final attractor
 drain carry the system to 0.7352.
 \end{abstract}
 
@@ -229,9 +229,9 @@ files it under Informative while every broad-only verifier answers Religious. Th
 post-evaluation three-arm ablation over the same 1{,}403 instances to estimate each factor's
 incremental effect (one model, GPT-5.6, identical pool): with broad definitions only and no such instruction, 394 are
 called Religious; adding the instruction alone removes 41\% of those (394$\rightarrow$233); supplying
-the full taxonomy removes a further 49\% (233$\rightarrow$119). The two are not interchangeable:
-the instruction helps only on the book descriptions and over-fires elsewhere, whereas the taxonomy
-improves every subset of the pool (Table~\ref{tab:arms}). Scripture filed as an encyclopedia entry (\ar{هؤلاء امراء بني عيسو}, Genesis~36) is relabelled
+the full taxonomy removes a further 49\% (233$\rightarrow$119). The two are not interchangeable: the
+instruction lowers Religious calls only on the book descriptions and raises them elsewhere,
+whereas the taxonomy lowers them on every subset of the pool (Table~\ref{tab:arms}). Scripture filed as an encyclopedia entry (\ar{هؤلاء امراء بني عيسو}, Genesis~36) is relabelled
 \texttt{bible}, and base-family agreement rises in five of the six families (Appendix~\ref{app:trap}).
 
 \paragraph{Conservative application.} The first model runs over all 27{,}972 instances, the
@@ -359,10 +359,8 @@ no released gold and the development set is near-degenerate, so components were 
 public leaderboard and by manual reading; our reported progression therefore doubles as the
 selection signal, which risks fitting the test distribution. Because blind labels are
 unreleased, no hidden-test gain carries a confidence interval, and those gains should be read as
-leaderboard-measured rather than statistically certified. For scale: 19 of the 74 specific
-classes receive fewer than 200 predictions (the smallest, 33), and moving one class's F1 from 0
-to 1 shifts Specific Macro~F1 by 0.0135 and Hierarchical Macro~F1 by 0.0068, so our reported
-stage gains are on the order of two to three class-level effects. The one component testable against
+leaderboard-measured rather than statistically certified; Appendix~\ref{app:subs} gives the
+scale of a class-level effect for comparison. The one component testable against
 gold is the drain, where a paired bootstrap on dev puts its gain above zero
 (\S\ref{sec:dev}). \textbf{Unmeasured components.} We never ran the judge with and without the 74 discriminators
 and per-family cue lists, so their contribution is unmeasured; they were written from the
@@ -508,10 +506,11 @@ definitions, which is why supplying the full taxonomy, rather than the broad lab
 changes model behaviour so sharply.
 \section{Prediction Audit Examples}
 \label{app:errors}
-Three error types dominate. (i)~\emph{Cross-family topic leaks}: a description \emph{of} a
+Three recurring prediction patterns appear in our audit. (i)~\emph{Cross-family topic leaks}: a description \emph{of} a
 religious book (\ar{يهدف هذا الكتاب إلى قراءة سيرة الرسول}, id 10041) is
-\texttt{islamic\_book\_description} (Informative), which our base and final systems both get
-right but which all three verifiers call Religious under the broad-only prompt; scripture leaks the other way
+\texttt{islamic\_book\_description} (Informative), which both our base and final systems label
+that way, consistent with the released definition, but which all three verifiers call Religious
+under the broad-only prompt; scripture leaks the other way
 (\ar{هؤلاء امراء بني عيسو}, Genesis~36, id 10798), where the base says
 \texttt{history\_encyclopedia} and consensus changes it to \texttt{bible}. (ii)~\emph{Heavy attractor prediction}: long prose absorbed into \texttt{egyptian\_song\_lyrics}.
 (iii)~\emph{Ceiling classes}: for each of the five song-lyric classes, 87--99\% of the texts we
@@ -545,7 +544,7 @@ the instances the base already reads as Religious and less often on every other 
 separation between the two widens monotonically. Second, the instruction and the taxonomy are not
 interchangeable. The instruction pays off only on the book descriptions, where the competing label
 (\texttt{*\_book\_description}) is the trap's target; on the rest of the pool it over-fires,
-raising Religious calls by a quarter. Only the full taxonomy improves every subset at once. We read
+raising Religious calls by a quarter. Only the full taxonomy lowers them on every subset at once. We read
 this as the instruction supplying a convention the model cannot act on until the taxonomy shows it
 a label that satisfies the convention. The caveat of Table~\ref{tab:trap} applies here too: the
 row labels come from the base system, so these are agreement counts, not accuracy.
@@ -720,6 +719,12 @@ listed here. Submissions were made sequentially over four days, so the progressi
 of scored configurations rather than a single controlled sweep.}
 \label{tab:subs}
 \end{table}
+
+\paragraph{The scale of a stage gain.} Nineteen of the 74 specific classes receive fewer than
+200 predictions in the final submission, the smallest 33. Moving a single class's F1 from 0 to 1
+would shift Specific Macro~F1 by 0.0135 and Hierarchical Macro~F1 by 0.0068, so the stage gains
+in Table~\ref{tab:ablation} are on the order of two to three class-level effects, and the margin
+over the second-placed system is about 2.7.
 
 \paragraph{Two readings this record supports.} The 0.6881 row isolates the surface rules on top
 of the 0.6882 row: they rewrite 32 labels (23 \texttt{quran}, 9 \texttt{hadith}) and leave the
