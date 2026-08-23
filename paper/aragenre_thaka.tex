@@ -555,7 +555,10 @@ cues for these distinctions, not that no written signal exists.
 
 \section{Negative Results}
 \label{app:negative}
-A \emph{direct} six-way broad classifier scored 0.6206; in our submitted configurations this
+Two paths were built but never reached a submitted configuration: LLM-enriched definitions
+(a sibling contrast and two synthetic exemplars per genre) and a transductive label-propagation
+pass over the test embeddings; the released judge keeps the definitions verbatim and adds only
+the hand-written cues. A \emph{direct} six-way broad classifier scored 0.6206; in our submitted configurations this
 fell below deriving broad from the specific prediction, though one prompt configuration cannot
 settle the comparison in general. Scoring all 74 candidates without retrieval pruning fell to
 0.6517. For correction, plain self-consistency (0.7134), entropic optimal transport
