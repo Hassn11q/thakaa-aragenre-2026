@@ -454,8 +454,11 @@ figures for our own predictions, not accuracy.
 
 \textbf{Provenance of the hand-built parts.} Nothing below was tuned on held-out gold. The 74
 discriminators and per-family cue lists were author-written from the released definitions and
-Arabic linguistic knowledge, fixed before the configuration that used them was scored and not
-revised afterwards. The five attractor classes, the seven accepted broad-move directions and the
+Arabic linguistic knowledge, without reference to labelled data. Their file was created in a
+single write on 28~July~2026 and never modified afterwards, so they were composed after the
+hidden-test inputs were released and after our first two scored submissions, but were fixed two
+days before the configuration that uses them was scored and could not have been revised in
+response to any later leaderboard result. The five attractor classes, the seven accepted broad-move directions and the
 2{,}635-instance verification subset were chosen by reading our own predictions over the
 released test inputs. The calibration $\alpha{=}0.5$ replaced an initial 0.75 that over-flattened
 the 74-class space (Appendix~\ref{app:calib}), and the broad gate is an earlier scored submission
