@@ -282,7 +282,7 @@ driver wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted sy
 \paragraph{Preprocessing.} We apply no text normalisation; retriever inputs are capped at 512
 tokens and verifier inputs at 1{,}500 characters. Normalisation erases two orthographic signals: heavy diacritisation marks 77\% of the texts we label
 \texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
-against under 1\% elsewhere (Appendix~\ref{app:subs}).
+against under 1\% elsewhere (Appendix~\ref{app:ortho}).
 \paragraph{Tools and metrics.} Qwen3-Embedding-8B, vLLM for the local judge, vendor SDKs for the
 verifiers; we report Macro F1, Weighted F1 and Accuracy at both tiers (Appendix~\ref{app:hparams}).
 \paragraph{Cost.} The correction makes 36{,}013 calls, about US\$50; the base needs no paid API
@@ -802,7 +802,9 @@ match, and one character class contains a literal \texttt{|}. They ran as writte
 submission was produced, so we keep them verbatim and document them in the code; correcting all
 three changes 22 of the 27{,}972 final predictions.
 
-\paragraph{Orthographic signals.} Share of each group carrying heavy diacritisation (a mark on
+\section{Orthographic Signals}
+\label{app:ortho}
+Share of each group carrying heavy diacritisation (a mark on
 over 10\% of its Arabic characters) or at least one emoji, over the final predictions:
 \texttt{quran} 77\%/0\% ($n{=}691$), poetry 43\%/0\% ($n{=}1{,}606$), \texttt{hadith} 1\%/1\%
 ($n{=}647$), book descriptions 1\%/0\% ($n{=}3{,}916$), the whole Interactive family 0\%/28\%
