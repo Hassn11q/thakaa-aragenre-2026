@@ -457,7 +457,9 @@ definitions and Arabic linguistic knowledge, without access to instance-level go
 single write on 28~July~2026 and never modified afterwards, so they were composed after the
 hidden-test inputs were released and after our first two scored submissions, but were fixed two
 days before the configuration that uses them was scored and could not have been revised in
-response to any later leaderboard result. The five attractor classes, the seven accepted broad-move directions and the
+response to any later leaderboard result. A design note written the same day records the rule
+followed: no class frequencies or priors were to be injected. We did not record whether the test
+texts or our own predictions were consulted while composing them, so we cannot rule that out. The five attractor classes, the seven accepted broad-move directions and the
 2{,}635-instance verification subset were chosen by reading our own predictions over the
 released test inputs. The calibration $\alpha{=}0.5$ replaced an initial 0.75 that over-flattened
 the 74-class space (Appendix~\ref{app:calib}), and the broad gate is an earlier scored submission
@@ -799,7 +801,9 @@ wire news filed as resolutions or contracts, long prose filed as song lyrics, sc
 fiction or encyclopedia entries. Directions where the agreed moves instead looked like a shared
 topic bias were rejected, the clearest being Informative$\rightarrow$Learning, which over-fires
 student-writing on academic prose. The criterion is a reading judgement, not a measurement; the
-accepted set is fixed in \texttt{src/assemble.py} with a one-line rationale per direction.
+accepted set is fixed in \texttt{src/assemble.py} with a one-line rationale per direction. One
+author did the screening; we did not record how many moves were read per direction or whether
+they were sampled at random, so the scale of that inspection is not recoverable.
 
 \paragraph{Gated broad moves.} Of the 3{,}300 instances where both verifiers agree against the
 base, 2{,}122 stay inside the base family and are applied as refinements. Of the 1{,}178 that
