@@ -436,22 +436,14 @@ genres explicitly (\texttt{src/discriminators.py}, \texttt{src/judge.py}). The s
 name a further seven labels. No test label or annotation informs any of it, but the pipeline is
 not label-agnostic and we do not claim it is.
 
-\textbf{Provenance of the hand-written material.} The 74 discriminators and the per-family cue
-lists were written by the authors from the released English definitions and Arabic linguistic
-knowledge, without consulting any labelled data. They were composed during the evaluation phase,
-after the first scored submission and before the base configuration was scored, and were not
-revised afterwards; each was therefore fixed before the configuration that used it was
-submitted. We did not keep per-cue authorship records.
-
-\textbf{Provenance of the selected constants.} None of the following was tuned on held-out gold.
-The five attractor classes and the seven accepted broad-move directions were chosen by reading
-our own predictions over the released test inputs (\S\ref{sec:system}). The calibration
-$\alpha{=}0.5$ replaced an initial 0.75 chosen on the released training labels, after the
-larger value over-flattened the 74-class space (Appendix~\ref{app:calib}). The 2{,}635-instance
-verification subset was selected during the evaluation phase as the instances whose broad label
-we judged least secure. The broad gate is an earlier scored submission of ours reused verbatim.
-On dev the drain fires on the two most-predicted classes, re-derived there rather than carried
-over.
+\textbf{Provenance of the hand-built parts.} Nothing below was tuned on held-out gold. The 74
+discriminators and per-family cue lists were author-written from the released definitions and
+Arabic linguistic knowledge, fixed before the configuration that used them was scored and not
+revised afterwards. The five attractor classes, the seven accepted broad-move directions and the
+2{,}635-instance verification subset were chosen by reading our own predictions over the
+released test inputs. The calibration $\alpha{=}0.5$ replaced an initial 0.75 that over-flattened
+the 74-class space (Appendix~\ref{app:calib}), and the broad gate is an earlier scored submission
+of ours reused verbatim.
 
 \textbf{Models:} the base retriever is Qwen3-Embedding-8B (4-bit NF4
 weights with fp16 compute, 4096-dim, cosine over L2-normalised vectors, sequence length
@@ -705,10 +697,8 @@ JSON array of integer scores over the candidate definitions; the consensus promp
 judge, and the \texttt{openai} and \texttt{google-genai} SDKs for the verifiers; pinned
 versions accompany the code.
 
-\paragraph{Cost.} The \$50 total quoted in \S\ref{sec:setup} is the amount actually billed for
-the 36{,}013 correction calls at the vendor prices in force in July~2026. We did not log
-per-request token usage, so we cannot decompose it into input and output totals or restate it as
-a rate.
+\paragraph{Cost.} The \$50 in \S\ref{sec:setup} is the amount billed for the 36{,}013 calls at
+July~2026 prices; we did not log per-request token usage, so we cannot restate it as a rate.
 
 \paragraph{Throughput.} A consensus call takes 2.0--2.8\,s. At the released default of 20
 concurrent workers the 8{,}041-instance Gemini pass took 19\,min of wall clock; the full GPT
