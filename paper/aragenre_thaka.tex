@@ -264,11 +264,13 @@ predictions during the evaluation phase revealed five heavily predicted \emph{at
 classes whose rarer siblings were almost unused, so
 redistribution is metric-directed toward Macro~F1 and is intended to affect the per-class average
 more directly than accuracy; we cannot show the reassignments are semantically correct. The list comes from
-that distribution, not from gold. The drain is deterministic. When the base label is an attractor class and a separate
-chain-of-thought pass (following~\citealp{wei2022cot}) names a different sibling in the same
-family, that sibling replaces it; the broad label never changes. The surface rules are re-applied afterwards as a guard. It moves 554
+that distribution, not from gold. \begingroup\hyphenpenalty=10000\exhyphenpenalty=10000
+The drain is deterministic. When the base label is an attractor class and a separate
+chain-of-thought pass (following~\citealp{wei2022cot}) names a different sibling within the same
+family, that sibling then replaces it; the broad label never changes. The surface rules are re-applied
+afterwards as a guard. It moves 554
 instances on the base alone and 383 in the final pipeline, where the correction runs first
-(Appendices~\ref{app:subs} and~\ref{app:drain}).
+(Appendices~\ref{app:subs} and~\ref{app:drain}).\endgroup
 
 \begin{table}[t]
 \centering\small
@@ -495,7 +497,8 @@ correction $\alpha{=}0.75$ (Appendix~\ref{app:calib}).
 \textbf{Pipeline and code:} the code and cached model outputs described in this appendix will be
 released publicly; every path below is relative to that release's root and names what it will
 contain, not a file readers can fetch today. Every stage is one file: retrieval
-(\texttt{src/retrieve.py}), the family-restricted judge (\texttt{src/judge.py}), the surface
+(\texttt{src/retrieve.py}; the unedited producer of the submitted cache is kept separately as
+\texttt{src/retrieve\_\allowbreak submitted.py}), the family-restricted judge (\texttt{src/judge.py}), the surface
 rules (\texttt{src/rules.py}), the full-context verifiers (\texttt{src/verify.py}), the
 consensus and drain assembly (\texttt{src/assemble.py}), and the submission builder
 (\texttt{src/submission.py}), which enforces
