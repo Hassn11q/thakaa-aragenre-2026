@@ -207,7 +207,7 @@ does not: it averages per-class F1, and the gap between the two is what the diag
 exploits. (iii) Following the setwise comparison of~\citet{sun2023rankgpt}, our judge scores each
 candidate 0--100 against its definition in one call, and we take the argmax after a light marginal correction
 (Appendix~\ref{app:calib}). (iv) A few
-high-specificity surface rules override the judge only on near-unambiguous markers
+targeted surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; hand-screened samples showed nothing visibly violating the
 intended rule semantics, which is not a precision estimate; emoji/hashtag short posts $\rightarrow$
@@ -257,9 +257,8 @@ agree.
 \subsection{Attractor drain: redistributing to low-frequency siblings}
 Specific Macro~F1 averages F1 over all 74 classes, so a class that is systematically
 under-predicted has low recall and low class-level F1. This stage is partly transductive: reading our own hidden-test
-predictions during the evaluation phase revealed five \emph{attractor} classes worded broadly
-enough to absorb much of what the judge cannot place confidently, leaving their rarer siblings
-almost unused, so
+predictions during the evaluation phase revealed five heavily predicted \emph{attractor}
+classes whose rarer siblings were almost unused, so
 redistribution to those siblings is metric-directed: it changes the per-class average far more
 than accuracy, and we cannot show the reassignments are semantically correct. The list comes from
 that prediction distribution, not from gold. The drain is deterministic: when the base label is an attractor class and a separate
@@ -279,7 +278,7 @@ driver wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted sy
 \texttt{broad\_genre} = Informative and \texttt{specific\_genre} = \texttt{drivers\_and\_}
 \texttt{delivery\_jobs}.
 \paragraph{Preprocessing.} We apply no text normalisation; retriever inputs are capped at 512
-tokens and verifier inputs at 1{,}500 characters. Normalisation erases two orthographic signals: heavy diacritisation marks 77\% of the texts we label
+tokens and verifier inputs at 1{,}500 characters, preserving two orthographic signals: heavy diacritisation occurs in 77\% of the texts we label
 \texttt{quran} and 43\% of poetry against 1\% elsewhere, and emoji mark 28\% of Interactive texts
 against under 1\% elsewhere (Appendix~\ref{app:ortho}).
 \paragraph{Tools and metrics.} Qwen3-Embedding-8B, vLLM for the local judge, vendor SDKs for the
@@ -311,10 +310,11 @@ Genre-general judge, no retrieval & test & 0.6067 \\
 \textbf{\; + within-family refinements, drain} & test & \textbf{0.7352} \\
 \bottomrule
 \end{tabular}
-\caption{Submission record on both splits. Dev is near-degenerate (its 6 specific genres map
+\caption{Results on both splits. Dev is near-degenerate (its 6 specific genres map
 one-to-one onto 6 broad, so all three F1 metrics coincide), so the hidden test is our primary
 evaluation. \emph{Subset} corrects only instances whose broad label the base judged least
-secure. Rows are successive submissions, not single-component ablations. $^{\dagger}$~applied to the GPT-5.6 judge, tuned on dev, so not held out.}
+secure. Test rows are successive submissions, not single-component ablations; dev rows are
+local evaluations. $^{\dagger}$~applied to the GPT-5.6 judge, tuned on dev, so not held out.}
 \label{tab:ablation}
 \end{table}
 
@@ -365,7 +365,7 @@ A definition-guided judge, an agreement-gated correction and an attractor drain 
 
 \textbf{What is and is not a score.} Every hidden-test \emph{score} we report is an official
 evaluation-phase submission (Appendix~\ref{app:subs}); we made none after the deadline. The
-instruction-only ablation arm (\S\ref{sec:system}) was run after the phase closed, and the
+instruction-only diagnostic arm (\S\ref{sec:system}) was run after the phase closed, and the
 descriptive tables in Appendices~\ref{app:errors}, \ref{app:trap}, \ref{app:drain}
 and~\ref{app:subs} are local analyses of submitted outputs, not scored runs.
 \textbf{Validation.} The hidden test has no released gold and dev is near-degenerate, so
@@ -441,7 +441,7 @@ verifiers receive the 74 definitions verbatim. The judge does not: by default it
 one-line Arabic discriminator to each definition and prepends per-family cue lists, both
 author-written from the released definitions and Arabic linguistic knowledge, and both naming
 genres explicitly (\texttt{src/discriminators.py}, \texttt{src/judge.py}). The surface rules
-name a further seven labels. No test label or annotation informs any of it, but the pipeline is
+name a further seven labels. No hidden-test gold label or annotation informs any of it, but the pipeline is
 not label-agnostic and we do not claim it is.
 
 \textbf{Retrieval coverage.} The hidden test has no gold, so we cannot report recall against
@@ -526,7 +526,7 @@ Informative and our correction stage moves such predictions out of Religious, co
 the released test definition. The examples suggest different boundary choices across the
 disjoint dev and test taxonomies, although the differing label inventories prevent a direct
 annotation-consistency comparison. A system following the released test taxonomy is therefore at a disadvantage on these dev
-examples, an observed tradeoff rather than a formal bound. It also supports our central claim: the convention is carried by the
+examples, an observed tradeoff rather than a formal bound. It is also consistent with our central claim: the convention is carried by the
 definitions, which is why supplying the full taxonomy, rather than the broad labels alone,
 changes model behaviour so sharply.
 \section{Prediction Audit Examples}
@@ -575,7 +575,7 @@ Table~\ref{tab:arms} splits the same three arms over the whole pool. Two things 
 the reduction is not a prior shift: from A to C the verifier calls Religious \emph{more} often on
 the instances the base already reads as Religious and less often on every other subset, so the
 separation between the two widens monotonically. Second, the instruction and the taxonomy are not
-interchangeable. The instruction pays off only on the book descriptions, where the competing label
+interchangeable. The instruction reduces Religious calls only on the book descriptions, where the competing label
 (\texttt{*\_book\_description}) is the trap's target; on the rest of the pool it over-fires,
 raising Religious calls by a quarter. Only the full-taxonomy arm lowers them on the book
 descriptions and the rest of the pool while raising them on base-Religious instances, which is
