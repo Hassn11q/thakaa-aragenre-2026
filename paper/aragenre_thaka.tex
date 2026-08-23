@@ -32,7 +32,12 @@ definition-guided prompting, LLM-as-a-judge, retrieval-augmented classification}
 \usepackage{fontspec}
 % acl.sty loads {times}, but under XeLaTeX fontspec overrides it, so we set the
 % Times-metric-compatible Nimbus Roman explicitly to keep ACL's required typeface.
-\setmainfont{Nimbus Roman}
+\setmainfont{texgyretermes}[
+  Extension      = .otf,
+  UprightFont    = *-regular,
+  BoldFont       = *-bold,
+  ItalicFont     = *-italic,
+  BoldItalicFont = *-bolditalic]
 \setmonofont{Nimbus Mono PS}
 \usepackage{polyglossia}
 \setmainlanguage{english}
@@ -100,7 +105,7 @@ consistent with uneven performance across broad classes, so correction must be t
 \item An agreement-gated correction stage in which each verifier sees the full taxonomy, with a
 three-arm prompt diagnostic separating an explicit type-vs-topic instruction from a visible
 label to move the error onto.
-\item An attractor-drain step targeting the macro-F1 failure mode of heavily predicting a few
+\item An attractor-drain step targeting the Macro~F1 failure mode of heavily predicting a few
 generic classes; its only gold-scored estimate is on dev, where it was also tuned.
 \item Official shared-task evaluation: 0.7352 Hierarchical Macro~F1, ranked 1st of 18 teams,
 with the major system configurations scored as their own submissions.
@@ -203,7 +208,7 @@ does not: it averages per-class F1, and the gap between the two is what the diag
 exploits. (iii) The judge scores each candidate 0--100 against its definition in one setwise
 call~\citep{sun2023rankgpt}, and we take the argmax after a light marginal correction
 (Appendix~\ref{app:calib}). (iv) A few
-high-precision surface rules override the judge only on near-unambiguous markers
+high-specificity surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
 openings $\rightarrow$ \texttt{hadith}; hand-screened samples showed nothing visibly violating the
 intended rule semantics, which is not a precision estimate; emoji/hashtag short posts $\rightarrow$
@@ -310,7 +315,7 @@ Genre-general judge, no retrieval & test & 0.6067 \\
 \caption{Submission record on both splits. Dev is near-degenerate (its 6 specific genres map
 one-to-one onto 6 broad, so all three F1 metrics coincide), so the hidden test is our primary
 evaluation. \emph{Subset} corrects only instances whose broad label the base judged least
-secure. Rows are successive submissions, not single-component ablations. $^{\dagger}$applied to the GPT-5.6 judge, tuned on dev, so not held out.}
+secure. Rows are successive submissions, not single-component ablations. $^{\dagger}$~applied to the GPT-5.6 judge, tuned on dev, so not held out.}
 \label{tab:ablation}
 \end{table}
 
@@ -370,8 +375,8 @@ components were selected on the public leaderboard and by manual reading; the re
 progression therefore doubles as the selection signal, which risks fitting the test
 distribution. No hidden-test gain carries a confidence interval, so those gains are
 leaderboard-measured rather than statistically certified; Appendix~\ref{app:subs} gives the
-scale of a class-level effect. Only the drain is evaluable on dev for its intended failure mode; a paired bootstrap there puts
-its gain above zero (\S\ref{sec:dev}), on a set it was also tuned on. \textbf{Unmeasured
+scale of a class-level effect. The drain is the only component scored against dev gold, but it was tuned on the same items, so
+its result is descriptive rather than held-out evidence (\S\ref{sec:dev}). \textbf{Unmeasured
 components.} We never ran the judge with and without the 74 discriminators and per-family cue
 lists, so we cannot separate their contribution from the rest of the prompt.
 \textbf{Partly transductive.} The marginal correction subtracts a per-genre mean computed over
@@ -411,7 +416,7 @@ the base retriever-plus-open-judge pipeline is the self-hostable alternative.
 
 \section*{Acknowledgments}
 We thank the AraGenre~2026 organisers for designing and running the shared task, for the
-released taxonomy and definitions, and for their prompt support throughout the evaluation
+released taxonomy and definitions, and for answering task questions promptly during the evaluation
 phase. We also thank the maintainers of
 the open models and libraries our pipeline builds on.
 
@@ -602,10 +607,9 @@ base-Religious instances minus the rate on the other 2{,}572. Rebuilt by
 \end{table}
 
 Table~\ref{tab:trap} reports how often GPT-5.6's broad verdict still agrees with the base
-system's family, one model across the two original prompts. Broad-only prompting collapses on
-families whose members are \emph{about} another family's subject matter (Learning,
-Informative), which is exactly the topic trap; under the full taxonomy those calls largely
-disappear. Requiring both
+system's family, one model across the two original prompts. Broad-only prompting shows substantially lower base-family
+agreement on families whose members are \emph{about} another family's subject matter (Learning,
+Informative); full-taxonomy prompting raises that agreement. Requiring both
 verifiers to agree, joint Religious assignments fall from 134 under broad-only prompting to 37
 under the full taxonomy, a 72\% reduction. That comparison is restricted to the 548 book
 descriptions for which the second verifier has a call under both prompts, since the deployed
@@ -671,9 +675,10 @@ applied first and the drain fires on 383 of these instances.}
 \label{tab:drain}
 \end{table}
 
-\section{Calibration}
+\section{Marginal Score Centring}
 \label{app:calib}
-The correction subtracts a scaled per-genre mean from each candidate's score,
+This is score centring, not probabilistic calibration: we subtract a scaled per-genre mean from
+each candidate's score,
 $s'(y) = s(y) - \alpha\,\bar{s}(y)$, where $\bar{s}(y)$ is the mean score genre $y$
 received over the whole test set and $\alpha{=}0.5$. It damps genres the judge rates generously
 everywhere, which is what leaves rare siblings seldom predicted. We started from $\alpha{=}0.75$, chosen on the
@@ -708,8 +713,8 @@ JSON array of integer scores over the candidate definitions; the consensus promp
 
 \paragraph{Software.} \texttt{torch}, \texttt{transformers},
 \texttt{sentence-transformers} and \texttt{bitsandbytes} for the retriever, vLLM for the local
-judge, and the \texttt{openai} and \texttt{google-genai} SDKs for the verifiers; pinned
-versions accompany the code.
+judge, and the \texttt{openai} and \texttt{google-genai} SDKs for the verifiers; the code lists
+minimum versions rather than exact pins.
 
 \paragraph{Cost.} The \$50 in \S\ref{sec:setup} is the amount billed for the 36{,}013 calls at
 July~2026 prices; we did not log per-request token usage, so we cannot restate it as a rate.
