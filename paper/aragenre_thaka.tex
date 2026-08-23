@@ -719,9 +719,9 @@ endpoint reports as \texttt{/gemma-4-31b} with \texttt{max\_model\_len} 32{,}768
 temperature 0, seed 42, 3 retries with JSON-regex fallback, marginal correction
 $\alpha{=}0.75$. We did not record the serving precision of the judge endpoint. The retriever precision is given above.
 
-\paragraph{Consensus verifiers.} GPT-5.6~Luna, requested as \texttt{gpt-5.6-luna}
-(\texttt{reasoning\_effort=low}, $\leq$500 completion tokens), and Gemini-3.6~Flash, requested as
-\texttt{gemini-3.6-flash} (called with \texttt{temperature=0}, $\leq$400 output tokens), each given the full 74-definition taxonomy
+\paragraph{Consensus verifiers.} GPT-5.6~Luna (\texttt{gpt-5.6-luna};
+\texttt{reasoning\_effort=low}, $\leq$500 completion tokens) and Gemini-3.6~Flash
+(\texttt{gemini-3.6-flash}; \texttt{temperature=0}, $\leq$400 output tokens), each given the full 74-definition taxonomy
 (2{,}884 tokens under \texttt{o200k\_base}, giving a mean prompt of 3{,}034 tokens and a maximum
 of 5{,}185) in the system prompt, and the text truncated to 1500 characters. The judge prompt asks for a
 JSON array of integer scores over the candidate definitions; the consensus prompt asks for a single exact
