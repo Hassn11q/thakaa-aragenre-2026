@@ -82,7 +82,7 @@ Refinements and an attractor drain reach 0.7352.
 Genre is what a text \emph{does} rather than what it is about: the same subject appears in a
 contract, a news report and a textbook, and only the first is useful to someone assembling a
 legal corpus. Sorting documents this way is what makes an archive filterable and a corpus
-assemblable by register, and Arabic lacks a comparable body of genre-labelled resources.
+assemblable by register.
 AraGenre~2026~\citep{elhaj-etal-2026-aragenre} frames the problem as one of generalisation:
 systems receive English genre definitions and limited synthetic training data, but the
 hidden benchmark contains noisier naturally occurring Arabic spanning Modern Standard
@@ -118,7 +118,7 @@ dialects, textbook levels).
 \section{Related Work}
 \paragraph{Arabic and hierarchy-aware HTC.} Prominent Arabic pretrained models~\citep{antoun2020arabert,antoun2021aragpt2}
 support much work on the language, including hierarchical variants~\citep{aragpt2htc2025,arabichtc2026}, and a large
-literature models the label hierarchy explicitly~\citep{zhu2023hitin,cai2023hpt,zeng2025cpm,wang2025hierclassifier,combining2025,consistencyreg2024,htcsurvey2024}.
+literature models the label hierarchy explicitly~\citep{zhu2023hitin,cai2023hpt,zeng2025cpm,wang2025hierclassifier,combining2025,consistencyreg2025,htcsurvey2024}.
 These closed-label supervised setups do not directly address AraGenre's unseen,
 definition-specified label inventory; we instead
 enforce the hierarchy structurally, forcing $\text{broad}=\text{parent}(\text{specific})$.
@@ -129,8 +129,8 @@ prototypes~\citep{zhang2024hierprompt} or rewritten taxonomies~\citep{golde2026r
 leave the definitions unrewritten and vary how much of the taxonomy is visible, though the base
 judge appends hand-written cues to each (\S\ref{sec:system}). Our two-stage design retrieves
 candidate definitions~\citep{chen2024retrieval} and compares them with an
-LLM~\citep{sun2023rankgpt,zheng2023judging}, with
-Qwen3-Embedding~\citep{qwen3embedding2025} bridging Arabic and English; the chain-of-thought
+LLM~\citep{sun2023rankgpt,zheng2023judging}, with Qwen3-Embedding~\citep{qwen3embedding2025}
+placing Arabic inputs and English definitions in one multilingual space; the chain-of-thought
 pass follows reasoning-based HTC~\citep{jiang2026reasoning}. Ensembles of
 diverse predictors~\citep{dietterich2000ensemble} appear in LLM form as juries, blending,
 mixtures of agents, debate and
@@ -205,8 +205,8 @@ English definitions, and proposes candidate specific genres by cosine similarity
 retrieved for large topical ones, so that $\text{broad}=\text{parent}(\text{specific})$ and
 broad \emph{accuracy} equals the family-accuracy of the specific prediction. Broad Macro~F1
 does not: it averages per-class F1, and the gap between the two is what the diagnosis below
-exploits. (iii) The judge scores each candidate 0--100 against its definition in one setwise
-call~\citep{sun2023rankgpt}, and we take the argmax after a light marginal correction
+exploits. (iii) Following the setwise comparison of~\citet{sun2023rankgpt}, our judge scores each
+candidate 0--100 against its definition in one call, and we take the argmax after a light marginal correction
 (Appendix~\ref{app:calib}). (iv) A few
 high-specificity surface rules override the judge only on near-unambiguous markers
 (Qur'anic mushaf orthography $\rightarrow$ \texttt{quran}; isn\=ad
@@ -343,8 +343,7 @@ cross-family moves, within-family refinements and the drain.}
 \label{sec:dev}
 Re-running the pipeline on dev (110 examples, official gold) separates what transfers from what
 does not. No class list is carried over: the two dev classes the drain fires on are the two
-most-predicted there under either judge, so neither gold nor a particular base is needed to find
-them. On dev it moves five labels for $+0.042$ (95\% CI $[+0.010, +0.082]$),
+most-predicted there under either judge. On dev it moves five labels for $+0.042$ (95\% CI $[+0.010, +0.082]$),
 but four are a single confusion and the component was tuned on these same items, so this is
 descriptive, not held-out, evidence. The correction stage does not: dev has no \texttt{*\_book\_description} and no scripture, so the trap it targets has zero
 instances, and both corrections that fire are wrong. Residual dev disagreements stem from a
@@ -354,10 +353,10 @@ convention clash between splits (Appendix~\ref{app:convention}).
 \label{sec:analysis}
 Broad-only prompting put 157 book descriptions under Religious unanimously across all three
 models, a pattern the full taxonomy largely reverses; one model alone disagreed with the base on
-$\sim$29\% of specifics. Every alternative correction we tried scored below the base
+$\sim$29\% of specifics. Every alternative correction scored below the base
 (Appendix~\ref{app:negative}).
 
-Appendix~\ref{app:errors} characterises the three prediction patterns that dominate our audit.
+Appendix~\ref{app:errors} characterises the prediction patterns in our audit.
 
 \section{Conclusion}
 A definition-guided judge, an agreement-gated correction and an attractor drain placed 1st of
