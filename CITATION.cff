@@ -6,15 +6,19 @@ authors:
     given-names: Hassan
   - family-names: Alamr
     given-names: Meshal
+  - family-names: Aldahlawi
+    given-names: Abdullah
 license: MIT
 repository-code: "https://github.com/Hassn11q/thakaa-aragenre-2026"
 preferred-citation:
   type: conference-paper
-  title: "Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Context Multi-Model Consensus for Hierarchical Arabic Genre Classification"
+  title: "Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Taxonomy Agreement-Gated Correction for Hierarchical Arabic Genre Classification"
   authors:
     - family-names: Alqaeri
       given-names: Hassan
     - family-names: Alamr
       given-names: Meshal
+    - family-names: Aldahlawi
+      given-names: Abdullah
   collection-title: "Proceedings of ArabicNLP 2026"
   year: 2026

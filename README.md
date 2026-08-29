@@ -72,6 +72,9 @@ Arabic text
   ├─ retrieve.py    Qwen3-Embedding-8B ranks the 74 English definitions → candidate set
   ├─ judge.py       Gemma judge scores candidates setwise inside one broad family
   ├─ rules.py       surface overrides (mushaf orthography, isnad openings, emoji posts)
+  ├─ interactive_judge.py
+  │                 binary recall pass over short or marker-bearing texts; moved 1,441
+  │                 predictions to an Interactive subtype
   │                 → 0.7139
   ├─ verify.py      GPT-5.6 and Gemini-3.6 re-predict with all 74 definitions in context;
   │                 a correction lands only where both models agree against the base
@@ -84,8 +87,10 @@ Arabic text
 
 Three findings the paper reports in full:
 
-**Derive the broad label, never predict it.** Forcing `broad = parent(specific)` beat a direct
-six-way broad classifier by 0.093 Hierarchical Macro F1 (0.7139 against 0.6206).
+**Derive the broad label, never predict it.** Our submitted configuration whose broad label came
+from a direct six-way judge scored 0.6206, against 0.7139 for the pipeline that derives it from
+the specific prediction. The two submissions differ in more than that one choice, so this is a
+comparison between configurations, not an isolated ablation.
 
 **Show the model every label, not just the top of the hierarchy.** Given only the 6 broad
 definitions, all three frontier models we tried filed a book *about* religion under Religious.
@@ -94,7 +99,7 @@ type-versus-topic instruction removes 41% of those errors (394 → 233), and sup
 definitions removes a further 49% (233 → 119). Neither factor alone explains the effect.
 
 **Agreement between two models beats either alone.** A single model disagreed with the base
-pipeline on 28.8% of specific labels, far too noisy to apply. Requiring both models to name the
+pipeline on 28.7% of specific labels (8,041 of 27,972), far too noisy to apply. Requiring both models to name the
 same label reduced that to corrections worth taking.
 
 Approaches that lost — uniform-prior and optimal-transport calibration, plain self-consistency,
@@ -150,6 +155,26 @@ scored 0.6812; it is shipped and reused, not regenerated. A from-scratch run inh
 `src/interactive_judge.py` reassignment applied during the evaluation phase. Re-running the
 judge alone recovers 93.5% of its specific labels and 97.1% of its broad labels; run
 `python3 src/judge_rerun_check.py` to confirm that yourself.
+
+**The score-centring constant.** The submitted base invocation was not logged. Our judge run
+logs report `ALPHA=0.75`, while sibling experiments that select it over `{0, 0.25, 0.5, 0.75, 1}`
+recorded other values. Two cached prediction files whose score files survive reproduce at 0.75
+and at no other value on that grid, which is why `src/judge.py` defaults to it:
+
+```sh
+python3 src/judge_rerun_check.py --scores artifacts/cot_scores.json \
+    --base artifacts/cot_predictions.json --alpha 0.75        # 27972/27972
+python3 src/judge_rerun_check.py --scores artifacts/early_base_scores.json \
+    --base artifacts/early_base.json --alpha 0.75             # 27972/27972
+```
+
+We report 0.75 as a reconstruction rather than a directly verified invocation setting.
+
+**Preserved rule defects.** Three regexes in `src/rules.py` do not match their stated intent: the
+Qur'anic class also admits U+0671, the opinion class lets a bare variation selector match, and one
+character class contains a literal `|`. They ran as written when the submission was produced, so
+they are kept verbatim and documented in place rather than corrected; fixing all three changes 22
+of the 27,972 final predictions.
 
 Two inputs to the topic-trap ablation, `artifacts/trap_pool.json` and
 `artifacts/trap_arm_a.json`, also have no producer in this repository. See
