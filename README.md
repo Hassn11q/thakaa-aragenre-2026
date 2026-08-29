@@ -4,7 +4,7 @@ Code and cached model outputs for the first-place system in the
 [AraGenre 2026](https://www.codabench.org/competitions/16356) shared task on hierarchical
 definition-guided Arabic genre classification (ArabicNLP 2026).
 
-**Paper:** [`paper/aragenre_thaka.pdf`](paper/aragenre_thaka.pdf) · **Submission:** 872515 ·
+**Paper:** ArabicNLP 2026 (see Citing, below) · **Submission:** 872515 ·
 **Rank:** 1 of 18 teams
 
 Every text is assigned one broad genre out of 6 and one specific genre out of 74. The 74
@@ -188,7 +188,6 @@ Two inputs to the topic-trap ablation, `artifacts/trap_pool.json` and
 | `artifacts/` | cached model outputs, the final leaderboard, and a README describing each |
 | `submissions/` | the file that was scored, JSON and zip |
 | `data/` | the released genre definitions; `test.json` is not redistributed |
-| `paper/` | system description paper, LaTeX source and PDF |
 | `work/` | scratch space, gitignored |
 
 ## Data, licensing and intended use
