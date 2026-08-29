@@ -176,6 +176,11 @@ character class contains a literal `|`. They ran as written when the submission 
 they are kept verbatim and documented in place rather than corrected; fixing all three changes 22
 of the 27,972 final predictions.
 
+**Explored, never scored.** `src/enrich_definitions.py` (LLM-rewritten definitions) and
+`src/label_propagation.py` (transductive smoothing over the test embeddings) were built but used
+in no submitted configuration; the paper's Negative Results appendix records both. They are
+shipped for completeness and are not part of any reproduction path.
+
 Two inputs to the topic-trap ablation, `artifacts/trap_pool.json` and
 `artifacts/trap_arm_a.json`, also have no producer in this repository. See
 [`artifacts/README.md`](artifacts/README.md) for the provenance of every cached file.
