@@ -297,15 +297,16 @@ Genre-general judge, no retrieval & test & 0.6067 \\
 \caption{Results on both splits. Dev is near-degenerate (its 6 specific genres map
 one-to-one onto 6 broad, so all three F1 metrics coincide), so the hidden test is our primary
 evaluation. \emph{Subset} corrects only instances whose broad label the base judged least
-secure. Test rows are successive submissions, not single-component ablations; dev rows are
-local evaluations. $^{\dagger}$~applied to the GPT-5.6 judge, tuned on dev, so not held out.}
+secure. Provenance: test rows are pre-deadline official submissions, successive rather than
+single-component ablations; dev rows are local evaluations; all other numbers are
+post-evaluation diagnostics. $^{\dagger}$~applied to the GPT-5.6 judge, tuned on dev, so not held out.}
 \label{tab:ablation}
 \end{table}
 \section{Experimental Setup}
 \label{sec:setup}
-\paragraph{Data splits.} We update no model parameters, and each configuration predicts
-automatically once fixed, but the configurations were adapted between submissions from
-leaderboard feedback and from reading test inputs and our own outputs. An input is \texttt{\{"id","text"\}} with Arabic text such as
+\paragraph{Data splits.} Each configuration predicts automatically once fixed, but the
+configurations were adapted between submissions from leaderboard feedback and from reading test
+inputs and our own outputs. An input is \texttt{\{"id","text"\}} with Arabic text such as
 \ar{مطلوب سائق باص 24 راكب في شركة في دبي جبل علي} (test id 24486,
 ``bus driver wanted, 24-seater, for a company in Dubai, Jebel Ali''); our submitted system pairs
 it with \texttt{broad\_genre} = Informative and \texttt{specific\_genre} =
@@ -337,10 +338,10 @@ Base (ours) & .714 & .549 & .584 & .591 & .879 & .900 & .900 \\
 \bottomrule
 \end{tabular}
 \caption{Official metrics for our three scored systems on the hidden test, to three decimals
-(Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). These are sequential
-submissions, so each difference accompanies a configuration change rather than one component:
-$+.013$ Broad Macro~F1 with the subset correction, $+.020$ Specific Macro~F1 with the final row,
-which combines cross-family moves, within-family refinements and the drain.}
+(Sp/Br = Specific/Broad; M/W/A = Macro~F1, Weighted~F1, Accuracy). Sequential submissions, so each
+difference accompanies a configuration change rather than one component: $+.013$ Broad
+Macro~F1 with the subset correction, $+.020$ Specific Macro~F1 with the final row, which
+combines cross-family moves, within-family refinements and the drain.}
 \label{tab:metrics}
 \end{table}
 
@@ -734,7 +735,8 @@ large ones.
 
 \paragraph{Judge.} A local copy of \texttt{google/\allowbreak gemma-\allowbreak 4-\allowbreak
 31B-\allowbreak it}, served via vLLM and reported by the endpoint as
-\texttt{/gemma-\allowbreak 4-\allowbreak 31b}, with a context window of 32{,}768 tokens; setwise
+\texttt{/gemma-\allowbreak 4-\allowbreak 31b}, served with \texttt{max\_\allowbreak model\_\allowbreak len} 32{,}768
+rather than the checkpoint's full context; setwise
 0--100 scoring in a single pass,
 temperature 0, seed 42, up to 3 attempts with JSON-regex fallback, marginal correction
 $\alpha{=}0.75$. We did not record the serving precision of the judge endpoint. The retriever precision is given above.
