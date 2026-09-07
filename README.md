@@ -1,7 +1,7 @@
 # Thakaa at AraGenre 2026: first-place system
 
-This repository contains the paper, exact submitted predictions, text-free cached model
-outputs, prompts, and scripts for Thakaa's AraGenre 2026 system.
+This repository contains the exact submitted predictions, text-free cached model outputs,
+prompts, and scripts for Thakaa's AraGenre 2026 system.
 
 ## Official result
 
@@ -12,7 +12,7 @@ outputs, prompts, and scripts for Thakaa's AraGenre 2026 system.
 The system uses no task-specific weight updates. It is zero-shot with respect to the 74
 hidden-test specific genres, but it includes task-specific prompts, hand-written cues,
 manual output inspection, transductive operations, and leaderboard-guided component selection.
-The paper documents these qualifications in detail.
+The release documents these qualifications in detail.
 
 ## Exact offline reconstruction
 
@@ -95,7 +95,7 @@ PROVIDER=gemini POOL=work/gpt_disagree_ids.json OUT=work/gemini_verifier_predict
 The exact submitted assembly always uses the files in `cached_outputs/`; rerun outputs go to the
 ignored `work/` directory and do not overwrite the evidence bundle.
 
-The post-evaluation prompt diagnostics in the paper can also be rebuilt without API access:
+The reported post-evaluation prompt diagnostics can also be rebuilt without API access:
 
 ```bash
 python3 scripts/rebuild_prompt_diagnostics.py
@@ -105,15 +105,14 @@ python3 scripts/rebuild_prompt_diagnostics.py
 
 ```text
 cached_outputs/  text-free model decisions used by the submitted assembly
-paper/        camera-ready LaTeX source, bibliography, and compiled PDF
 scripts/      prompts, model-stage scripts, assembly, validation, and audits
 submissions/  the exact official JSON and ZIP submitted for scoring
 test/         the released taxonomy definitions; hidden-test text is excluded
 ```
 
 The three known regex defects from the submitted surface-rule implementation are intentionally
-preserved in `scripts/apply_rules.py` and described in the paper. Fixing them would no longer
-reconstruct the official scored system.
+preserved in `scripts/apply_rules.py`. Fixing them would no longer reconstruct the official scored
+system.
 
 ## Citation
 
@@ -130,5 +129,17 @@ reconstruct the official scored system.
 }
 ```
 
-Please also cite the AraGenre 2026 shared-task overview paper listed in
-`paper/aragenre.bib`.
+Please also cite the shared-task overview:
+
+```bibtex
+@inproceedings{elhaj-etal-2026-aragenre,
+  title = {AraGenre 2026: A Hierarchical Definition-Guided Arabic Genre Classification Shared Task},
+  author = {El-Haj, Mo and Ezzini, Saad and Abudalfa, Shadi and Jarrar, Mustafa and
+            Chi, Nguyen Minh and Quan, Nguyen Minh},
+  booktitle = {Proceedings of the 4th Arabic Natural Language Processing Conference
+               (ArabicNLP 2026)},
+  address = {Budapest, Hungary},
+  publisher = {Association for Computational Linguistics},
+  year = {2026}
+}
+```
