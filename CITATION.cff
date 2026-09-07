@@ -1,6 +1,10 @@
 cff-version: 1.2.0
-message: If you use this software, please cite the paper below.
-title: "Thakaa at AraGenre 2026 system"
+message: "If you use this system or its released data, please cite the paper below."
+title: "Thakaa at AraGenre 2026"
+type: software
+version: 1.0.0
+date-released: 2026-09-07
+url: "https://github.com/Hassn11q/thakaa-aragenre-2026"
 authors:
   - family-names: Alqaeri
     given-names: Hassan
@@ -8,8 +12,6 @@ authors:
     given-names: Meshal
   - family-names: Aldahlawi
     given-names: Abdullah
-license: MIT
-repository-code: "https://github.com/Hassn11q/thakaa-aragenre-2026"
 preferred-citation:
   type: conference-paper
   title: "Thakaa at AraGenre 2026: Definition-Guided LLM Judging with Full-Taxonomy Agreement-Gated Correction for Hierarchical Arabic Genre Classification"
@@ -20,5 +22,6 @@ preferred-citation:
       given-names: Meshal
     - family-names: Aldahlawi
       given-names: Abdullah
-  collection-title: "Proceedings of ArabicNLP 2026"
+  conference:
+    name: "4th Arabic Natural Language Processing Conference (ArabicNLP 2026)"
   year: 2026
