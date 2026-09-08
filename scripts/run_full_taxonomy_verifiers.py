@@ -1,4 +1,4 @@
-"""Predict a specific genre with GPT or Gemini using the full taxonomy.
+"""Predict a specific genre with GPT 5.6 Luna or Gemini 3.6 Flash using the full taxonomy.
 
 The prompt includes all 74 specific definitions, grouped by broad genre, and asks for one specific
 label. The broad label is derived from its parent. Seeing book-description labels helps the
@@ -16,6 +16,8 @@ POOL = Path(os.environ.get("POOL", ROOT / "work" / "verification_pool.json"))
 PROVIDER = os.environ.get("PROVIDER", "gpt")
 OUT = Path(os.environ.get("OUT", ROOT / "work" / f"{PROVIDER}_verifier_predictions.json"))
 WORKERS = int(os.environ.get("WORKERS", "20"))
+GPT_MODEL_ID = os.environ.get("GPT_MODEL_ID", "gpt-5.6-luna")
+GEMINI_MODEL_ID = os.environ.get("GEMINI_MODEL_ID", "gemini-3.6-flash")
 
 defs = json.loads(DEFS.read_text())
 SPECS = [d["specific_genre"] for d in defs]
@@ -38,7 +40,7 @@ def make_call():
         from google.genai import types
         cl = genai.Client()
         def call(text):
-            r = cl.models.generate_content(model="gemini-3.6-flash",
+            r = cl.models.generate_content(model=GEMINI_MODEL_ID,
                 contents=SYS + f"\n\nArabic text:\n{text[:1500]}\n\nBest specific_genre:",
                 config=types.GenerateContentConfig(temperature=0, max_output_tokens=400))
             return r.text or ""
@@ -47,7 +49,7 @@ def make_call():
         from openai import OpenAI
         cl = OpenAI()
         def call(text):
-            r = cl.chat.completions.create(model="gpt-5.6-luna",
+            r = cl.chat.completions.create(model=GPT_MODEL_ID,
                 messages=[{"role": "system", "content": SYS},
                           {"role": "user", "content": f"Arabic text:\n{text[:1500]}\n\nBest specific_genre:"}],
                 reasoning_effort="low", max_completion_tokens=500)

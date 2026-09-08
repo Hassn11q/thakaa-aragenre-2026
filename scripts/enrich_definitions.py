@@ -1,6 +1,6 @@
 """Build the enriched genre definitions used by the retrieval and judge stages.
 
-For each genre, Gemma adds a contrast with same-family labels and two short synthetic Arabic
+For each genre, Gemma 4 31B IT adds a contrast with same-family labels and two short synthetic Arabic
 examples. The inputs are the released definitions and Arabic-language cues; dataset labels are not
 used.
 """
@@ -19,7 +19,7 @@ client = OpenAI(
     timeout=60.0,
     max_retries=0,
 )
-LLM = os.environ.get("JUDGE_MODEL", "google/gemma-4-31B-it")
+MODEL_ID = os.environ.get("JUDGE_MODEL", "google/gemma-4-31B-it")
 
 
 def main():
@@ -43,7 +43,7 @@ def main():
         for attempt in range(3):
             try:
                 r = client.chat.completions.create(
-                    model=LLM, temperature=0.3, max_tokens=400, extra_body={"seed": 42},
+                    model=MODEL_ID, temperature=0.3, max_tokens=400, extra_body={"seed": 42},
                     messages=[{"role": "user", "content": prompt}])
                 m = re.search(r"\{.*\}", r.choices[0].message.content, re.S)
                 if m:

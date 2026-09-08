@@ -45,12 +45,23 @@ the text-free `cached_outputs/surface_rule_overrides.json`, which contains only 
 ```text
 Arabic text
   -> Qwen3-Embedding-8B retrieval over the 74 English definitions
-  -> google/gemma-4-31B-it family-restricted setwise judge
-  -> GPT-5.6 Luna + Gemini 3.6 Flash agreement-gated correction
+  -> Gemma 4 31B IT family-restricted setwise judge
+  -> GPT 5.6 Luna + Gemini 3.6 Flash agreement-gated correction
   -> within-family attractor drain
   -> preserved submitted surface-rule decisions
   -> broad = parent(specific), validation, and ZIP packaging
 ```
+
+## Model identifiers
+
+Documentation uses the display names below. Scripts use the corresponding model IDs exactly.
+
+| Role | Display name | Model ID |
+|---|---|---|
+| Retrieval | Qwen3-Embedding-8B | `Qwen/Qwen3-Embedding-8B` |
+| Family judge | Gemma 4 31B IT | `google/gemma-4-31B-it` |
+| First verifier | GPT 5.6 Luna | `gpt-5.6-luna` |
+| Second verifier | Gemini 3.6 Flash | `gemini-3.6-flash` |
 
 ## Optional model reruns
 

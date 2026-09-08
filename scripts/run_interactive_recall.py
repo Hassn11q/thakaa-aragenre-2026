@@ -22,7 +22,7 @@ client = OpenAI(
     timeout=45.0,
     max_retries=0,
 )
-LLM = os.environ.get("JUDGE_MODEL", "google/gemma-4-31B-it")
+MODEL_ID = os.environ.get("JUDGE_MODEL", "google/gemma-4-31B-it")
 
 EMO = re.compile(r"[\U0001F300-\U0001FAFF☀-➿❤♥♡\U0001F900-\U0001F9FF]"); HASH = re.compile(r"#[^\s#]{2,}")
 SECOND = re.compile(r"(?<![ء-ي])(?:انت|انتي|إنت|أنت|يا|ياخي|ياخوي|والله|ليش|شنو|ايش|وش)(?![ء-ي])")
@@ -43,7 +43,7 @@ def judge(text):
     for attempt in range(3):
         try:
             r = client.chat.completions.create(
-                model=LLM, temperature=0.0, max_tokens=40, extra_body={"seed": 42},
+                model=MODEL_ID, temperature=0.0, max_tokens=40, extra_body={"seed": 42},
                 messages=[{"role": "system", "content": SYS},
                           {"role": "user", "content": f"Arabic text:\n{text[:1500]}\n\nOutput the JSON."}])
             t = r.choices[0].message.content

@@ -1,7 +1,7 @@
 """Assemble the Thakaa submission that scored 0.7352 Hierarchical Macro F1.
 
 The script applies three steps to the base predictions:
-  1. Full-context consensus corrections. GPT-5.6 Luna and Gemini-3.6 Flash must agree on the same
+  1. Full-context consensus corrections. GPT 5.6 Luna and Gemini 3.6 Flash must agree on the same
      specific genre and disagree with the base. Broad-changing moves are limited to directions
      checked by manual reading; broad-preserving changes are accepted.
   2. Attractor drain: within-family redistribution of over-predicted generic classes using the

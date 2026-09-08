@@ -2,7 +2,7 @@
 
 The cached broad prediction limits each decision to one family. For families with at most
 ``MAX_ENUM`` specific genres, the judge sees every sibling. For the 42-label Informative family,
-it sees the highest-ranked in-family retrieval candidates. A Gemma call scores the candidates,
+it sees the highest-ranked in-family retrieval candidates. A Gemma 4 31B IT call scores the candidates,
 then marginal calibration and argmax produce the specific prediction.
 
 The smaller label set excludes cross-family alternatives and avoids retrieval misses in the small
@@ -34,7 +34,7 @@ client = OpenAI(
     timeout=45.0,
     max_retries=0,
 )
-LLM = os.environ.get("JUDGE_MODEL", "google/gemma-4-31B-it")
+MODEL_ID = os.environ.get("JUDGE_MODEL", "google/gemma-4-31B-it")
 SYS = ("You are a world-class Arabic philologist and corpus linguist. Given an Arabic text and a "
        "numbered list of candidate genre DEFINITIONS from the SAME broad family, identify the ONE genre "
        "the text actually belongs to. Work like an expert: first find the single MOST DIAGNOSTIC signal "
@@ -93,7 +93,7 @@ def setwise_scores(text, defs, k, cue=""):
     for attempt in range(3):                             # retry transient errors under high concurrency
         try:
             r = client.chat.completions.create(
-                model=LLM, temperature=0.0, max_tokens=mx, extra_body={"seed": 42},
+                model=MODEL_ID, temperature=0.0, max_tokens=mx, extra_body={"seed": 42},
                 messages=[{"role": "system", "content": SYS}, {"role": "user", "content": user}])
             txt = r.choices[0].message.content.strip()
             break

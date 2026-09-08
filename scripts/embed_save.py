@@ -15,6 +15,7 @@ OUT = Path(os.environ.get("OUT_DIR", ROOT / "work"))
 OUT.mkdir(parents=True, exist_ok=True)
 QPROMPT = "Instruct: Given an Arabic text, retrieve the genre definition that best describes it.\nQuery: "
 CHAR_CAP = 8000
+MODEL_ID = os.environ.get("EMBEDDING_MODEL_ID", "Qwen/Qwen3-Embedding-8B")
 
 def main():
     from sentence_transformers import SentenceTransformer
@@ -25,7 +26,7 @@ def main():
     cand = [d["specific_genre"] for d in defrows]
     cand_def = [d["specific_genre_definition"] for d in defrows]
 
-    model = SentenceTransformer("Qwen/Qwen3-Embedding-8B", trust_remote_code=True, device="cuda:0",
+    model = SentenceTransformer(MODEL_ID, trust_remote_code=True, device="cuda:0",
                                 model_kwargs={"torch_dtype": torch.float16})
     model.max_seq_length = 512
 

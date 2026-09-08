@@ -9,8 +9,8 @@ definitions. Hidden-test text and gold labels are not included.
 |---|---|
 | `cached_outputs/family_gate_predictions.json` | Earlier official submission reused as the broad-family gate |
 | `cached_outputs/base_predictions.json` | Five-step base system consumed by the final assembly |
-| `cached_outputs/gpt_verifier_predictions.json` | Full-taxonomy GPT verifier output for all 27,972 IDs |
-| `cached_outputs/gemini_verifier_predictions.json` | Gemini verifier output on GPT/base disagreements |
+| `cached_outputs/gpt_verifier_predictions.json` | GPT 5.6 Luna full-taxonomy output for all 27,972 IDs |
+| `cached_outputs/gemini_verifier_predictions.json` | Gemini 3.6 Flash output on GPT 5.6 Luna/base disagreements |
 | `cached_outputs/rationalized_judge_predictions.json` | Judge pass consumed by the attractor drain |
 | `cached_outputs/surface_rule_overrides.json` | Text-free cache of the submitted surface-rule decisions |
 | `submissions/final_submission.json` | Exact official prediction file associated with the 0.7352 score |

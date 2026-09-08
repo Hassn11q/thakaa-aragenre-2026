@@ -21,6 +21,7 @@ TOPK = 20  # save a deep candidate list so the judge can pick any k without re-e
 # Qwen3-Embedding query instruction, applied only to the Arabic texts.
 QPROMPT = "Instruct: Given an Arabic text, retrieve the genre definition that best describes it.\nQuery: "
 CHAR_CAP = 8000  # pre-truncate very long texts; genre signal is in the opening (max_model_len=8192).
+MODEL_ID = os.environ.get("EMBEDDING_MODEL_ID", "Qwen/Qwen3-Embedding-8B")
 
 def main():
     from transformers import BitsAndBytesConfig
@@ -38,7 +39,7 @@ def main():
 
     bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
                              bnb_4bit_compute_dtype=torch.float16, bnb_4bit_use_double_quant=True)
-    model = SentenceTransformer("Qwen/Qwen3-Embedding-8B", trust_remote_code=True, device="cuda:0",
+    model = SentenceTransformer(MODEL_ID, trust_remote_code=True, device="cuda:0",
                                 model_kwargs={"quantization_config": bnb, "torch_dtype": torch.float16})
     model.max_seq_length = 512  # cap activations under the ~14 GB free; genre signal is early in the text
 
